@@ -4,10 +4,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { format } from "date-fns";
+import { format, isAfter, isBefore, parseISO, subDays } from "date-fns";
 import {
   ArrowLeft, Plus, Calendar, Users, Settings,
-  CheckSquare, Circle, ArrowRight, Eye, UserPlus
+  CheckSquare, Circle, ArrowRight, Eye, UserPlus,
+  BarChart3, List
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -26,8 +27,10 @@ import { toast } from "sonner";
 
 import TaskCard from "@/components/tasks/TaskCard";
 import TaskForm from "@/components/tasks/TaskForm";
+import TaskFilters from "@/components/tasks/TaskFilters";
 import ProjectForm from "@/components/projects/ProjectForm";
 import InviteTeamDialog from "@/components/team/InviteTeamDialog";
+import GanttChart from "@/components/gantt/GanttChart";
 
 export default function ProjectDetail() {
   const [user, setUser] = useState(null);
@@ -40,6 +43,15 @@ export default function ProjectDetail() {
   const [editingTask, setEditingTask] = useState(null);
   const [deleteTask, setDeleteTask] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [viewMode, setViewMode] = useState("list"); // "list" or "gantt"
+  const [filters, setFilters] = useState({
+    assignee: "",
+    priority: "",
+    dueDateFrom: "",
+    dueDateTo: ""
+  });
+  const [sortBy, setSortBy] = useState("created_date");
+  const [sortOrder, setSortOrder] = useState("desc");
   
   const queryClient = useQueryClient();
 
@@ -151,9 +163,56 @@ export default function ProjectDetail() {
   const completedTasks = tasks.filter(t => t.status === 'completed').length;
   const progress = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
 
-  const filteredTasks = activeTab === "all" 
-    ? tasks 
-    : tasks.filter(t => t.status === activeTab);
+  // Apply filters and sorting
+  const filteredTasks = tasks.filter(task => {
+    // Status filter (tabs)
+    if (activeTab !== "all" && task.status !== activeTab) return false;
+    
+    // Assignee filter
+    if (filters.assignee) {
+      if (filters.assignee === "unassigned" && task.assigned_to) return false;
+      if (filters.assignee !== "unassigned" && task.assigned_to !== filters.assignee) return false;
+    }
+    
+    // Priority filter
+    if (filters.priority && task.priority !== filters.priority) return false;
+    
+    // Due date range filter
+    if (filters.dueDateFrom && task.due_date) {
+      if (isBefore(parseISO(task.due_date), parseISO(filters.dueDateFrom))) return false;
+    }
+    if (filters.dueDateTo && task.due_date) {
+      if (isAfter(parseISO(task.due_date), parseISO(filters.dueDateTo))) return false;
+    }
+    
+    return true;
+  }).sort((a, b) => {
+    const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
+    const statusOrder = { todo: 1, in_progress: 2, review: 3, completed: 4 };
+    
+    let comparison = 0;
+    switch (sortBy) {
+      case "due_date":
+        if (!a.due_date && !b.due_date) comparison = 0;
+        else if (!a.due_date) comparison = 1;
+        else if (!b.due_date) comparison = -1;
+        else comparison = new Date(a.due_date) - new Date(b.due_date);
+        break;
+      case "priority":
+        comparison = (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+        break;
+      case "title":
+        comparison = a.title.localeCompare(b.title);
+        break;
+      case "status":
+        comparison = (statusOrder[a.status] || 0) - (statusOrder[b.status] || 0);
+        break;
+      default: // created_date
+        comparison = new Date(b.created_date) - new Date(a.created_date);
+    }
+    
+    return sortOrder === "asc" ? comparison : -comparison;
+  });
 
   const handleTaskSubmit = (data) => {
     if (editingTask) {
@@ -194,6 +253,10 @@ export default function ProjectDetail() {
         completed_at: newStatus === 'completed' ? new Date().toISOString() : null
       }
     });
+  };
+
+  const handleGanttUpdate = (taskId, updates) => {
+    updateTaskMutation.mutate({ id: taskId, data: updates });
   };
 
   return (
@@ -270,37 +333,76 @@ export default function ProjectDetail() {
           </div>
         </motion.div>
 
-        {/* Tasks Section */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
-          <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList>
-                <TabsTrigger value="all" className="gap-1">
-                  All
-                  <span className="text-xs bg-slate-100 px-1.5 rounded">{tasks.length}</span>
-                </TabsTrigger>
-                <TabsTrigger value="todo" className="gap-1">
-                  <Circle className="w-3 h-3" />
-                  To Do
-                </TabsTrigger>
-                <TabsTrigger value="in_progress" className="gap-1">
-                  <ArrowRight className="w-3 h-3" />
-                  In Progress
-                </TabsTrigger>
-                <TabsTrigger value="review" className="gap-1">
-                  <Eye className="w-3 h-3" />
-                  Review
-                </TabsTrigger>
-                <TabsTrigger value="completed" className="gap-1">
-                  <CheckSquare className="w-3 h-3" />
-                  Done
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Button onClick={() => setShowTaskForm(true)} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Task
+        {/* View Toggle & Tasks Section */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2 bg-white rounded-lg p-1 border border-slate-200">
+            <Button
+              variant={viewMode === "list" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className="gap-2"
+            >
+              <List className="w-4 h-4" />
+              List
             </Button>
+            <Button
+              variant={viewMode === "gantt" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("gantt")}
+              className="gap-2"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Gantt
+            </Button>
+          </div>
+          <Button onClick={() => setShowTaskForm(true)} size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Task
+          </Button>
+        </div>
+
+        {viewMode === "gantt" ? (
+          <GanttChart tasks={tasks} onTaskUpdate={handleGanttUpdate} />
+        ) : (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
+          <div className="p-4 border-b border-slate-100 flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList>
+                  <TabsTrigger value="all" className="gap-1">
+                    All
+                    <span className="text-xs bg-slate-100 px-1.5 rounded">{tasks.length}</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="todo" className="gap-1">
+                    <Circle className="w-3 h-3" />
+                    To Do
+                  </TabsTrigger>
+                  <TabsTrigger value="in_progress" className="gap-1">
+                    <ArrowRight className="w-3 h-3" />
+                    In Progress
+                  </TabsTrigger>
+                  <TabsTrigger value="review" className="gap-1">
+                    <Eye className="w-3 h-3" />
+                    Review
+                  </TabsTrigger>
+                  <TabsTrigger value="completed" className="gap-1">
+                    <CheckSquare className="w-3 h-3" />
+                    Done
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            <TaskFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              teamMembers={project.team_members}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortChange={(field, order) => {
+                setSortBy(field);
+                setSortOrder(order);
+              }}
+            />
           </div>
 
           <div className="p-4">
@@ -347,6 +449,7 @@ export default function ProjectDetail() {
             )}
           </div>
         </div>
+        )}
       </div>
 
       <TaskForm
