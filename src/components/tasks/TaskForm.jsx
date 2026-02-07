@@ -25,6 +25,7 @@ import {
 import { CalendarIcon, Link2 } from "lucide-react";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
+import ReminderSelector from "./ReminderSelector";
 
 export default function TaskForm({ open, onOpenChange, task, projectId, teamMembers, allTasks, onSubmit, isLoading }) {
   const [formData, setFormData] = useState({
@@ -33,9 +34,11 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
     status: "todo",
     priority: "medium",
     due_date: "",
+    start_date: "",
     assigned_to: "",
     project_id: projectId,
-    depends_on: []
+    depends_on: [],
+    reminders: []
   });
 
   useEffect(() => {
@@ -46,9 +49,11 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
         status: task.status || "todo",
         priority: task.priority || "medium",
         due_date: task.due_date || "",
+        start_date: task.start_date || "",
         assigned_to: task.assigned_to || "",
         project_id: task.project_id || projectId,
-        depends_on: task.depends_on || []
+        depends_on: task.depends_on || [],
+        reminders: task.reminders || []
       });
     } else {
       setFormData({
@@ -57,9 +62,11 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
         status: "todo",
         priority: "medium",
         due_date: "",
+        start_date: "",
         assigned_to: "",
         project_id: projectId,
-        depends_on: []
+        depends_on: [],
+        reminders: []
       });
     }
   }, [task, projectId, open]);
@@ -147,25 +154,52 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
             </div>
           </div>
 
-          <div>
-            <Label>Due Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.due_date ? format(new Date(formData.due_date), "PPP") : "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formData.due_date ? new Date(formData.due_date) : undefined}
-                  onSelect={(date) => setFormData({ ...formData, due_date: date?.toISOString().split('T')[0] || "" })}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Start Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.start_date ? format(new Date(formData.start_date), "MMM d") : "Start"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.start_date ? new Date(formData.start_date) : undefined}
+                    onSelect={(date) => setFormData({ ...formData, start_date: date?.toISOString().split('T')[0] || "" })}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div>
+              <Label>Due Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.due_date ? format(new Date(formData.due_date), "MMM d") : "Due"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.due_date ? new Date(formData.due_date) : undefined}
+                    onSelect={(date) => setFormData({ ...formData, due_date: date?.toISOString().split('T')[0] || "" })}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
+
+          <ReminderSelector
+            reminders={formData.reminders}
+            onChange={(reminders) => setFormData({ ...formData, reminders })}
+            dueDate={formData.due_date}
+          />
 
           {teamMembers && teamMembers.length > 0 && (
             <div>
