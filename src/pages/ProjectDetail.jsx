@@ -163,7 +163,29 @@ export default function ProjectDetail() {
     }
   };
 
+  const getTaskDependencyStatus = (task) => {
+    if (!task.depends_on || task.depends_on.length === 0) {
+      return { isBlocked: false, blockingTasks: [] };
+    }
+    
+    const blockingTasks = task.depends_on
+      .map(depId => tasks.find(t => t.id === depId))
+      .filter(t => t && t.status !== 'completed');
+    
+    return {
+      isBlocked: blockingTasks.length > 0 && task.status !== 'completed',
+      blockingTasks
+    };
+  };
+
   const handleStatusChange = (task, newStatus) => {
+    const { isBlocked } = getTaskDependencyStatus(task);
+    
+    if (isBlocked && newStatus !== 'completed' && newStatus !== task.status) {
+      toast.error("This task is blocked by incomplete dependencies");
+      return;
+    }
+    
     updateTaskMutation.mutate({
       id: task.id,
       data: { 
@@ -301,19 +323,25 @@ export default function ProjectDetail() {
             ) : (
               <div className="space-y-3">
                 <AnimatePresence>
-                  {filteredTasks.map((task, index) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      index={index}
-                      onEdit={(t) => {
-                        setEditingTask(t);
-                        setShowTaskForm(true);
-                      }}
-                      onDelete={setDeleteTask}
-                      onStatusChange={handleStatusChange}
-                    />
-                  ))}
+                  {filteredTasks.map((task, index) => {
+                    const { isBlocked, blockingTasks } = getTaskDependencyStatus(task);
+                    return (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        index={index}
+                        allTasks={tasks}
+                        isBlocked={isBlocked}
+                        blockingTasks={blockingTasks}
+                        onEdit={(t) => {
+                          setEditingTask(t);
+                          setShowTaskForm(true);
+                        }}
+                        onDelete={setDeleteTask}
+                        onStatusChange={handleStatusChange}
+                      />
+                    );
+                  })}
                 </AnimatePresence>
               </div>
             )}
@@ -330,6 +358,7 @@ export default function ProjectDetail() {
         task={editingTask}
         projectId={projectId}
         teamMembers={project.team_members}
+        allTasks={tasks}
         onSubmit={handleTaskSubmit}
         isLoading={createTaskMutation.isPending || updateTaskMutation.isPending}
       />

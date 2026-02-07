@@ -22,10 +22,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Link2 } from "lucide-react";
 import { format } from "date-fns";
+import { Checkbox } from "@/components/ui/checkbox";
 
-export default function TaskForm({ open, onOpenChange, task, projectId, teamMembers, onSubmit, isLoading }) {
+export default function TaskForm({ open, onOpenChange, task, projectId, teamMembers, allTasks, onSubmit, isLoading }) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -33,7 +34,8 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
     priority: "medium",
     due_date: "",
     assigned_to: "",
-    project_id: projectId
+    project_id: projectId,
+    depends_on: []
   });
 
   useEffect(() => {
@@ -45,7 +47,8 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
         priority: task.priority || "medium",
         due_date: task.due_date || "",
         assigned_to: task.assigned_to || "",
-        project_id: task.project_id || projectId
+        project_id: task.project_id || projectId,
+        depends_on: task.depends_on || []
       });
     } else {
       setFormData({
@@ -55,7 +58,8 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
         priority: "medium",
         due_date: "",
         assigned_to: "",
-        project_id: projectId
+        project_id: projectId,
+        depends_on: []
       });
     }
   }, [task, projectId, open]);
@@ -63,6 +67,17 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
+  };
+
+  const availableTasks = (allTasks || []).filter(t => t.id !== task?.id);
+  
+  const toggleDependency = (taskId) => {
+    setFormData(prev => ({
+      ...prev,
+      depends_on: prev.depends_on.includes(taskId)
+        ? prev.depends_on.filter(id => id !== taskId)
+        : [...prev.depends_on, taskId]
+    }));
   };
 
   return (
@@ -171,6 +186,41 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          )}
+
+          {availableTasks.length > 0 && (
+            <div>
+              <Label className="flex items-center gap-2 mb-3">
+                <Link2 className="w-4 h-4" />
+                Dependencies
+              </Label>
+              <p className="text-xs text-slate-500 mb-3">
+                Select tasks that must be completed before this task can start
+              </p>
+              <div className="border border-slate-200 rounded-lg max-h-40 overflow-y-auto">
+                {availableTasks.map((t) => (
+                  <div
+                    key={t.id}
+                    className="flex items-start gap-3 p-3 hover:bg-slate-50 border-b border-slate-100 last:border-0"
+                  >
+                    <Checkbox
+                      checked={formData.depends_on.includes(t.id)}
+                      onCheckedChange={() => toggleDependency(t.id)}
+                      id={`dep-${t.id}`}
+                    />
+                    <label
+                      htmlFor={`dep-${t.id}`}
+                      className="flex-1 text-sm cursor-pointer"
+                    >
+                      <p className="font-medium text-slate-900">{t.title}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {t.status === 'completed' ? '✓ Completed' : `Status: ${t.status.replace('_', ' ')}`}
+                      </p>
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
