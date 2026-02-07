@@ -31,6 +31,7 @@ import TaskFilters from "@/components/tasks/TaskFilters";
 import ProjectForm from "@/components/projects/ProjectForm";
 import InviteTeamDialog from "@/components/team/InviteTeamDialog";
 import GanttChart from "@/components/gantt/GanttChart";
+import ReminderChecker from "@/components/reminders/ReminderChecker";
 
 export default function ProjectDetail() {
   const [user, setUser] = useState(null);
@@ -482,6 +483,8 @@ export default function ProjectDetail() {
           queryClient.invalidateQueries({ queryKey: ['project', projectId] });
         }}
       />
+
+      <ReminderChecker tasks={tasks} projectName={project?.name} user={user} />
 
       <AlertDialog open={!!deleteTask} onOpenChange={() => setDeleteTask(null)}>
         <AlertDialogContent>
