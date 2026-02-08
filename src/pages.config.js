@@ -55,6 +55,8 @@ import ProjectDetail from './pages/ProjectDetail';
 import Projects from './pages/Projects';
 import ReminderGroups from './pages/ReminderGroups';
 import SocialMedia from './pages/SocialMedia';
+import Settings from './pages/Settings';
+import Blog from './pages/Blog';
 import __Layout from './Layout.jsx';
 
 
@@ -67,6 +69,8 @@ export const PAGES = {
     "Projects": Projects,
     "ReminderGroups": ReminderGroups,
     "SocialMedia": SocialMedia,
+    "Settings": Settings,
+    "Blog": Blog,
 }
 
 export const pagesConfig = {

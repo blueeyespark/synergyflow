@@ -77,7 +77,7 @@ export default function Dashboard() {
     });
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -85,12 +85,12 @@ export default function Dashboard() {
           className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
         >
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
               Welcome back{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}
             </h1>
             <p className="text-slate-500 mt-1">Here's what's happening with your projects</p>
           </div>
-          <Button onClick={() => setShowProjectForm(true)} className="bg-indigo-600 hover:bg-indigo-700">
+          <Button onClick={() => setShowProjectForm(true)} className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-200">
             <Plus className="w-4 h-4 mr-2" />
             New Project
           </Button>

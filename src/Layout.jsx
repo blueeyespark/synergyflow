@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard, FolderKanban, LogOut, Menu, X,
-  Calendar, DollarSign, Users, Share2, FolderOpen, Moon, Sun
+  Calendar, DollarSign, Users, Share2, FolderOpen, Moon, Sun, Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -17,7 +17,7 @@ const navItems = [
   { name: "Calendar", icon: Calendar, page: "Calendar" },
   { name: "Budget", icon: DollarSign, page: "Budget" },
   { name: "Meetings", icon: Users, page: "Meetings" },
-  { name: "Social", icon: Share2, page: "SocialMedia" },
+  { name: "Blog", icon: Share2, page: "Blog" },
   { name: "Groups", icon: FolderOpen, page: "ReminderGroups" },
 ];
 
@@ -153,6 +153,15 @@ export default function Layout({ children, currentPageName }) {
                   <p className="text-sm font-medium text-slate-900">{user?.full_name || 'User'}</p>
                   <p className="text-xs text-slate-500">{user?.email}</p>
                 </div>
+                <Link to={createPageUrl("Settings")}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </Link>
                 <Button
                   variant="ghost"
                   size="icon"
