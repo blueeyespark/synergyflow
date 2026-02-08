@@ -22,12 +22,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Link2 } from "lucide-react";
+import { CalendarIcon, Link2, Plus, X, Image, Copy } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
 import ReminderSelector from "./ReminderSelector";
 
-export default function TaskForm({ open, onOpenChange, task, projectId, teamMembers, allTasks, onSubmit, isLoading }) {
+export default function TaskForm({ open, onOpenChange, task, projectId, reminderGroups, teamMembers, allTasks, onSubmit, isLoading, onDuplicate }) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -37,9 +38,14 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
     start_date: "",
     assigned_to: "",
     project_id: projectId,
+    reminder_group_id: "",
     depends_on: [],
-    reminders: []
+    reminders: [],
+    steps: [],
+    image_urls: []
   });
+  const [newStep, setNewStep] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (task) {
@@ -52,8 +58,11 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
         start_date: task.start_date || "",
         assigned_to: task.assigned_to || "",
         project_id: task.project_id || projectId,
+        reminder_group_id: task.reminder_group_id || "",
         depends_on: task.depends_on || [],
-        reminders: task.reminders || []
+        reminders: task.reminders || [],
+        steps: task.steps || [],
+        image_urls: task.image_urls || []
       });
     } else {
       setFormData({
@@ -65,11 +74,53 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
         start_date: "",
         assigned_to: "",
         project_id: projectId,
+        reminder_group_id: "",
         depends_on: [],
-        reminders: []
+        reminders: [],
+        steps: [],
+        image_urls: []
       });
     }
   }, [task, projectId, open]);
+
+  const addStep = () => {
+    if (newStep.trim()) {
+      setFormData({
+        ...formData,
+        steps: [...formData.steps, { id: Date.now().toString(), title: newStep, completed: false }]
+      });
+      setNewStep("");
+    }
+  };
+
+  const removeStep = (stepId) => {
+    setFormData({ ...formData, steps: formData.steps.filter(s => s.id !== stepId) });
+  };
+
+  const toggleStep = (stepId) => {
+    setFormData({
+      ...formData,
+      steps: formData.steps.map(s => s.id === stepId ? { ...s, completed: !s.completed } : s)
+    });
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData({ ...formData, image_urls: [...formData.image_urls, file_url] });
+    } catch (error) {
+      console.error("Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = (index) => {
+    setFormData({ ...formData, image_urls: formData.image_urls.filter((_, i) => i !== index) });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -91,7 +142,14 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{task ? "Edit Task" : "Create Task"}</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>{task ? "Edit Task" : "Create Task"}</DialogTitle>
+            {task && onDuplicate && (
+              <Button type="button" variant="outline" size="sm" onClick={() => onDuplicate(task)}>
+                <Copy className="w-4 h-4 mr-1" /> Duplicate
+              </Button>
+            )}
+          </div>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div>
@@ -200,6 +258,78 @@ export default function TaskForm({ open, onOpenChange, task, projectId, teamMemb
             onChange={(reminders) => setFormData({ ...formData, reminders })}
             dueDate={formData.due_date}
           />
+
+          {/* Steps/Subtasks */}
+          <div>
+            <Label className="flex items-center gap-2 mb-2">
+              <Plus className="w-4 h-4" /> Steps
+            </Label>
+            <div className="flex gap-2 mb-2">
+              <Input
+                value={newStep}
+                onChange={(e) => setNewStep(e.target.value)}
+                placeholder="Add a step"
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addStep())}
+              />
+              <Button type="button" onClick={addStep} size="sm">Add</Button>
+            </div>
+            {formData.steps.length > 0 && (
+              <div className="space-y-1 max-h-32 overflow-y-auto">
+                {formData.steps.map((step) => (
+                  <div key={step.id} className="flex items-center gap-2 p-2 bg-slate-50 rounded text-sm">
+                    <Checkbox checked={step.completed} onCheckedChange={() => toggleStep(step.id)} />
+                    <span className={step.completed ? 'line-through text-slate-400' : ''}>{step.title}</span>
+                    <button type="button" onClick={() => removeStep(step.id)} className="ml-auto text-slate-400 hover:text-red-500">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Images */}
+          <div>
+            <Label className="flex items-center gap-2 mb-2">
+              <Image className="w-4 h-4" /> Images
+            </Label>
+            <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+            {formData.image_urls.length > 0 && (
+              <div className="flex gap-2 mt-2 flex-wrap">
+                {formData.image_urls.map((url, i) => (
+                  <div key={i} className="relative">
+                    <img src={url} alt="" className="w-16 h-16 object-cover rounded" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                    >×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Reminder Group */}
+          {reminderGroups && reminderGroups.length > 0 && (
+            <div>
+              <Label>Reminder Group</Label>
+              <Select
+                value={formData.reminder_group_id || "none"}
+                onValueChange={(value) => setFormData({ ...formData, reminder_group_id: value === "none" ? "" : value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Group</SelectItem>
+                  {reminderGroups.map((g) => (
+                    <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {teamMembers && teamMembers.length > 0 && (
             <div>
