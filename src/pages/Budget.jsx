@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO, subMonths } from "date-fns";
 import { 
   Plus, TrendingUp, TrendingDown, DollarSign, 
-  Calculator, PieChart, BarChart3, LineChart 
+  Calculator, PieChart, BarChart3, LineChart, Activity, CircleDot
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,7 +39,12 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend
+  Legend,
+  AreaChart,
+  Area,
+  ScatterChart,
+  Scatter,
+  ComposedChart
 } from "recharts";
 import { toast } from "sonner";
 
@@ -122,6 +127,25 @@ export default function BudgetPage() {
     value: budgetEntries.filter(e => e.category === cat && e.type === "expense").reduce((sum, e) => sum + e.amount, 0)
   })).filter(c => c.value > 0);
 
+  // Net worth over time (cumulative)
+  const netWorthOverTime = last6Months.reduce((acc, month, index) => {
+    const prevNetWorth = index === 0 ? 0 : acc[index - 1].netWorth;
+    acc.push({
+      name: month.name,
+      netWorth: prevNetWorth + month.net,
+      income: month.income,
+      expenses: month.expenses
+    });
+    return acc;
+  }, []);
+
+  // Scatter data for income vs expenses correlation
+  const scatterData = last6Months.map(m => ({
+    x: m.income,
+    y: m.expenses,
+    name: m.name
+  }));
+
   const handleSubmit = (e) => {
     e.preventDefault();
     createMutation.mutate({
@@ -145,6 +169,36 @@ export default function BudgetPage() {
               <Line type="monotone" dataKey="expenses" stroke="#ef4444" strokeWidth={2} />
               <Line type="monotone" dataKey="net" stroke="#6366f1" strokeWidth={2} />
             </ReLineChart>
+          </ResponsiveContainer>
+        );
+      case "area":
+        return (
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={last6Months}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="name" stroke="#64748b" />
+              <YAxis stroke="#64748b" />
+              <Tooltip />
+              <Legend />
+              <Area type="monotone" dataKey="income" stackId="1" stroke="#22c55e" fill="#22c55e" fillOpacity={0.6} />
+              <Area type="monotone" dataKey="expenses" stackId="2" stroke="#ef4444" fill="#ef4444" fillOpacity={0.6} />
+            </AreaChart>
+          </ResponsiveContainer>
+        );
+      case "scatter":
+        return (
+          <ResponsiveContainer width="100%" height={300}>
+            <ScatterChart>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis type="number" dataKey="x" name="Income" stroke="#64748b" label={{ value: 'Income', position: 'bottom' }} />
+              <YAxis type="number" dataKey="y" name="Expenses" stroke="#64748b" label={{ value: 'Expenses', angle: -90, position: 'left' }} />
+              <Tooltip cursor={{ strokeDasharray: '3 3' }} formatter={(value, name) => [`$${value.toLocaleString()}`, name === 'x' ? 'Income' : 'Expenses']} />
+              <Scatter name="Monthly" data={scatterData} fill="#6366f1">
+                {scatterData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Scatter>
+            </ScatterChart>
           </ResponsiveContainer>
         );
       case "pie":
@@ -268,6 +322,7 @@ export default function BudgetPage() {
                 variant={chartType === "bar" ? "secondary" : "ghost"} 
                 size="sm"
                 onClick={() => setChartType("bar")}
+                title="Bar Chart"
               >
                 <BarChart3 className="w-4 h-4" />
               </Button>
@@ -275,19 +330,53 @@ export default function BudgetPage() {
                 variant={chartType === "line" ? "secondary" : "ghost"} 
                 size="sm"
                 onClick={() => setChartType("line")}
+                title="Line Chart"
               >
                 <LineChart className="w-4 h-4" />
+              </Button>
+              <Button 
+                variant={chartType === "area" ? "secondary" : "ghost"} 
+                size="sm"
+                onClick={() => setChartType("area")}
+                title="Area Chart"
+              >
+                <Activity className="w-4 h-4" />
+              </Button>
+              <Button 
+                variant={chartType === "scatter" ? "secondary" : "ghost"} 
+                size="sm"
+                onClick={() => setChartType("scatter")}
+                title="Scatter Plot"
+              >
+                <CircleDot className="w-4 h-4" />
               </Button>
               <Button 
                 variant={chartType === "pie" ? "secondary" : "ghost"} 
                 size="sm"
                 onClick={() => setChartType("pie")}
+                title="Pie Chart"
               >
                 <PieChart className="w-4 h-4" />
               </Button>
             </div>
           </div>
           {renderChart()}
+        </div>
+
+        {/* Net Worth Over Time Chart */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 mb-8">
+          <h2 className="text-lg font-semibold mb-6">Net Worth Over Time</h2>
+          <ResponsiveContainer width="100%" height={250}>
+            <ComposedChart data={netWorthOverTime}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="name" stroke="#64748b" />
+              <YAxis stroke="#64748b" />
+              <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+              <Legend />
+              <Area type="monotone" dataKey="netWorth" fill="#6366f1" fillOpacity={0.2} stroke="#6366f1" strokeWidth={2} name="Net Worth" />
+              <Line type="monotone" dataKey="netWorth" stroke="#6366f1" strokeWidth={2} dot={{ fill: '#6366f1', r: 4 }} name="Net Worth" />
+            </ComposedChart>
+          </ResponsiveContainer>
         </div>
 
         {/* Recent Entries */}
