@@ -72,6 +72,11 @@ export default function ProjectDetail() {
     enabled: !!projectId,
   });
 
+  const { data: reminderGroups = [] } = useQuery({
+    queryKey: ['remindergroups'],
+    queryFn: () => base44.entities.ReminderGroup.list(),
+  });
+
   const updateProjectMutation = useMutation({
     mutationFn: (data) => base44.entities.Project.update(projectId, data),
     onSuccess: () => {
@@ -258,6 +263,17 @@ export default function ProjectDetail() {
 
   const handleGanttUpdate = (taskId, updates) => {
     updateTaskMutation.mutate({ id: taskId, data: updates });
+  };
+
+  const handleDuplicateTask = (task) => {
+    const { id, created_date, updated_date, created_by, completed_at, ...taskData } = task;
+    createTaskMutation.mutate({
+      ...taskData,
+      title: `${taskData.title} (Copy)`,
+      status: "todo"
+    });
+    setShowTaskForm(false);
+    setEditingTask(null);
   };
 
   return (
@@ -462,8 +478,10 @@ export default function ProjectDetail() {
         task={editingTask}
         projectId={projectId}
         teamMembers={project.team_members}
+        reminderGroups={reminderGroups}
         allTasks={tasks}
         onSubmit={handleTaskSubmit}
+        onDuplicate={handleDuplicateTask}
         isLoading={createTaskMutation.isPending || updateTaskMutation.isPending}
       />
 
