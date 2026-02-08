@@ -5,7 +5,8 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard, FolderKanban, LogOut, Menu, X
+  LayoutDashboard, FolderKanban, LogOut, Menu, X,
+  Calendar, DollarSign, Users, Share2, FolderOpen, Moon, Sun
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -13,12 +14,32 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
   { name: "Projects", icon: FolderKanban, page: "Projects" },
+  { name: "Calendar", icon: Calendar, page: "Calendar" },
+  { name: "Budget", icon: DollarSign, page: "Budget" },
+  { name: "Meetings", icon: Users, page: "Meetings" },
+  { name: "Social", icon: Share2, page: "SocialMedia" },
+  { name: "Groups", icon: FolderOpen, page: "ReminderGroups" },
 ];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('darkMode') === 'true';
+    }
+    return false;
+  });
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]);
 
   useEffect(() => {
     base44.auth.me().then(setUser);
@@ -65,7 +86,18 @@ export default function Layout({ children, currentPageName }) {
   }, [user?.email, queryClient]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className={`min-h-screen transition-colors ${darkMode ? 'dark bg-slate-900' : 'bg-slate-50'}`}>
+      <style>{`
+        .dark { --background: 15 23 42; --foreground: 248 250 252; }
+        .dark .bg-white { background-color: rgb(30 41 59) !important; }
+        .dark .bg-slate-50 { background-color: rgb(15 23 42) !important; }
+        .dark .text-slate-900 { color: rgb(248 250 252) !important; }
+        .dark .text-slate-600 { color: rgb(148 163 184) !important; }
+        .dark .text-slate-500 { color: rgb(148 163 184) !important; }
+        .dark .border-slate-100, .dark .border-slate-200 { border-color: rgb(51 65 85) !important; }
+        .dark .bg-white\\/80 { background-color: rgba(30, 41, 59, 0.9) !important; }
+        .dark input, .dark textarea, .dark select { background-color: rgb(51 65 85) !important; color: white !important; border-color: rgb(71 85 105) !important; }
+      `}</style>
       {/* Top Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -101,6 +133,14 @@ export default function Layout({ children, currentPageName }) {
 
             {/* Right Section */}
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setDarkMode(!darkMode)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </Button>
               <NotificationBell
                 notifications={notifications}
                 onMarkAsRead={(id) => markAsReadMutation.mutate(id)}
