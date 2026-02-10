@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { format, addDays, addWeeks, addMonths, addYears } from "date-fns";
 import {
   Plus, Settings, MessageSquare, Users, ArrowLeft, Lock, 
-  Eye, Pencil, RefreshCw, Link2, ChevronRight
+  Eye, Pencil, RefreshCw, Link2, ChevronRight, Share2, History, Brain
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,12 +13,15 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 
-import TaskCard from "@/components/tasks/TaskCard";
 import TaskForm from "@/components/tasks/TaskForm";
 import PlannerChat from "@/components/planner/PlannerChat";
-import TaskComments from "@/components/planner/TaskComments";
 import CustomStatusManager from "@/components/planner/CustomStatusManager";
 import UserPresenceIndicator from "@/components/collaboration/UserPresenceIndicator";
+import KanbanBoard from "@/components/planner/KanbanBoard";
+import TaskDetailSheet from "@/components/planner/TaskDetailSheet";
+import AITaskAssistant from "@/components/ai/AITaskAssistant";
+import ShareDialog from "@/components/sharing/ShareDialog";
+import ActivityLogPanel from "@/components/activity/ActivityLogPanel";
 
 export default function PlannerDetail() {
   const [user, setUser] = useState(null);
@@ -27,6 +30,9 @@ export default function PlannerDetail() {
   const [showChat, setShowChat] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showStatusManager, setShowStatusManager] = useState(false);
+  const [showAI, setShowAI] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [showActivity, setShowActivity] = useState(false);
   const queryClient = useQueryClient();
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -80,6 +86,25 @@ export default function PlannerDetail() {
     refetchInterval: 10000,
   });
 
+  const { data: comments = [] } = useQuery({
+    queryKey: ['planner-comments', plannerId],
+    queryFn: async () => {
+      const taskIds = tasks.map(t => t.id);
+      if (taskIds.length === 0) return [];
+      const allComments = await base44.entities.TaskComment.list('-created_date');
+      return allComments.filter(c => taskIds.includes(c.task_id));
+    },
+    enabled: !!plannerId && tasks.length > 0,
+  });
+
+  const { data: chatMessages = [] } = useQuery({
+    queryKey: ['chat-messages', plannerId],
+    queryFn: () => base44.entities.ChatMessage.filter({ planner_id: plannerId }, '-created_date'),
+    enabled: !!plannerId,
+  });
+
+  const getTaskCommentCount = (taskId) => comments.filter(c => c.task_id === taskId).length;
+
   // Determine user role
   const getUserRole = () => {
     if (!planner || !user) return 'viewer';
@@ -91,12 +116,27 @@ export default function PlannerDetail() {
   const canEdit = userRole === 'owner' || userRole === 'editor';
   const canComment = canEdit || userRole === 'commenter';
 
+  const logActivity = async (action, entityId, entityName, changes = null) => {
+    await base44.entities.ActivityLog.create({
+      entity_type: 'task',
+      entity_id: entityId,
+      entity_name: entityName,
+      action,
+      changes,
+      user_email: user?.email,
+      user_name: user?.full_name,
+      parent_id: plannerId
+    });
+  };
+
   const createTaskMutation = useMutation({
     mutationFn: (data) => base44.entities.Task.create({ ...data, project_id: plannerId }),
-    onSuccess: (newTask, variables) => {
+    onSuccess: async (newTask, variables) => {
       queryClient.invalidateQueries({ queryKey: ['planner-tasks', plannerId] });
       setShowTaskForm(false);
       setEditingTask(null);
+      
+      await logActivity('created', newTask.id, variables.title);
       
       // Handle recurring task
       if (variables.recurring?.enabled) {
@@ -107,7 +147,23 @@ export default function PlannerDetail() {
   });
 
   const updateTaskMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Task.update(id, data),
+    mutationFn: async ({ id, data, oldData }) => {
+      const result = await base44.entities.Task.update(id, data);
+      
+      // Log changes
+      const changes = {};
+      Object.keys(data).forEach(key => {
+        if (oldData && oldData[key] !== data[key]) {
+          changes[key] = { from: oldData[key], to: data[key] };
+        }
+      });
+      
+      if (Object.keys(changes).length > 0) {
+        await logActivity('updated', id, oldData?.title || 'Task', changes);
+      }
+      
+      return result;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['planner-tasks', plannerId] });
       setEditingTask(null);
@@ -116,7 +172,13 @@ export default function PlannerDetail() {
   });
 
   const deleteTaskMutation = useMutation({
-    mutationFn: (id) => base44.entities.Task.delete(id),
+    mutationFn: async (id) => {
+      const task = tasks.find(t => t.id === id);
+      await base44.entities.Task.delete(id);
+      if (task) {
+        await logActivity('deleted', id, task.title);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['planner-tasks', plannerId] });
       toast.success("Task deleted");
@@ -169,11 +231,6 @@ export default function PlannerDetail() {
     { id: 'completed', name: 'Completed', color: '#22c55e' }
   ];
 
-  const tasksByStatus = statuses.reduce((acc, status) => {
-    acc[status.id] = tasks.filter(t => (t.status || 'todo') === status.id);
-    return acc;
-  }, {});
-
   // Check dependencies
   const isTaskBlocked = (task) => {
     if (!task.depends_on?.length) return false;
@@ -182,6 +239,43 @@ export default function PlannerDetail() {
       return depTask && depTask.status !== 'completed';
     });
   };
+
+  const handleTaskMove = async (taskId, newStatus, newIndex) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || task.status === newStatus) return;
+    
+    await updateTaskMutation.mutateAsync({ 
+      id: taskId, 
+      data: { status: newStatus },
+      oldData: task
+    });
+  };
+
+  const handleCreateTasksFromAI = async (aiTasks) => {
+    for (const task of aiTasks) {
+      await base44.entities.Task.create({
+        ...task,
+        project_id: plannerId,
+        status: 'todo'
+      });
+    }
+    queryClient.invalidateQueries({ queryKey: ['planner-tasks', plannerId] });
+  };
+
+  const handleAssignTask = async (taskId, assignTo) => {
+    const task = tasks.find(t => t.id === taskId);
+    await updateTaskMutation.mutateAsync({
+      id: taskId,
+      data: { assigned_to: assignTo },
+      oldData: task
+    });
+  };
+
+  // Get team members from shared_with
+  const teamMembers = [
+    planner?.owner_email,
+    ...(planner?.shared_with?.map(s => s.email) || [])
+  ].filter(Boolean);
 
   if (plannerLoading) {
     return <div className="min-h-screen bg-slate-50 flex items-center justify-center">Loading...</div>;
@@ -239,18 +333,31 @@ export default function PlannerDetail() {
               </div>
             </div>
             
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowChat(!showChat)}>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowActivity(true)}>
+                <History className="w-4 h-4 mr-2" />
+                Activity
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowChat(!showChat)}>
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Chat
               </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowAI(true)}>
+                <Brain className="w-4 h-4 mr-2" />
+                AI Assistant
+              </Button>
+              {userRole === 'owner' && (
+                <Button variant="outline" size="sm" onClick={() => setShowShare(true)}>
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+              )}
               {canEdit && (
                 <>
-                  <Button variant="outline" onClick={() => setShowStatusManager(true)}>
-                    <Settings className="w-4 h-4 mr-2" />
-                    Statuses
+                  <Button variant="outline" size="sm" onClick={() => setShowStatusManager(true)}>
+                    <Settings className="w-4 h-4" />
                   </Button>
-                  <Button onClick={() => { setEditingTask(null); setShowTaskForm(true); }}>
+                  <Button size="sm" onClick={() => { setEditingTask(null); setShowTaskForm(true); }}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Task
                   </Button>
@@ -261,53 +368,19 @@ export default function PlannerDetail() {
         </motion.div>
 
         <div className="flex gap-6">
-          {/* Main Content - Kanban Board */}
+          {/* Main Content - Kanban Board with Drag & Drop */}
           <div className={`flex-1 ${showChat ? 'pr-80' : ''}`}>
-            <div className="flex gap-4 overflow-x-auto pb-4">
-              {statuses.map(status => (
-                <div key={status.id} className="flex-shrink-0 w-80">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: status.color }} />
-                      <h3 className="font-semibold text-slate-900">{status.name}</h3>
-                      <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                        {tasksByStatus[status.id]?.length || 0}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    {tasksByStatus[status.id]?.map(task => (
-                      <div key={task.id} className="relative">
-                        {task.recurring?.enabled && (
-                          <div className="absolute -top-1 -right-1 z-10">
-                            <RefreshCw className="w-3 h-3 text-indigo-500" />
-                          </div>
-                        )}
-                        {isTaskBlocked(task) && (
-                          <div className="absolute -top-1 -left-1 z-10">
-                            <Link2 className="w-3 h-3 text-amber-500" />
-                          </div>
-                        )}
-                        <TaskCard
-                          task={task}
-                          onEdit={canEdit ? () => { setEditingTask(task); setShowTaskForm(true); } : undefined}
-                          onDelete={canEdit ? () => deleteTaskMutation.mutate(task.id) : undefined}
-                          onStatusChange={canEdit ? (status) => updateTaskMutation.mutate({ id: task.id, data: { status } }) : undefined}
-                          onClick={() => setSelectedTask(task)}
-                          isBlocked={isTaskBlocked(task)}
-                        />
-                      </div>
-                    ))}
-                    {tasksByStatus[status.id]?.length === 0 && (
-                      <div className="p-4 border-2 border-dashed border-slate-200 rounded-xl text-center text-sm text-slate-400">
-                        No tasks
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <KanbanBoard
+              statuses={statuses}
+              tasks={tasks}
+              onTaskMove={handleTaskMove}
+              onTaskClick={(task) => setSelectedTask(task)}
+              onTaskEdit={(task) => { setEditingTask(task); setShowTaskForm(true); }}
+              onTaskDelete={(taskId) => deleteTaskMutation.mutate(taskId)}
+              canEdit={canEdit}
+              getTaskCommentCount={getTaskCommentCount}
+              isTaskBlocked={isTaskBlocked}
+            />
           </div>
 
           {/* Chat Sidebar */}
@@ -330,23 +403,26 @@ export default function PlannerDetail() {
         task={editingTask}
         tasks={tasks}
         customStatuses={statuses}
+        teamMembers={teamMembers}
         onSubmit={(data) => editingTask 
-          ? updateTaskMutation.mutate({ id: editingTask.id, data })
+          ? updateTaskMutation.mutate({ id: editingTask.id, data, oldData: editingTask })
           : createTaskMutation.mutate(data)
         }
         isLoading={createTaskMutation.isPending || updateTaskMutation.isPending}
       />
 
-      {/* Task Comments Modal */}
-      {selectedTask && canComment && (
-        <TaskComments
-          open={!!selectedTask}
-          onOpenChange={(open) => !open && setSelectedTask(null)}
-          task={selectedTask}
-          user={user}
-          canComment={canComment}
-        />
-      )}
+      {/* Task Detail Sheet */}
+      <TaskDetailSheet
+        open={!!selectedTask}
+        onOpenChange={(open) => !open && setSelectedTask(null)}
+        task={selectedTask}
+        user={user}
+        canEdit={canEdit}
+        canComment={canComment}
+        onEdit={(task) => { setSelectedTask(null); setEditingTask(task); setShowTaskForm(true); }}
+        allTasks={tasks}
+        statuses={statuses}
+      />
 
       {/* Custom Status Manager */}
       <CustomStatusManager
@@ -354,6 +430,37 @@ export default function PlannerDetail() {
         onOpenChange={setShowStatusManager}
         statuses={planner.custom_statuses || []}
         onSave={(statuses) => updatePlannerMutation.mutate({ custom_statuses: statuses })}
+      />
+
+      {/* AI Task Assistant */}
+      <AITaskAssistant
+        open={showAI}
+        onOpenChange={setShowAI}
+        tasks={tasks}
+        teamMembers={teamMembers}
+        comments={comments}
+        chatMessages={chatMessages}
+        onCreateTasks={handleCreateTasksFromAI}
+        onAssignTask={handleAssignTask}
+      />
+
+      {/* Share Dialog */}
+      <ShareDialog
+        open={showShare}
+        onOpenChange={setShowShare}
+        title={planner?.name}
+        entityType="Planner"
+        entityId={plannerId}
+        ownerEmail={planner?.owner_email}
+        sharedWith={planner?.shared_with || []}
+        onUpdate={(data) => updatePlannerMutation.mutate(data)}
+      />
+
+      {/* Activity Log */}
+      <ActivityLogPanel
+        open={showActivity}
+        onOpenChange={setShowActivity}
+        parentId={plannerId}
       />
     </div>
   );
