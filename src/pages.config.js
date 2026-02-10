@@ -47,6 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import Blog from './pages/Blog';
 import Budget from './pages/Budget';
 import Calendar from './pages/Calendar';
 import Dashboard from './pages/Dashboard';
@@ -54,13 +55,16 @@ import Meetings from './pages/Meetings';
 import ProjectDetail from './pages/ProjectDetail';
 import Projects from './pages/Projects';
 import ReminderGroups from './pages/ReminderGroups';
-import SocialMedia from './pages/SocialMedia';
 import Settings from './pages/Settings';
-import Blog from './pages/Blog';
+import SocialMedia from './pages/SocialMedia';
+import Planner from './pages/Planner';
+import PlannerDetail from './pages/PlannerDetail';
+import Reports from './pages/Reports';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "Blog": Blog,
     "Budget": Budget,
     "Calendar": Calendar,
     "Dashboard": Dashboard,
@@ -68,9 +72,11 @@ export const PAGES = {
     "ProjectDetail": ProjectDetail,
     "Projects": Projects,
     "ReminderGroups": ReminderGroups,
-    "SocialMedia": SocialMedia,
     "Settings": Settings,
-    "Blog": Blog,
+    "SocialMedia": SocialMedia,
+    "Planner": Planner,
+    "PlannerDetail": PlannerDetail,
+    "Reports": Reports,
 }
 
 export const pagesConfig = {
