@@ -14,11 +14,11 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
   { name: "Projects", icon: FolderKanban, page: "Projects" },
+  { name: "Planner", icon: FolderOpen, page: "Planner" },
   { name: "Calendar", icon: Calendar, page: "Calendar" },
   { name: "Budget", icon: DollarSign, page: "Budget" },
-  { name: "Meetings", icon: Users, page: "Meetings" },
-  { name: "Blog", icon: Share2, page: "Blog" },
-  { name: "Groups", icon: FolderOpen, page: "ReminderGroups" },
+  { name: "Reports", icon: Share2, page: "Reports" },
+  { name: "Blog", icon: Users, page: "Blog" },
 ];
 
 export default function Layout({ children, currentPageName }) {

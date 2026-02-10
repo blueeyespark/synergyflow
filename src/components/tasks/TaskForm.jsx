@@ -22,13 +22,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Link2, Plus, X, Image, Copy } from "lucide-react";
+import { CalendarIcon, Link2, Plus, X, Image, Copy, RefreshCw } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
 import ReminderSelector from "./ReminderSelector";
 
-export default function TaskForm({ open, onOpenChange, task, projectId, reminderGroups, teamMembers, allTasks, onSubmit, isLoading, onDuplicate }) {
+export default function TaskForm({ open, onOpenChange, task, projectId, reminderGroups, teamMembers, allTasks, tasks, customStatuses, onSubmit, isLoading, onDuplicate }) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -42,7 +42,8 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
     depends_on: [],
     reminders: [],
     steps: [],
-    image_urls: []
+    image_urls: [],
+    recurring: { enabled: false, frequency: "weekly", interval: 1, end_date: "", days_of_week: [] }
   });
   const [newStep, setNewStep] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -78,10 +79,21 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
         depends_on: [],
         reminders: [],
         steps: [],
-        image_urls: []
+        image_urls: [],
+        recurring: { enabled: false, frequency: "weekly", interval: 1, end_date: "", days_of_week: [] }
       });
     }
   }, [task, projectId, open]);
+
+  // Use custom statuses if provided, otherwise default
+  const statusOptions = customStatuses?.length > 0 ? customStatuses : [
+    { id: 'todo', name: 'To Do' },
+    { id: 'in_progress', name: 'In Progress' },
+    { id: 'review', name: 'Review' },
+    { id: 'completed', name: 'Completed' }
+  ];
+
+  const availableTasksForDeps = (tasks || allTasks || []).filter(t => t.id !== task?.id);
 
   const addStep = () => {
     if (newStep.trim()) {
@@ -127,7 +139,7 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
     onSubmit(formData);
   };
 
-  const availableTasks = (allTasks || []).filter(t => t.id !== task?.id);
+
   
   const toggleDependency = (taskId) => {
     setFormData(prev => ({
@@ -185,10 +197,9 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todo">To Do</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="review">Review</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
+                  {statusOptions.map(s => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -258,6 +269,56 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
             onChange={(reminders) => setFormData({ ...formData, reminders })}
             dueDate={formData.due_date}
           />
+
+          {/* Recurring Task */}
+          <div className="p-3 bg-slate-50 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <Label className="flex items-center gap-2">
+                <RefreshCw className="w-4 h-4" /> Recurring Task
+              </Label>
+              <input
+                type="checkbox"
+                checked={formData.recurring?.enabled}
+                onChange={(e) => setFormData({ ...formData, recurring: { ...formData.recurring, enabled: e.target.checked } })}
+                className="rounded"
+              />
+            </div>
+            {formData.recurring?.enabled && (
+              <div className="space-y-2 mt-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <Select
+                    value={formData.recurring.frequency}
+                    onValueChange={(v) => setFormData({ ...formData, recurring: { ...formData.recurring, frequency: v } })}
+                  >
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-8 text-sm">
+                        {formData.recurring.end_date ? format(new Date(formData.recurring.end_date), "MMM d") : "End date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={formData.recurring.end_date ? new Date(formData.recurring.end_date) : undefined}
+                        onSelect={(date) => setFormData({ ...formData, recurring: { ...formData.recurring, end_date: date?.toISOString().split('T')[0] || "" } })}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Steps/Subtasks */}
           <div>
@@ -353,7 +414,7 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
             </div>
           )}
 
-          {availableTasks.length > 0 && (
+          {availableTasksForDeps.length > 0 && (
             <div>
               <Label className="flex items-center gap-2 mb-3">
                 <Link2 className="w-4 h-4" />
@@ -363,7 +424,7 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
                 Select tasks that must be completed before this task can start
               </p>
               <div className="border border-slate-200 rounded-lg max-h-40 overflow-y-auto">
-                {availableTasks.map((t) => (
+                {availableTasksForDeps.map((t) => (
                   <div
                     key={t.id}
                     className="flex items-start gap-3 p-3 hover:bg-slate-50 border-b border-slate-100 last:border-0"
