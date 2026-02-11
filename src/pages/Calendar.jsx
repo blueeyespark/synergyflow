@@ -198,7 +198,7 @@ export default function CalendarPage() {
     return (
       <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
         {months.map((month) => {
-          const monthTasks = tasks.filter(t => t.due_date && isSameMonth(new Date(t.due_date), month));
+          const monthTasks = tasks.filter(t => t.due_date && isSameMonth(new Date(t.due_date + 'T12:00:00'), month));
           
           return (
             <div
