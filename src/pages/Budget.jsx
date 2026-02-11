@@ -475,8 +475,15 @@ export default function BudgetPage() {
                   <PopoverContent className="w-auto p-0">
                     <Calendar
                       mode="single"
-                      selected={formData.date ? new Date(formData.date) : undefined}
-                      onSelect={(d) => setFormData({ ...formData, date: d?.toISOString().split('T')[0] || '' })}
+                      selected={formData.date ? new Date(formData.date + 'T12:00:00') : undefined}
+                      onSelect={(d) => {
+                        if (d) {
+                          const year = d.getFullYear();
+                          const month = String(d.getMonth() + 1).padStart(2, '0');
+                          const day = String(d.getDate()).padStart(2, '0');
+                          setFormData({ ...formData, date: `${year}-${month}-${day}` });
+                        }
+                      }}
                     />
                   </PopoverContent>
                 </Popover>

@@ -46,11 +46,19 @@ export default function CalendarPage() {
   });
 
   const getTasksForDay = (day) => {
-    return tasks.filter(task => task.due_date && isSameDay(new Date(task.due_date), day));
+    return tasks.filter(task => {
+      if (!task.due_date) return false;
+      const taskDate = new Date(task.due_date + 'T12:00:00');
+      return isSameDay(taskDate, day);
+    });
   };
 
   const getMeetingsForDay = (day) => {
-    return meetings.filter(meeting => meeting.date && isSameDay(new Date(meeting.date), day));
+    return meetings.filter(meeting => {
+      if (!meeting.date) return false;
+      const meetingDate = new Date(meeting.date + 'T12:00:00');
+      return isSameDay(meetingDate, day);
+    });
   };
 
   const navigatePrev = () => {

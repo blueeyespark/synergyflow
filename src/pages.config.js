@@ -52,14 +52,14 @@ import Budget from './pages/Budget';
 import Calendar from './pages/Calendar';
 import Dashboard from './pages/Dashboard';
 import Meetings from './pages/Meetings';
+import Planner from './pages/Planner';
+import PlannerDetail from './pages/PlannerDetail';
 import ProjectDetail from './pages/ProjectDetail';
 import Projects from './pages/Projects';
 import ReminderGroups from './pages/ReminderGroups';
+import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import SocialMedia from './pages/SocialMedia';
-import Planner from './pages/Planner';
-import PlannerDetail from './pages/PlannerDetail';
-import Reports from './pages/Reports';
 import __Layout from './Layout.jsx';
 
 
@@ -69,14 +69,14 @@ export const PAGES = {
     "Calendar": Calendar,
     "Dashboard": Dashboard,
     "Meetings": Meetings,
+    "Planner": Planner,
+    "PlannerDetail": PlannerDetail,
     "ProjectDetail": ProjectDetail,
     "Projects": Projects,
     "ReminderGroups": ReminderGroups,
+    "Reports": Reports,
     "Settings": Settings,
     "SocialMedia": SocialMedia,
-    "Planner": Planner,
-    "PlannerDetail": PlannerDetail,
-    "Reports": Reports,
 }
 
 export const pagesConfig = {

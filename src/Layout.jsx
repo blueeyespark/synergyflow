@@ -91,12 +91,39 @@ export default function Layout({ children, currentPageName }) {
         .dark { --background: 15 23 42; --foreground: 248 250 252; }
         .dark .bg-white { background-color: rgb(30 41 59) !important; }
         .dark .bg-slate-50 { background-color: rgb(15 23 42) !important; }
+        .dark .bg-slate-100 { background-color: rgb(51 65 85) !important; }
         .dark .text-slate-900 { color: rgb(248 250 252) !important; }
+        .dark .text-slate-800 { color: rgb(226 232 240) !important; }
+        .dark .text-slate-700 { color: rgb(203 213 225) !important; }
         .dark .text-slate-600 { color: rgb(148 163 184) !important; }
         .dark .text-slate-500 { color: rgb(148 163 184) !important; }
+        .dark .text-slate-400 { color: rgb(100 116 139) !important; }
         .dark .border-slate-100, .dark .border-slate-200 { border-color: rgb(51 65 85) !important; }
-        .dark .bg-white\\/80 { background-color: rgba(30, 41, 59, 0.9) !important; }
-        .dark input, .dark textarea, .dark select { background-color: rgb(51 65 85) !important; color: white !important; border-color: rgb(71 85 105) !important; }
+        .dark .border-slate-300 { border-color: rgb(71 85 105) !important; }
+        .dark .bg-white\\/80 { background-color: rgba(30, 41, 59, 0.95) !important; }
+        .dark input, .dark textarea, .dark select { background-color: rgb(51 65 85) !important; color: rgb(248 250 252) !important; border-color: rgb(71 85 105) !important; }
+        .dark input::placeholder, .dark textarea::placeholder { color: rgb(100 116 139) !important; }
+        .dark .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.15) !important; }
+        .dark .bg-green-100 { background-color: rgba(34, 197, 94, 0.2) !important; }
+        .dark .bg-red-100 { background-color: rgba(239, 68, 68, 0.2) !important; }
+        .dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.2) !important; }
+        .dark .bg-purple-100 { background-color: rgba(168, 85, 247, 0.2) !important; }
+        .dark .bg-blue-100 { background-color: rgba(59, 130, 246, 0.2) !important; }
+        .dark [data-radix-popper-content-wrapper] > div { background-color: rgb(30 41 59) !important; border-color: rgb(51 65 85) !important; }
+        .dark [role="dialog"] { background-color: rgb(30 41 59) !important; border-color: rgb(51 65 85) !important; }
+        .dark [role="listbox"] { background-color: rgb(30 41 59) !important; }
+        .dark [role="option"]:hover { background-color: rgb(51 65 85) !important; }
+        .dark .hover\\:bg-slate-50:hover { background-color: rgb(51 65 85) !important; }
+        .dark .hover\\:bg-slate-100:hover { background-color: rgb(51 65 85) !important; }
+        .dark table { color: rgb(248 250 252) !important; }
+        .dark th, .dark td { border-color: rgb(51 65 85) !important; }
+        .dark .divide-slate-100 > * + * { border-color: rgb(51 65 85) !important; }
+        .dark .divide-slate-200 > * + * { border-color: rgb(51 65 85) !important; }
+        .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 { color: rgb(248 250 252) !important; }
+        .dark p { color: rgb(203 213 225); }
+        .dark .recharts-cartesian-grid line { stroke: rgb(51 65 85) !important; }
+        .dark .recharts-text { fill: rgb(148 163 184) !important; }
+        .dark .shadow-sm, .dark .shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important; }
       `}</style>
       {/* Top Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
