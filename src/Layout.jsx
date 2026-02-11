@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import WorkspaceSelector from "@/components/workspace/WorkspaceSelector";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
@@ -30,7 +31,20 @@ export default function Layout({ children, currentPageName }) {
     }
     return false;
   });
+  const [currentWorkspace, setCurrentWorkspace] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('currentWorkspace');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
+  });
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (currentWorkspace) {
+      localStorage.setItem('currentWorkspace', JSON.stringify(currentWorkspace));
+    }
+  }, [currentWorkspace]);
 
   useEffect(() => {
     if (darkMode) {
@@ -129,13 +143,23 @@ export default function Layout({ children, currentPageName }) {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">P</span>
+            {/* Logo & Workspace */}
+            <div className="flex items-center gap-2">
+              <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">P</span>
+                </div>
+                <span className="font-semibold text-slate-900 hidden sm:block">Planify</span>
+              </Link>
+              <span className="text-slate-300 hidden sm:block">/</span>
+              <div className="hidden sm:block">
+                <WorkspaceSelector
+                  currentWorkspace={currentWorkspace}
+                  onWorkspaceChange={setCurrentWorkspace}
+                  user={user}
+                />
               </div>
-              <span className="font-semibold text-slate-900 hidden sm:block">Planify</span>
-            </Link>
+            </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-1">
