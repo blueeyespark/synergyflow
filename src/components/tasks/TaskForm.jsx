@@ -25,6 +25,21 @@ import {
 import { CalendarIcon, Link2, Plus, X, Image, Copy, RefreshCw } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
+
+// Helper function to format date without timezone issues
+const formatDateString = (date) => {
+  if (!date) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Helper function to parse date string without timezone issues
+const parseDateString = (dateStr) => {
+  if (!dateStr) return undefined;
+  return new Date(dateStr + 'T12:00:00');
+};
 import { Checkbox } from "@/components/ui/checkbox";
 import ReminderSelector from "./ReminderSelector";
 
@@ -230,14 +245,14 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.start_date ? format(new Date(formData.start_date), "MMM d") : "Start"}
+                    {formData.start_date ? format(parseDateString(formData.start_date), "MMM d") : "Start"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={formData.start_date ? new Date(formData.start_date) : undefined}
-                    onSelect={(date) => setFormData({ ...formData, start_date: date?.toISOString().split('T')[0] || "" })}
+                    selected={parseDateString(formData.start_date)}
+                    onSelect={(date) => setFormData({ ...formData, start_date: formatDateString(date) })}
                     initialFocus
                   />
                 </PopoverContent>
@@ -249,14 +264,14 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.due_date ? format(new Date(formData.due_date), "MMM d") : "Due"}
+                    {formData.due_date ? format(parseDateString(formData.due_date), "MMM d") : "Due"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={formData.due_date ? new Date(formData.due_date) : undefined}
-                    onSelect={(date) => setFormData({ ...formData, due_date: date?.toISOString().split('T')[0] || "" })}
+                    selected={parseDateString(formData.due_date)}
+                    onSelect={(date) => setFormData({ ...formData, due_date: formatDateString(date) })}
                     initialFocus
                   />
                 </PopoverContent>
@@ -304,14 +319,14 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" size="sm" className="h-8 text-sm">
-                        {formData.recurring.end_date ? format(new Date(formData.recurring.end_date), "MMM d") : "End date"}
+                        {formData.recurring.end_date ? format(parseDateString(formData.recurring.end_date), "MMM d") : "End date"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
-                        selected={formData.recurring.end_date ? new Date(formData.recurring.end_date) : undefined}
-                        onSelect={(date) => setFormData({ ...formData, recurring: { ...formData.recurring, end_date: date?.toISOString().split('T')[0] || "" } })}
+                        selected={parseDateString(formData.recurring.end_date)}
+                        onSelect={(date) => setFormData({ ...formData, recurring: { ...formData.recurring, end_date: formatDateString(date) } })}
                       />
                     </PopoverContent>
                   </Popover>

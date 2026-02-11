@@ -25,6 +25,21 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 
+// Helper function to format date without timezone issues
+const formatDateString = (date) => {
+  if (!date) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Helper function to parse date string without timezone issues
+const parseDateString = (dateStr) => {
+  if (!dateStr) return undefined;
+  return new Date(dateStr + 'T12:00:00');
+};
+
 const colors = [
   "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e", 
   "#f97316", "#eab308", "#22c55e", "#14b8a6", "#0ea5e9"
@@ -143,14 +158,14 @@ export default function ProjectForm({ open, onOpenChange, project, onSubmit, isL
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-start text-left font-normal">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.due_date ? format(new Date(formData.due_date), "PPP") : "Pick a date"}
+                  {formData.due_date ? format(parseDateString(formData.due_date), "PPP") : "Pick a date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={formData.due_date ? new Date(formData.due_date) : undefined}
-                  onSelect={(date) => setFormData({ ...formData, due_date: date?.toISOString().split('T')[0] || "" })}
+                  selected={parseDateString(formData.due_date)}
+                  onSelect={(date) => setFormData({ ...formData, due_date: formatDateString(date) })}
                   initialFocus
                 />
               </PopoverContent>
