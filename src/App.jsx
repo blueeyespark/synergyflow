@@ -1,4 +1,6 @@
 import { Toaster } from "@/components/ui/toaster"
+import Leaderboard from './pages/Leaderboard';
+import AIScanner from './pages/AIScanner';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -58,6 +60,8 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route path="/Leaderboard" element={<LayoutWrapper currentPageName="Leaderboard"><Leaderboard /></LayoutWrapper>} />
+      <Route path="/AIScanner" element={<LayoutWrapper currentPageName="AIScanner"><AIScanner /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

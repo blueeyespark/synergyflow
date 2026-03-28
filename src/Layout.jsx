@@ -6,10 +6,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard, FolderKanban, LogOut, Menu, X,
-  Calendar, DollarSign, Users, Share2, FolderOpen, Moon, Sun, Settings
+  Calendar, DollarSign, Users, Share2, FolderOpen, Moon, Sun, Settings, Trophy, Scan
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import MobileNav from "@/components/MobileNav";
+import PointsToast from "@/components/gamification/PointsToast";
 import WorkspaceSelector from "@/components/workspace/WorkspaceSelector";
 
 const navItems = [
@@ -20,11 +22,14 @@ const navItems = [
   { name: "Budget", icon: DollarSign, page: "Budget" },
   { name: "Reports", icon: Share2, page: "Reports" },
   { name: "Blog", icon: Users, page: "Blog" },
+  { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
+  { name: "AI Scanner", icon: Scan, page: "AIScanner" },
 ];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pointsEvent, setPointsEvent] = useState(null);
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('darkMode') === 'true';
@@ -101,6 +106,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className={`min-h-screen transition-colors ${darkMode ? 'dark bg-slate-900' : 'bg-slate-50'}`}>
+      {pointsEvent && <PointsToast event={pointsEvent} onDismiss={() => setPointsEvent(null)} />}
       <style>{`
         .dark { --background: 15 23 42; --foreground: 248 250 252; }
         .dark .bg-white { background-color: rgb(30 41 59) !important; }
@@ -283,9 +289,10 @@ export default function Layout({ children, currentPageName }) {
       </nav>
 
       {/* Main Content */}
-      <main className="pt-16">
+      <main className="pt-16 pb-16 md:pb-0">
         {children}
       </main>
+      <MobileNav currentPageName={currentPageName} />
     </div>
   );
 }
