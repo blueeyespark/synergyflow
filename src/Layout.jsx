@@ -6,13 +6,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard, FolderKanban, LogOut, Menu, X,
-  Calendar, DollarSign, Users, Share2, FolderOpen, Moon, Sun, Settings, Trophy, Scan
+  Calendar, DollarSign, Users, Share2, FolderOpen, Moon, Sun, Settings, Trophy, Scan,
+  LayoutTemplate, Bug
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import MobileNav from "@/components/MobileNav";
 import PointsToast from "@/components/gamification/PointsToast";
 import WorkspaceSelector from "@/components/workspace/WorkspaceSelector";
+import OfflineBanner from "@/components/OfflineBanner";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
@@ -22,8 +24,10 @@ const navItems = [
   { name: "Budget", icon: DollarSign, page: "Budget" },
   { name: "Reports", icon: Share2, page: "Reports" },
   { name: "Blog", icon: Users, page: "Blog" },
+  { name: "Templates", icon: LayoutTemplate, page: "Templates" },
   { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
   { name: "AI Scanner", icon: Scan, page: "AIScanner" },
+  { name: "Bug Monitor", icon: Bug, page: "AIBugMonitor" },
 ];
 
 export default function Layout({ children, currentPageName }) {
@@ -107,6 +111,7 @@ export default function Layout({ children, currentPageName }) {
   return (
     <div className={`min-h-screen transition-colors ${darkMode ? 'dark bg-slate-900' : 'bg-slate-50'}`}>
       {pointsEvent && <PointsToast event={pointsEvent} onDismiss={() => setPointsEvent(null)} />}
+      <OfflineBanner />
       <style>{`
         .dark { --background: 15 23 42; --foreground: 248 250 252; }
         .dark .bg-white { background-color: rgb(30 41 59) !important; }
