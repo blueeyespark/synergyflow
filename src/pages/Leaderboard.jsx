@@ -1,19 +1,13 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { Trophy, Star, Flame, Zap, Medal, Crown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Trophy, Flame, Crown, Medal, Star, Zap, Target } from "lucide-react";
 import { BADGES } from "@/components/gamification/useGamification";
-import { format } from "date-fns";
-
-const RANK_STYLES = [
-  "bg-amber-100 text-amber-700 border-amber-300",
-  "bg-slate-100 text-slate-600 border-slate-300",
-  "bg-orange-100 text-orange-700 border-orange-300"
-];
 
 export default function Leaderboard() {
   const [user, setUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => { base44.auth.me().then(setUser); }, []);
 
@@ -23,53 +17,59 @@ export default function Leaderboard() {
   });
 
   const sorted = [...allStats].sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
-
   const myStats = allStats.find(s => s.user_email === user?.email);
   const myRank = sorted.findIndex(s => s.user_email === user?.email) + 1;
 
+  const top3 = sorted.slice(0, 3);
+  const rest = sorted.slice(3);
+
+  const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
+  const podiumHeights = top3.length >= 3 ? ['h-20', 'h-28', 'h-16'] : ['h-28'];
+  const podiumRanks = top3.length >= 3 ? [2, 1, 3] : [1];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/30">
-      <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950">
+      <div className="max-w-2xl mx-auto px-4 py-8">
+
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
-            <Trophy className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900">Leaderboard</h1>
-          <p className="text-slate-500 mt-1">Team performance & achievements</p>
+          <motion.div
+            animate={{ rotate: [0, -5, 5, -5, 0] }}
+            transition={{ repeat: Infinity, repeatDelay: 3, duration: 0.5 }}
+            className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-amber-500/30"
+          >
+            <Trophy className="w-10 h-10 text-white" />
+          </motion.div>
+          <h1 className="text-3xl font-bold text-white">Leaderboard</h1>
+          <p className="text-indigo-300 mt-1">Top performers this month</p>
         </motion.div>
 
-        {/* My Stats Card */}
+        {/* My Stats */}
         {myStats && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-4 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl text-white shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-indigo-200 text-sm">Your Ranking</p>
-                <p className="text-4xl font-bold">#{myRank || '—'}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-indigo-200 text-sm">Points</p>
-                <p className="text-4xl font-bold">{myStats.total_points || 0}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-indigo-200 text-sm">Streak</p>
-                <div className="flex items-center gap-1 justify-center">
-                  <Flame className="w-5 h-5 text-orange-300" />
-                  <p className="text-4xl font-bold">{myStats.streak_days || 0}</p>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            className="mb-6 p-4 bg-white/10 backdrop-blur rounded-2xl border border-white/20 text-white">
+            <p className="text-xs text-indigo-300 mb-2">YOUR STATS</p>
+            <div className="grid grid-cols-4 gap-3 text-center">
+              {[
+                { label: 'Rank', value: `#${myRank || '—'}`, icon: Target },
+                { label: 'Points', value: myStats.total_points || 0, icon: Zap },
+                { label: 'Streak', value: myStats.streak_days || 0, icon: Flame },
+                { label: 'Badges', value: myStats.badges?.length || 0, icon: Medal },
+              ].map(({ label, value, icon: Icon }) => (
+                <div key={label} className="bg-white/10 rounded-xl p-2">
+                  <Icon className="w-4 h-4 mx-auto mb-1 text-indigo-300" />
+                  <p className="font-bold text-lg">{value}</p>
+                  <p className="text-xs text-indigo-300">{label}</p>
                 </div>
-              </div>
-              <div className="text-center">
-                <p className="text-indigo-200 text-sm">Badges</p>
-                <p className="text-4xl font-bold">{myStats.badges?.length || 0}</p>
-              </div>
+              ))}
             </div>
-            {/* My Badges */}
             {myStats.badges?.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-1.5">
                 {myStats.badges.map(b => {
                   const badge = BADGES.find(bd => bd.id === b.id);
                   return badge ? (
-                    <span key={b.id} className="text-xl" title={badge.name}>{badge.icon}</span>
+                    <motion.span key={b.id} whileHover={{ scale: 1.2 }} title={badge.name}
+                      className="text-xl cursor-pointer">{badge.icon}</motion.span>
                   ) : null;
                 })}
               </div>
@@ -77,61 +77,94 @@ export default function Leaderboard() {
           </motion.div>
         )}
 
-        {/* Leaderboard Table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        {/* Podium */}
+        {top3.length >= 2 && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+            className="mb-6 flex items-end justify-center gap-3">
+            {podiumOrder.map((stat, i) => {
+              if (!stat) return null;
+              const rank = podiumRanks[i];
+              const isFirst = rank === 1;
+              return (
+                <div key={stat.id} className="flex flex-col items-center gap-2">
+                  {isFirst && (
+                    <motion.div animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 2 }}>
+                      <Crown className="w-6 h-6 text-amber-400" />
+                    </motion.div>
+                  )}
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ${
+                    isFirst ? 'bg-gradient-to-br from-amber-400 to-orange-500 ring-4 ring-amber-300/50' :
+                    rank === 2 ? 'bg-gradient-to-br from-slate-300 to-slate-400' :
+                    'bg-gradient-to-br from-orange-600 to-orange-700'
+                  }`}>
+                    {(stat.user_name || stat.user_email)?.charAt(0).toUpperCase()}
+                  </div>
+                  <p className="text-white text-xs font-medium text-center max-w-[70px] truncate">
+                    {stat.user_name || stat.user_email?.split('@')[0]}
+                  </p>
+                  <div className={`${podiumHeights[i]} w-20 rounded-t-xl flex flex-col items-center justify-center gap-1 ${
+                    isFirst ? 'bg-gradient-to-t from-amber-500 to-amber-400' :
+                    rank === 2 ? 'bg-gradient-to-t from-slate-500 to-slate-400' :
+                    'bg-gradient-to-t from-orange-700 to-orange-600'
+                  }`}>
+                    <span className="text-white font-bold text-lg">#{rank}</span>
+                    <span className="text-white/80 text-xs">{stat.total_points || 0}pts</span>
+                  </div>
+                </div>
+              );
+            })}
+          </motion.div>
+        )}
+
+        {/* Rankings List */}
+        <div className="bg-white/10 backdrop-blur rounded-2xl border border-white/20 overflow-hidden">
           {isLoading ? (
-            <div className="p-8 text-center text-slate-400">Loading...</div>
+            <div className="p-8 text-center text-indigo-300">Loading...</div>
           ) : sorted.length === 0 ? (
             <div className="p-12 text-center">
-              <Star className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <h3 className="font-medium text-slate-700">No stats yet</h3>
-              <p className="text-sm text-slate-500">Complete tasks to earn points and appear here!</p>
+              <Star className="w-12 h-12 text-indigo-400 mx-auto mb-3" />
+              <h3 className="font-medium text-white">No rankings yet</h3>
+              <p className="text-sm text-indigo-300">Complete tasks to earn points!</p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-white/10">
               {sorted.map((stat, index) => {
                 const isMe = stat.user_email === user?.email;
                 const rank = index + 1;
                 return (
-                  <motion.div
-                    key={stat.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={`flex items-center gap-4 p-4 ${isMe ? 'bg-indigo-50' : 'hover:bg-slate-50'}`}
+                  <motion.div key={stat.id}
+                    initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: Math.min(index * 0.04, 0.3) }}
+                    onClick={() => setSelectedUser(selectedUser?.id === stat.id ? null : stat)}
+                    className={`flex items-center gap-3 p-4 cursor-pointer transition-colors ${isMe ? 'bg-indigo-500/20' : 'hover:bg-white/5'}`}
                   >
-                    {/* Rank */}
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm border-2 flex-shrink-0 ${rank <= 3 ? RANK_STYLES[rank - 1] : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
-                      {rank === 1 ? <Crown className="w-5 h-5" /> : rank}
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0 ${
+                      rank === 1 ? 'bg-amber-400 text-amber-900' :
+                      rank === 2 ? 'bg-slate-400 text-slate-900' :
+                      rank === 3 ? 'bg-orange-600 text-white' :
+                      'bg-white/10 text-indigo-300'
+                    }`}>
+                      {rank <= 3 ? ['🥇','🥈','🥉'][rank-1] : rank}
                     </div>
-
-                    {/* Avatar */}
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 ${isMe ? 'bg-indigo-600' : 'bg-slate-400'}`}>
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 ${isMe ? 'bg-indigo-500' : 'bg-white/20'}`}>
                       {(stat.user_name || stat.user_email)?.charAt(0).toUpperCase()}
                     </div>
-
-                    {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className={`font-semibold truncate ${isMe ? 'text-indigo-700' : 'text-slate-900'}`}>
-                        {stat.user_name || stat.user_email?.split('@')[0]}
-                        {isMe && <span className="ml-2 text-xs bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded">You</span>}
-                      </p>
-                      <div className="flex items-center gap-3 text-xs text-slate-500 mt-0.5">
-                        <span>✅ {stat.tasks_completed || 0} tasks</span>
-                        <span className="flex items-center gap-0.5"><Flame className="w-3 h-3 text-orange-400" />{stat.streak_days || 0}</span>
-                        <div className="flex gap-0.5">
-                          {stat.badges?.slice(0, 5).map(b => {
-                            const badge = BADGES.find(bd => bd.id === b.id);
-                            return badge ? <span key={b.id} className="text-sm">{badge.icon}</span> : null;
-                          })}
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-white truncate text-sm">
+                          {stat.user_name || stat.user_email?.split('@')[0]}
+                        </p>
+                        {isMe && <span className="text-xs bg-indigo-500 text-white px-1.5 py-0.5 rounded">You</span>}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-indigo-300">
+                        <span>✅ {stat.tasks_completed || 0}</span>
+                        <span className="flex items-center gap-0.5"><Flame className="w-3 h-3 text-orange-400" />{stat.streak_days || 0}d</span>
+                        <span>{stat.badges?.slice(0, 4).map(b => BADGES.find(bd => bd.id === b.id)?.icon).filter(Boolean).join('')}</span>
                       </div>
                     </div>
-
-                    {/* Points */}
                     <div className="text-right">
-                      <p className="font-bold text-lg text-slate-900">{stat.total_points || 0}</p>
-                      <p className="text-xs text-slate-500">pts</p>
+                      <p className="font-bold text-white">{stat.total_points || 0}</p>
+                      <p className="text-xs text-indigo-400">pts</p>
                     </div>
                   </motion.div>
                 );
@@ -140,21 +173,25 @@ export default function Leaderboard() {
           )}
         </div>
 
-        {/* Badges Legend */}
-        <div className="mt-6 bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
-          <h3 className="font-semibold mb-3 flex items-center gap-2"><Medal className="w-4 h-4 text-amber-500" />All Badges</h3>
+        {/* Badge Gallery */}
+        <div className="mt-5 bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-4">
+          <h3 className="font-semibold text-white mb-3 flex items-center gap-2"><Medal className="w-4 h-4 text-amber-400" />Badge Gallery</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {BADGES.map(badge => {
+            {BADGES.map((badge) => {
               const earned = myStats?.badges?.some(b => b.id === badge.id);
               return (
-                <div key={badge.id} className={`flex items-center gap-2 p-2 rounded-lg ${earned ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50 opacity-60'}`}>
+                <motion.div key={badge.id} whileHover={{ scale: 1.02 }}
+                  className={`flex items-center gap-3 p-3 rounded-xl transition-all ${earned ? 'bg-amber-500/20 border border-amber-400/30' : 'bg-white/5 opacity-50'}`}>
                   <span className="text-2xl">{badge.icon}</span>
-                  <div>
-                    <p className="font-medium text-sm">{badge.name}</p>
-                    <p className="text-xs text-slate-500">{badge.description} · {badge.points}pts</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-white">{badge.name}</p>
+                    <p className="text-xs text-indigo-300 truncate">{badge.description}</p>
                   </div>
-                  {earned && <span className="ml-auto text-green-500 text-xs font-medium">Earned ✓</span>}
-                </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xs font-bold text-amber-400">+{badge.points}</p>
+                    {earned && <p className="text-xs text-green-400">✓</p>}
+                  </div>
+                </motion.div>
               );
             })}
           </div>

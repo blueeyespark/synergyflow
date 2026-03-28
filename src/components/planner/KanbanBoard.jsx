@@ -83,37 +83,36 @@ export default function KanbanBoard({
                     snapshot.isDraggingOver ? 'bg-indigo-50/50 ring-2 ring-indigo-200' : 'bg-slate-50/50'
                   }`}
                 >
-                  <AnimatePresence>
-                    {tasksByStatus[status.id]?.map((task, index) => (
-                      <Draggable 
-                        key={task.id} 
-                        draggableId={task.id} 
-                        index={index}
-                        isDragDisabled={!canEdit}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            <TaskCard
-                              task={task}
-                              isDragging={snapshot.isDragging}
-                              onClick={() => onTaskClick(task)}
-                              onEdit={canEdit ? () => onTaskEdit(task) : undefined}
-                              onDelete={canEdit ? () => onTaskDelete(task.id) : undefined}
-                              commentCount={getTaskCommentCount?.(task.id) || 0}
-                              isBlocked={isTaskBlocked?.(task)}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                  </AnimatePresence>
+                  {tasksByStatus[status.id]?.map((task, index) => (
+                    <Draggable 
+                      key={task.id} 
+                      draggableId={task.id} 
+                      index={index}
+                      isDragDisabled={!canEdit}
+                    >
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          style={provided.draggableProps.style}
+                        >
+                          <TaskCard
+                            task={task}
+                            isDragging={snapshot.isDragging}
+                            onClick={() => onTaskClick(task)}
+                            onEdit={canEdit ? () => onTaskEdit(task) : undefined}
+                            onDelete={canEdit ? () => onTaskDelete(task.id) : undefined}
+                            commentCount={getTaskCommentCount?.(task.id) || 0}
+                            isBlocked={isTaskBlocked?.(task)}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
                   {provided.placeholder}
                   
-                  {tasksByStatus[status.id]?.length === 0 && (
+                  {tasksByStatus[status.id]?.length === 0 && !snapshot.isDraggingOver && (
                     <div className="p-6 border-2 border-dashed border-slate-200 rounded-xl text-center">
                       <p className="text-sm text-slate-400">Drop tasks here</p>
                     </div>
@@ -130,13 +129,9 @@ export default function KanbanBoard({
 
 function TaskCard({ task, isDragging, onClick, onEdit, onDelete, commentCount, isBlocked }) {
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
+    <div
       className={`group bg-white rounded-xl border-l-4 ${priorityColors[task.priority]} shadow-sm hover:shadow-md transition-all cursor-pointer ${
-        isDragging ? 'shadow-xl rotate-2 scale-105' : ''
+        isDragging ? 'shadow-xl rotate-1 scale-105 opacity-90' : ''
       } ${isBlocked ? 'opacity-60' : ''}`}
       onClick={onClick}
     >
@@ -220,7 +215,7 @@ function TaskCard({ task, isDragging, onClick, onEdit, onDelete, commentCount, i
             {task.due_date && (
               <span className="text-xs text-slate-500 flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
-                {format(new Date(task.due_date), 'MMM d')}
+                {format(new Date(task.due_date + 'T12:00:00'), 'MMM d')}
               </span>
             )}
           </div>
@@ -239,6 +234,6 @@ function TaskCard({ task, isDragging, onClick, onEdit, onDelete, commentCount, i
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
