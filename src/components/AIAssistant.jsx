@@ -10,6 +10,10 @@ const SUGGESTIONS = [
   "How is my team performing?",
   "What should I focus on today?",
   "Give me productivity tips",
+  "Which projects are at risk?",
+  "What's my budget status?",
+  "Suggest tasks I should prioritize",
+  "How can I improve productivity?",
 ];
 
 function AvatarFace({ talking, thinking }) {
@@ -135,7 +139,7 @@ Respond concisely and helpfully. Use bullet points or short paragraphs. Be actio
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-[340px] sm:w-[380px] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden"
+            className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-[340px] sm:w-[380px] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden"
             style={{ maxHeight: '520px' }}
           >
             {/* Header */}
@@ -158,7 +162,7 @@ Respond concisely and helpfully. Use bullet points or short paragraphs. Be actio
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-slate-50" style={{ minHeight: 200 }}>
+            <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-slate-50 dark:bg-slate-900" style={{ minHeight: 200 }}>
               {messages.map((msg, i) => (
                 <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'assistant' && (
@@ -169,7 +173,7 @@ Respond concisely and helpfully. Use bullet points or short paragraphs. Be actio
                   <div className={`max-w-[82%] rounded-2xl px-3 py-2 text-sm ${
                     msg.role === 'user'
                       ? 'bg-indigo-600 text-white rounded-br-sm'
-                      : 'bg-white text-slate-700 shadow-sm border border-slate-100 rounded-bl-sm'
+                          : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-100 shadow-sm border border-slate-100 dark:border-slate-600 rounded-bl-sm'
                   }`}>
                     {msg.role === 'assistant'
                       ? <ReactMarkdown className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">{msg.content}</ReactMarkdown>
@@ -183,7 +187,7 @@ Respond concisely and helpfully. Use bullet points or short paragraphs. Be actio
                   <div className="w-7 h-7 rounded-full overflow-hidden bg-indigo-600 flex-shrink-0">
                     <AvatarFace talking={false} thinking={true} />
                   </div>
-                  <div className="bg-white border border-slate-100 rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1 items-center shadow-sm">
+                  <div className="bg-white dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1 items-center shadow-sm">
                     {[0, 1, 2].map(i => (
                       <motion.div key={i} className="w-1.5 h-1.5 bg-indigo-400 rounded-full"
                         animate={{ y: [0, -5, 0] }} transition={{ duration: 0.6, delay: i * 0.15, repeat: Infinity }} />
@@ -195,25 +199,23 @@ Respond concisely and helpfully. Use bullet points or short paragraphs. Be actio
             </div>
 
             {/* Suggestions */}
-            {messages.length <= 2 && (
-              <div className="px-3 py-2 flex gap-2 overflow-x-auto border-t border-slate-100 bg-white">
-                {SUGGESTIONS.slice(0, 3).map(s => (
-                  <button key={s} onClick={() => send(s)} className="flex-shrink-0 text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors whitespace-nowrap">
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="px-3 py-2 flex gap-2 overflow-x-auto border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+              {SUGGESTIONS.map(s => (
+                <button key={s} onClick={() => send(s)} className="flex-shrink-0 text-xs bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors whitespace-nowrap">
+                  {s}
+                </button>
+              ))}
+            </div>
 
             {/* Input */}
-            <div className="flex gap-2 px-3 py-3 border-t border-slate-100 bg-white">
+            <div className="flex gap-2 px-3 py-3 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
               <input
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
                 placeholder="Ask me anything..."
                 disabled={loading}
-                className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50 placeholder:text-slate-400"
+                className="flex-1 text-sm border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               <button
                 onClick={() => send()}
