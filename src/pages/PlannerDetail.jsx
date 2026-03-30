@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { format, addDays, addWeeks, addMonths, addYears } from "date-fns";
 import {
   Plus, Settings, MessageSquare, Users, ArrowLeft, Lock, 
-  Eye, Pencil, RefreshCw, Link2, ChevronRight, Share2, History, Brain
+  Eye, Pencil, RefreshCw, Link2, ChevronRight, Share2, History, Brain, Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,7 @@ export default function PlannerDetail() {
   const [showAI, setShowAI] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showActivity, setShowActivity] = useState(false);
+  const [swimlaneBy, setSwimlaneBy] = useState(null); // null | 'priority' | 'assignee'
   const queryClient = useQueryClient();
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -334,6 +335,11 @@ export default function PlannerDetail() {
             </div>
             
             <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-1 border border-slate-200 rounded-lg p-0.5 bg-white">
+                <Button variant={swimlaneBy === null ? 'secondary' : 'ghost'} size="sm" className="h-7 text-xs px-2" onClick={() => setSwimlaneBy(null)}>Board</Button>
+                <Button variant={swimlaneBy === 'priority' ? 'secondary' : 'ghost'} size="sm" className="h-7 text-xs px-2" onClick={() => setSwimlaneBy('priority')}>Priority</Button>
+                <Button variant={swimlaneBy === 'assignee' ? 'secondary' : 'ghost'} size="sm" className="h-7 text-xs px-2" onClick={() => setSwimlaneBy('assignee')}>Assignee</Button>
+              </div>
               <Button variant="outline" size="sm" onClick={() => setShowActivity(true)}>
                 <History className="w-4 h-4 mr-2" />
                 Activity
@@ -380,6 +386,7 @@ export default function PlannerDetail() {
               canEdit={canEdit}
               getTaskCommentCount={getTaskCommentCount}
               isTaskBlocked={isTaskBlocked}
+              swimlaneBy={swimlaneBy}
             />
           </div>
 

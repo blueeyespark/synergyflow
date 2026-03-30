@@ -3,6 +3,7 @@ import Leaderboard from './pages/Leaderboard';
 import AIScanner from './pages/AIScanner';
 import Templates from './pages/Templates';
 import AIBugMonitor from './pages/AIBugMonitor';
+import TimeTracking from './pages/TimeTracking';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
       <Route path="/AIScanner" element={<LayoutWrapper currentPageName="AIScanner"><AIScanner /></LayoutWrapper>} />
       <Route path="/Templates" element={<LayoutWrapper currentPageName="Templates"><Templates /></LayoutWrapper>} />
       <Route path="/AIBugMonitor" element={<LayoutWrapper currentPageName="AIBugMonitor"><AIBugMonitor /></LayoutWrapper>} />
+      <Route path="/TimeTracking" element={<LayoutWrapper currentPageName="TimeTracking"><TimeTracking /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

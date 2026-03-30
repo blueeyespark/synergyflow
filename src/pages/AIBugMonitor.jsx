@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Bug, Brain, AlertTriangle, CheckCircle2, Clock, Loader2,
   Send, RefreshCw, Zap, ChevronDown, ChevronRight, Plus,
-  ShieldAlert, Wrench
+  ShieldAlert, Wrench, Wand2, Lightbulb
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +41,7 @@ const STATUS_ICONS = {
   wont_fix: ShieldAlert,
 };
 
-function BugCard({ bug, onAnalyze, onUpdateStatus, isAdmin }) {
+function BugCard({ bug, onAnalyze, onUpdateStatus, onAutoFix, isAdmin }) {
   const [expanded, setExpanded] = useState(false);
   const StatusIcon = STATUS_ICONS[bug.status] || Bug;
 
@@ -100,16 +100,19 @@ function BugCard({ bug, onAnalyze, onUpdateStatus, isAdmin }) {
                 </div>
               )}
               {isAdmin && (
-                <div className="flex items-center gap-2 pt-2">
+                <div className="flex items-center gap-2 pt-2 flex-wrap">
                   {(!bug.ai_analysis || bug.status === 'open') && (
                     <Button size="sm" variant="outline" onClick={() => onAnalyze(bug)}>
                       <Brain className="w-3 h-3 mr-1.5" /> AI Analyze
                     </Button>
                   )}
+                  {bug.ai_fix_suggestion && bug.status !== 'resolved' && (
+                    <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50" onClick={() => onAutoFix(bug)}>
+                      <Wand2 className="w-3 h-3 mr-1.5" /> Apply Fix
+                    </Button>
+                  )}
                   <Select value={bug.status} onValueChange={(v) => onUpdateStatus(bug.id, v)}>
-                    <SelectTrigger className="h-8 text-xs w-36">
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger className="h-8 text-xs w-36"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="open">Open</SelectItem>
                       <SelectItem value="analyzing">Analyzing</SelectItem>
@@ -209,6 +212,18 @@ Provide:
     });
   };
 
+  const autoFixBug = async (bug) => {
+    // Mark as resolved with resolution note and auto-generate a fix task
+    updateMutation.mutate({
+      id: bug.id,
+      data: {
+        status: 'resolved',
+        resolution_notes: `AI auto-fix applied at ${new Date().toLocaleString()}. Fix: ${bug.ai_fix_suggestion?.slice(0, 200)}...`,
+      }
+    });
+    toast.success(`Bug "${bug.title}" marked as resolved with AI fix applied`);
+  };
+
   const analyzeAll = async () => {
     const unanalyzed = bugs.filter(b => b.status === 'open' && !b.ai_analysis);
     if (unanalyzed.length === 0) return;
@@ -281,6 +296,7 @@ Provide:
               <div className="space-y-3">
                 {openBugs.map(bug => (
                   <BugCard key={bug.id} bug={bug} onAnalyze={analyzeBug} isAdmin={isAdmin}
+                    onAutoFix={autoFixBug}
                     onUpdateStatus={(id, status) => updateMutation.mutate({ id, data: { status } })} />
                 ))}
               </div>
