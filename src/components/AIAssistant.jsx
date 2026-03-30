@@ -67,6 +67,7 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
   const [loading, setLoading] = useState(false);
   const [talking, setTalking] = useState(false);
   const [pulsing, setPulsing] = useState(true);
+  const [dynamicSuggestions, setDynamicSuggestions] = useState([]);
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -92,13 +93,14 @@ Projects: ${projects.slice(0, 5).map(p => `${p.name} (${p.status})`).join(', ')}
     const userMsg = text || input.trim();
     if (!userMsg) return;
     setInput("");
+    setDynamicSuggestions([]);
     setMessages(prev => [...prev, { role: "user", content: userMsg }]);
     setLoading(true);
 
     const context = buildContext();
     const history = messages.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
 
-    const response = await base44.integrations.Core.InvokeLLM({
+    const result = await base44.integrations.Core.InvokeLLM({
       prompt: `You are Planify AI — a smart, friendly project management assistant. You help users understand their projects, tasks, and productivity.
 
 ${context}
@@ -108,11 +110,24 @@ ${history}
 
 User: ${userMsg}
 
-Respond concisely and helpfully. Use bullet points or short paragraphs. Be actionable and specific. Keep it under 150 words.`,
+Respond concisely and helpfully. Use bullet points or short paragraphs. Be actionable and specific. Keep response under 150 words.
+
+After your response, generate 3 short follow-up suggestion questions the user might want to ask next (each under 8 words). Return as JSON.`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          response: { type: "string" },
+          suggestions: { type: "array", items: { type: "string" } }
+        }
+      }
     });
+
+    const response = result?.response || "Sorry, I couldn't process that.";
+    const suggestions = result?.suggestions || [];
 
     setLoading(false);
     setTalking(true);
+    setDynamicSuggestions(suggestions);
     setMessages(prev => [...prev, { role: "assistant", content: response }]);
     setTimeout(() => setTalking(false), Math.min(response.length * 30, 4000));
   };
@@ -153,7 +168,7 @@ Respond concisely and helpfully. Use bullet points or short paragraphs. Be actio
                   {loading ? <><Loader2 className="w-2.5 h-2.5 animate-spin" /> Thinking...</> : <><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" /> Online</>}
                 </p>
               </div>
-              <button onClick={() => setMessages(m => [m[0]])} className="text-indigo-200 hover:text-white p-1" title="Reset">
+              <button onClick={() => { setMessages(m => [m[0]]); setDynamicSuggestions([]); }} className="text-indigo-200 hover:text-white p-1" title="Reset">
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
               <button onClick={() => setOpen(false)} className="text-indigo-200 hover:text-white p-1">
@@ -176,7 +191,7 @@ Respond concisely and helpfully. Use bullet points or short paragraphs. Be actio
                           : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-100 shadow-sm border border-slate-100 dark:border-slate-600 rounded-bl-sm'
                   }`}>
                     {msg.role === 'assistant'
-                      ? <ReactMarkdown className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">{msg.content}</ReactMarkdown>
+                      ? <ReactMarkdown className="prose prose-sm prose-invert dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">{msg.content}</ReactMarkdown>
                       : msg.content
                     }
                   </div>
@@ -200,7 +215,7 @@ Respond concisely and helpfully. Use bullet points or short paragraphs. Be actio
 
             {/* Suggestions */}
             <div className="px-3 py-2 flex gap-2 overflow-x-auto border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
-              {SUGGESTIONS.map(s => (
+              {(dynamicSuggestions.length > 0 ? dynamicSuggestions : SUGGESTIONS).map(s => (
                 <button key={s} onClick={() => send(s)} className="flex-shrink-0 text-xs bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors whitespace-nowrap">
                   {s}
                 </button>
