@@ -15,6 +15,7 @@ import MobileNav from "@/components/MobileNav";
 import PointsToast from "@/components/gamification/PointsToast";
 import WorkspaceSelector from "@/components/workspace/WorkspaceSelector";
 import OfflineBanner from "@/components/OfflineBanner";
+import AIAssistant from "@/components/AIAssistant";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
@@ -47,6 +48,8 @@ export default function Layout({ children, currentPageName }) {
     }
     return null;
   });
+
+
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -68,11 +71,32 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.me().then(setUser);
   }, []);
 
+  const { data: projects = [] } = useQuery({
+    queryKey: ['layout-projects'],
+    queryFn: () => base44.entities.Project.list(),
+    enabled: !!user?.email,
+    staleTime: 60000,
+  });
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['layout-tasks'],
+    queryFn: () => base44.entities.Task.list(),
+    enabled: !!user?.email,
+    staleTime: 60000,
+  });
+
+  const { data: budget = [] } = useQuery({
+    queryKey: ['layout-budget'],
+    queryFn: () => base44.entities.Budget.list(),
+    enabled: !!user?.email,
+    staleTime: 60000,
+  });
+
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications', user?.email],
     queryFn: () => base44.entities.Notification.filter({ user_email: user?.email }, '-created_date'),
     enabled: !!user?.email,
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   });
 
   const markAsReadMutation = useMutation({
@@ -112,6 +136,7 @@ export default function Layout({ children, currentPageName }) {
     <div className={`min-h-screen transition-colors ${darkMode ? 'dark bg-slate-900' : 'bg-slate-50'}`}>
       {pointsEvent && <PointsToast event={pointsEvent} onDismiss={() => setPointsEvent(null)} />}
       <OfflineBanner />
+      <AIAssistant projects={projects} tasks={tasks} budget={budget} />
       <style>{`
         .dark { --background: 15 23 42; --foreground: 248 250 252; }
         .dark .bg-white { background-color: rgb(30 41 59) !important; }
