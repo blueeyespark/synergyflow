@@ -14,8 +14,6 @@ import ActivityFeed from "@/components/dashboard/ActivityFeed";
 
 export default function UserViewer() {
   const [user, setUser] = useState(null);
-  const [selectedUserEmail, setSelectedUserEmail] = useState(null);
-  const [selectedUserData, setSelectedUserData] = useState(null);
 
   useEffect(() => {
     base44.auth.me().then(setUser);
@@ -27,6 +25,11 @@ export default function UserViewer() {
     enabled: !!user?.email,
   });
 
+  // Get default user (first non-admin user)
+  const defaultUser = allUsers.find(u => u.role !== 'admin' && u.email !== user?.email);
+  const selectedUserEmail = defaultUser?.email;
+  const viewedUser = defaultUser;
+
   const { data: projects = [] } = useQuery({
     queryKey: ["projects"],
     queryFn: () => base44.entities.Project.list("-created_date"),
@@ -37,17 +40,17 @@ export default function UserViewer() {
     queryFn: () => base44.entities.Task.list("-created_date"),
   });
 
-  // Filter data for selected user
-  const userProjects = selectedUserEmail 
+  // Filter data for default user
+  const userProjects = defaultUser
     ? projects.filter(p =>
-        p.owner_email === selectedUserEmail || p.team_members?.includes(selectedUserEmail)
+        p.owner_email === defaultUser.email || p.team_members?.includes(defaultUser.email)
       )
     : [];
 
-  const userTasks = selectedUserEmail
+  const userTasks = defaultUser
     ? tasks.filter(t => {
         const project = userProjects.find(p => p.id === t.project_id);
-        return project && (t.assigned_to === selectedUserEmail || !t.assigned_to);
+        return project && (t.assigned_to === defaultUser.email || !t.assigned_to);
       })
     : [];
 
@@ -73,7 +76,7 @@ export default function UserViewer() {
         <div className="text-center">
           <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-slate-900 mb-2">Access Denied</h2>
-          <p className="text-slate-600 mb-4">Only admins can view other users' perspectives</p>
+          <p className="text-slate-600 mb-4">Only admins can view user perspectives</p>
           <Link to={createPageUrl("Dashboard")}>
             <Button>Back to Dashboard</Button>
           </Link>
@@ -82,56 +85,20 @@ export default function UserViewer() {
     );
   }
 
-  if (!selectedUserEmail) {
+  if (!defaultUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-4xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-            <Link to={createPageUrl("Dashboard")}>
-              <Button variant="outline" className="mb-4 gap-2">
-                <ArrowLeft className="w-4 h-4" /> Back
-              </Button>
-            </Link>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">User Viewer</h1>
-            <p className="text-slate-600">Select a user to view their dashboard</p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {allUsers.filter(u => u.email !== user?.email).map((u, idx) => (
-              <motion.button
-                key={u.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                onClick={() => setSelectedUserEmail(u.email)}
-                className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-all text-left"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                    {u.full_name?.charAt(0) || "U"}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-900">{u.full_name}</p>
-                    <p className="text-xs text-slate-500">{u.email}</p>
-                  </div>
-                </div>
-                <p className="text-xs text-slate-400 capitalize">{u.role}</p>
-              </motion.button>
-            ))}
-          </div>
-
-          {allUsers.length <= 1 && (
-            <div className="text-center py-12">
-              <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-slate-400">No other users to view</p>
-            </div>
-          )}
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <Users className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-slate-900 mb-2">No Users Available</h2>
+          <p className="text-slate-600 mb-4">There are no other users to view</p>
+          <Link to={createPageUrl("Dashboard")}>
+            <Button>Back to Dashboard</Button>
+          </Link>
         </div>
       </div>
     );
   }
-
-  const viewedUser = allUsers.find(u => u.email === selectedUserEmail);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
@@ -139,20 +106,18 @@ export default function UserViewer() {
         
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
           <div>
-            <Button 
-              variant="outline" 
-              onClick={() => setSelectedUserEmail(null)}
-              className="mb-4 gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" /> Back to Users
-            </Button>
+            <Link to={createPageUrl("Dashboard")}>
+              <Button variant="outline" className="mb-4 gap-2">
+                <ArrowLeft className="w-4 h-4" /> Back
+              </Button>
+            </Link>
             <h1 className="text-2xl font-bold text-slate-900">
-              Viewing: {viewedUser?.full_name}
+              User View: {viewedUser?.full_name}
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">{viewedUser?.email}</p>
           </div>
           <div className="text-xs text-slate-500 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-            👁️ Admin View
+            👁️ Admin Monitoring
           </div>
         </motion.div>
 
