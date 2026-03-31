@@ -79,21 +79,24 @@ export default function Layout({ children, currentPageName }) {
     queryKey: ['layout-projects'],
     queryFn: () => base44.entities.Project.list(),
     enabled: !!user?.email,
-    staleTime: 60000,
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 5 * 60 * 1000,
   });
 
   const { data: tasks = [] } = useQuery({
     queryKey: ['layout-tasks'],
     queryFn: () => base44.entities.Task.list(),
     enabled: !!user?.email,
-    staleTime: 60000,
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 5 * 60 * 1000,
   });
 
   const { data: budget = [] } = useQuery({
     queryKey: ['layout-budget'],
     queryFn: () => base44.entities.Budget.list(),
     enabled: !!user?.email,
-    staleTime: 60000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: false,
   });
 
   const { data: notifications = [] } = useQuery({

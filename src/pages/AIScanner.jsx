@@ -110,6 +110,7 @@ export default function AIScanner() {
   const implementSuggestion = async (item, type) => {
     const key = `${type}-${item.title}`;
     setImplementing(key);
+    toast.loading(`Generating code for "${item.title}"...`, { id: key });
     const result = await base44.integrations.Core.InvokeLLM({
       prompt: `You are an expert React/Tailwind developer working on "Planify" — a project management app built with React, Tailwind CSS, shadcn/ui, and base44 SDK.
 
@@ -117,17 +118,15 @@ Feature/Improvement to implement: "${item.title}"
 Description: "${item.description}"
 Type: ${type}
 
-Generate a complete, production-ready React component or code snippet that implements this. Use:
+Generate a complete, production-ready React component or code snippet. Use:
 - React hooks (useState, useEffect, etc.)
 - Tailwind CSS for styling
-- lucide-react for icons
-- base44 SDK pattern: base44.entities.EntityName.method()
-- shadcn/ui components from @/components/ui/
+- lucide-react for icons (only valid icons)
+- base44 SDK: import { base44 } from '@/api/base44Client'; then base44.entities.Name.method()
+- shadcn/ui from @/components/ui/
+- export default function ComponentName() pattern
 
-Return:
-1. The main code (full component or relevant code snippet)
-2. The suggested file path (e.g., components/featureName/Component.jsx)
-3. A brief explanation of what the code does`,
+Return the full component code, the suggested file path (e.g., components/featureName/Component.jsx), and a brief explanation.`,
       response_json_schema: {
         type: "object",
         properties: {
@@ -139,6 +138,7 @@ Return:
     });
     setImplementing(null);
     setAppliedItems(prev => new Set([...prev, key]));
+    toast.success(`Code ready for "${item.title}"`, { id: key });
     setCodeModal({
       title: item.title,
       code: result.code || '// No code generated',
@@ -151,6 +151,7 @@ Return:
   const implementExternalFeature = async (feature) => {
     const key = `ext-${feature.feature}`;
     setImplementing(key);
+    toast.loading(`Generating code for "${feature.feature}"...`, { id: key });
     const result = await base44.integrations.Core.InvokeLLM({
       prompt: `You are an expert React/Tailwind developer working on "Planify" — a project management app.
 
@@ -158,11 +159,12 @@ Adapt this feature from ${siteAnalysis?.site_name || url} for Planify:
 Feature: "${feature.feature}"
 Description: "${feature.description}"
 
-Implement this for a React/Tailwind/base44 app. Generate:
-- A complete, working React component
-- Use Tailwind CSS, shadcn/ui, lucide-react, base44 SDK
-- Make it fit naturally into a project management app
-- Include realistic UI with proper dark mode support
+Generate a complete, working React component adapted for Planify:
+- Use Tailwind CSS, shadcn/ui (@/components/ui/), lucide-react, base44 SDK
+- import { base44 } from '@/api/base44Client'
+- export default function ComponentName() pattern
+- Include dark mode support (dark: classes)
+- Make it production-ready and copy-paste ready
 
 Return the component code, suggested file path, and explanation.`,
       response_json_schema: {
@@ -176,6 +178,7 @@ Return the component code, suggested file path, and explanation.`,
     });
     setImplementing(null);
     setAppliedItems(prev => new Set([...prev, key]));
+    toast.success(`Code ready for "${feature.feature}"`, { id: key });
     setCodeModal({
       title: `${feature.feature} (from ${siteAnalysis?.site_name || url})`,
       code: result.code || '// No code generated',
