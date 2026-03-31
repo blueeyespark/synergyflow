@@ -62,32 +62,39 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(async (u) => {
-      setUser(u);
-      if (u?.email?.toLowerCase().includes('blueeyespark') || u?.full_name?.toLowerCase().includes('blueeyespark')) {
-        // Promote to admin if not already
-        if (u.role !== 'admin') {
-          await base44.auth.updateMe({ role: 'admin' });
-          setUser({ ...u, role: 'admin' });
-        }
-        // Send verification email once
-        const sentKey = `owner_verify_sent_${u.email}`;
-        if (!localStorage.getItem(sentKey)) {
-          await base44.integrations.Core.SendEmail({
-            to: 'fallenangeljr1@gmail.com',
-            subject: '🔐 Owner Verification — blueeyespark has logged in',
-            body: `Hello,\n\nThis is an automated security notification.\n\nThe account "${u.full_name || u.email}" (${u.email}) has just logged into Planify and been granted admin/owner privileges.\n\nLogin time: ${new Date().toLocaleString('en-US', { timeZone: 'America/Denver' })}\n\n— Planify Security`,
-          });
-          localStorage.setItem(sentKey, 'true');
-        }
-      }
-    });
+    base44.auth.me().then(setUser);
   }, []);
 
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects', user?.email],
+    queryFn: () => base44.entities.Project.list('-created_date'),
+    enabled: !!user?.email,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+  });
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['tasks', user?.email],
+    queryFn: () => base44.entities.Task.list('-created_date'),
+    enabled: !!user?.email,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+  });
+
+  const { data: budget = [] } = useQuery({
+    queryKey: ['budget', user?.email],
+    queryFn: () => base44.entities.Budget.list('-date'),
+    enabled: !!user?.email,
+    staleTime: 15 * 60 * 1000,
+    gcTime: 20 * 60 * 1000,
+  });
+
   const { data: workspaces = [] } = useQuery({
-    queryKey: ['workspaces'],
+    queryKey: ['workspaces', user?.email],
     queryFn: () => base44.entities.Workspace.list(),
     enabled: !!user?.email,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 
   const updateWorkspaceMutation = useMutation({
@@ -98,29 +105,7 @@ export default function Dashboard() {
     },
   });
 
-  const { data: projects = [] } = useQuery({
-    queryKey: ['projects', user?.email],
-    queryFn: () => base44.entities.Project.list('-created_date'),
-    enabled: !!user?.email,
-    staleTime: 10 * 60 * 1000,
-    refetchInterval: false,
-  });
 
-  const { data: tasks = [] } = useQuery({
-    queryKey: ['tasks', user?.email],
-    queryFn: () => base44.entities.Task.list('-created_date'),
-    enabled: !!user?.email,
-    staleTime: 10 * 60 * 1000,
-    refetchInterval: false,
-  });
-
-  const { data: budget = [] } = useQuery({
-    queryKey: ['budget', user?.email],
-    queryFn: () => base44.entities.Budget.list('-date'),
-    enabled: !!user?.email,
-    staleTime: 15 * 60 * 1000,
-    refetchInterval: false,
-  });
 
   const createProjectMutation = useMutation({
     mutationFn: (data) => base44.entities.Project.create({
