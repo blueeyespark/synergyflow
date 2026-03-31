@@ -16,6 +16,11 @@ import NavDropdown from "./NavDropdown";
 const navGroups = [
   { label: "Dashboard", icon: LayoutDashboard, page: "Dashboard", single: true },
   { label: "Work", icon: FolderKanban, single: true, page: "WorkHub" },
+  { label: "Video Tools", icon: Zap, children: [
+    { name: "Video Editor", icon: Clock, page: "VideoEditor" },
+    { name: "Intro/Outro", icon: Clock, page: "IntroOutroMaker" },
+    { name: "Thumbnails", icon: Clock, page: "ThumbnailMaker" },
+  ]},
   { label: "Finance", icon: Receipt, single: true, page: "Reports" },
   { label: "Time Tracking", icon: Timer, single: true, page: "TimeTrackingAnalytics", adminOnly: false },
   {
