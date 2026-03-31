@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   Scan, Globe, Loader2, CheckCircle, AlertCircle,
   Lightbulb, Code, Sparkles, ArrowRight, Wand2, Bug,
-  Plus, Check, Zap
+  Plus, Check, Zap, Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,8 +49,30 @@ Provide:
 Be specific and actionable. Reference actual features.`;
 
 export default function AIScanner() {
+  const [user, setUser] = useState(null);
+  const [ownerKey, setOwnerKey] = useState('');
+  const [unlocked, setUnlocked] = useState(false);
+  const [keyError, setKeyError] = useState(false);
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    base44.auth.me().then(u => {
+      setUser(u);
+      if (u?.email?.toLowerCase().includes('blueeyespark') || u?.full_name?.toLowerCase().includes('blueeyespark')) {
+        setUnlocked(true);
+      }
+    });
+  }, []);
+
+  const handleUnlock = () => {
+    if (ownerKey === 'blueeyespark') {
+      setUnlocked(true);
+      setKeyError(false);
+    } else {
+      setKeyError(true);
+    }
+  };
   const [implementing, setImplementing] = useState(null);
   const [selfAnalysis, setSelfAnalysis] = useState(null);
   const [siteAnalysis, setSiteAnalysis] = useState(null);
@@ -59,6 +81,32 @@ export default function AIScanner() {
   const [autoFixingBugs, setAutoFixingBugs] = useState(false);
   const [appliedItems, setAppliedItems] = useState(new Set());
   const queryClient = useQueryClient();
+
+  if (!unlocked) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50/30 dark:from-slate-900 dark:to-purple-950/20 flex items-center justify-center">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-8 w-full max-w-sm text-center">
+          <div className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center">
+            <Lock className="w-7 h-7 text-white" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1">Owner Access Required</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">The AI Scanner is restricted to owners only. Enter your owner key to continue.</p>
+          <Input
+            type="password"
+            placeholder="Enter owner key..."
+            value={ownerKey}
+            onChange={e => { setOwnerKey(e.target.value); setKeyError(false); }}
+            onKeyDown={e => e.key === 'Enter' && handleUnlock()}
+            className={keyError ? 'border-red-400 mb-1' : 'mb-1'}
+          />
+          {keyError && <p className="text-xs text-red-500 mb-3">Invalid owner key.</p>}
+          <Button className="w-full mt-3 bg-gradient-to-r from-purple-600 to-indigo-600" onClick={handleUnlock}>
+            <Lock className="w-4 h-4 mr-2" /> Unlock
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const severityColor = { high: 'bg-red-100 text-red-700', medium: 'bg-amber-100 text-amber-700', low: 'bg-blue-100 text-blue-700', critical: 'bg-red-200 text-red-800' };
   const priorityColor = { high: 'bg-red-100 text-red-700', medium: 'bg-amber-100 text-amber-700', low: 'bg-green-100 text-green-700' };
