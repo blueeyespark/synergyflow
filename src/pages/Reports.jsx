@@ -593,51 +593,7 @@ export default function ReportsPage() {
             </div>
           </TabsContent>
           <TabsContent value="budgetmgr" className="-mx-4 sm:-mx-6 lg:-mx-8">
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={dailyCompletion}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
-                  <YAxis stroke="#64748b" fontSize={12} />
-                  <Tooltip />
-                  <Legend />
-                  <Area type="monotone" dataKey="created" stackId="1" stroke="#6366f1" fill="#6366f1" fillOpacity={0.3} name="Created" />
-                  <Area type="monotone" dataKey="completed" stackId="2" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} name="Completed" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                <h3 className="font-semibold mb-4">Tasks by Status</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                  <RePieChart>
-                    <Pie data={tasksByStatus} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => percent > 0 ? `${name} ${(percent * 100).toFixed(0)}%` : ''}>
-                      {tasksByStatus.map((_, index) => (
-                        <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </RePieChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                <h3 className="font-semibold mb-4">Tasks by Priority</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={tasksByPriority}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="name" stroke="#64748b" />
-                    <YAxis stroke="#64748b" />
-                    <Tooltip />
-                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                      {tasksByPriority.map((_, index) => (
-                        <Cell key={index} fill={['#3b82f6', '#f59e0b', '#f97316', '#ef4444'][index]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+            <BudgetPage />
           </TabsContent>
           <TabsContent value="budgetmgr" className="-mx-4 sm:-mx-6 lg:-mx-8">
             <BudgetPage />
