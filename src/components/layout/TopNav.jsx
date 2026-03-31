@@ -36,11 +36,10 @@ const navGroups = [
     icon: Scan,
     adminOnly: true,
     children: [
-      { section: "Management", items: [
+      { section: null, items: [
         { name: "AI Tools", icon: Scan, page: "AITools" },
         { name: "Users", icon: Users, page: "UserViewer" },
       ]},
-    ],
   },
 ];
 
