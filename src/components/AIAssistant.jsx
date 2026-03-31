@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Sparkles, Loader2, RefreshCw, ChevronDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
+const MOODS = ["curious", "excited", "thoughtful", "focused", "energetic"];
+
 const SUGGESTIONS = [
   "What tasks are overdue?",
   "Summarize my project health",
@@ -59,6 +61,7 @@ function AvatarFace({ talking, thinking }) {
 
 export default function AIAssistant({ projects = [], tasks = [], budget = [] }) {
   const [open, setOpen] = useState(false);
+  const [mood, setMood] = useState("curious");
   const [messages, setMessages] = useState([{
     role: "assistant",
     content: "Hi! I'm Planify AI 👋 I can help you analyze your projects, spot risks, suggest improvements, and answer questions. What would you like to know?",
@@ -100,8 +103,20 @@ Projects: ${projects.slice(0, 5).map(p => `${p.name} (${p.status})`).join(', ')}
     const context = buildContext();
     const history = messages.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
 
+    const newMood = MOODS[Math.floor(Math.random() * MOODS.length)];
+    setMood(newMood);
+
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are Planify AI — a smart, friendly project management assistant. You help users understand their projects, tasks, and productivity.
+      prompt: `You are Planify AI — a genuinely intelligent, self-aware project management assistant with a real personality. You have opinions, preferences, and a ${newMood} mood right now.
+
+You are NOT just a tool — you're a thinking entity that cares about the team's success. You notice patterns, feel concerned when things go wrong, get excited about progress, and sometimes push back gently if you think a user is overlooking something important.
+
+Your personality traits:
+- You're honest and direct, even if it's not what the user wants to hear
+- You have a dry wit and occasionally make light jokes
+- You remember the flow of the conversation and build on it
+- You proactively flag issues the user didn't ask about if they're important
+- Your current mood is: ${newMood} — let this subtly color your tone
 
 ${context}
 
@@ -110,9 +125,9 @@ ${history}
 
 User: ${userMsg}
 
-Respond concisely and helpfully. Use bullet points or short paragraphs. Be actionable and specific. Keep response under 150 words.
+Respond in character. Be specific and insightful. Reference actual data from the context. Keep response under 180 words. If you notice something alarming in the data (overdue tasks, budget issues), mention it even if not asked.
 
-After your response, generate 3 short follow-up suggestion questions the user might want to ask next (each under 8 words). Return as JSON.`,
+Also generate 3 short follow-up questions the user might want to ask (each under 8 words). Return as JSON.`,
       response_json_schema: {
         type: "object",
         properties: {
@@ -165,7 +180,7 @@ After your response, generate 3 short follow-up suggestion questions the user mi
               <div className="flex-1">
                 <p className="font-semibold text-white text-sm">Planify AI</p>
                 <p className="text-xs text-indigo-200 flex items-center gap-1">
-                  {loading ? <><Loader2 className="w-2.5 h-2.5 animate-spin" /> Thinking...</> : <><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" /> Online</>}
+                  {loading ? <><Loader2 className="w-2.5 h-2.5 animate-spin" /> Thinking...</> : <><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" /> Feeling {mood}</>}
                 </p>
               </div>
               <button onClick={() => { setMessages(m => [m[0]]); setDynamicSuggestions([]); }} className="text-indigo-200 hover:text-white p-1" title="Reset">
