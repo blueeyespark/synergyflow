@@ -4,7 +4,6 @@ import Templates from './pages/Templates';
 import UserViewer from './pages/UserViewer';
 import TimeTrackingAnalytics from './pages/TimeTrackingAnalytics';
 import Tasks from './pages/Tasks';
-import WorkHub from './pages/WorkHub';
 import ClientPortal from './pages/ClientPortal';
 import DiscordBot from './pages/DiscordBot';
 import AITools from './pages/AITools';
@@ -82,7 +81,6 @@ const AuthenticatedApp = () => {
       <Route path="/ClientPortal" element={<LayoutWrapper currentPageName="ClientPortal"><ClientPortal /></LayoutWrapper>} />
       <Route path="/DiscordBot" element={<LayoutWrapper currentPageName="DiscordBot"><DiscordBot /></LayoutWrapper>} />
       <Route path="/AITools" element={<LayoutWrapper currentPageName="AITools"><AITools /></LayoutWrapper>} />
-      <Route path="/WorkHub" element={<LayoutWrapper currentPageName="WorkHub"><WorkHub /></LayoutWrapper>} />
       <Route path="/ContentCreator" element={<LayoutWrapper currentPageName="ContentCreator"><ContentCreator /></LayoutWrapper>} />
       <Route path="/UserViewer" element={<LayoutWrapper currentPageName="UserViewer"><UserViewer /></LayoutWrapper>} />
       <Route path="/TimeTrackingAnalytics" element={<LayoutWrapper currentPageName="TimeTrackingAnalytics"><TimeTrackingAnalytics /></LayoutWrapper>} />

@@ -3,7 +3,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard, FolderKanban, LogOut, Menu, X, Users,
+  LayoutDashboard, LogOut, Menu, X, Users,
   Moon, Sun, Settings, ChevronDown, BarChart2, CheckSquare,
   Globe, Bot, Receipt, UserCog, History, Scan, Bug, Timer,
   Trophy, FolderOpen, LayoutTemplate, Share2, Zap, Clock, TrendingUp, Folder
@@ -15,7 +15,6 @@ import NavDropdown from "./NavDropdown";
 
 const navGroups = [
   { label: "Dashboard", icon: LayoutDashboard, page: "Dashboard", single: true },
-  { label: "Work", icon: FolderKanban, single: true, page: "WorkHub" },
   { label: "Creator", icon: Zap, single: true, page: "CreatorStudio" },
   {
     label: "Team & Collaboration",
@@ -79,16 +78,6 @@ export default function TopNav({
               <LayoutDashboard className="w-4 h-4" />
               Dashboard
             </Link>
-            <Link
-              to={createPageUrl("WorkHub")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
-                currentPageName === "WorkHub" ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-400/30" : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
-              }`}
-              aria-current={currentPageName === "WorkHub" ? "page" : "false"}
-            >
-              <FolderKanban className="w-4 h-4" />
-              Work
-            </Link>
 
             {navGroups.filter(g => !g.single && (!g.adminOnly || isAdmin)).map(group => (
               <NavDropdown key={group.label} group={group} currentPageName={currentPageName} isAdmin={isAdmin} />
@@ -105,7 +94,7 @@ export default function TopNav({
                 Users
               </Link>
             )}
-            {navGroups.filter(g => g.single && g.page !== 'Dashboard' && g.page !== 'WorkHub' && (!g.adminOnly || isAdmin)).map(group => (
+            {navGroups.filter(g => g.single && g.page !== 'Dashboard' && (!g.adminOnly || isAdmin)).map(group => (
               <Link
                 key={group.page}
                 to={createPageUrl(group.page)}
@@ -168,9 +157,8 @@ export default function TopNav({
           <div className="px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto">
             {[
               { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
-              { name: "Work", icon: FolderKanban, page: "WorkHub" },
               ...navGroups
-                .filter(g => g.single && g.page !== 'Dashboard' && g.page !== 'WorkHub' && (!g.adminOnly || isAdmin))
+                .filter(g => g.single && g.page !== 'Dashboard' && (!g.adminOnly || isAdmin))
                 .map(g => ({ name: g.label, icon: g.icon, page: g.page })),
               ...navGroups
                 .filter(g => !g.single && (!g.adminOnly || isAdmin))
