@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Plus, Globe, Copy, Eye, Trash2, Users, CheckCircle, MessageSquare, Link, Settings, Lock } from "lucide-react";
+import { Plus, Globe, Copy, Eye, Trash2, Users, CheckCircle, MessageSquare, Link, Settings, Lock, Upload, Flag, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +45,12 @@ export default function ClientPortal() {
   const { data: comments = [] } = useQuery({
     queryKey: ['client-comments'],
     queryFn: () => base44.entities.ClientComment.list('-created_date'),
+  });
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: () => base44.entities.Task.list(),
+    enabled: !!user,
   });
 
   const createMutation = useMutation({
@@ -133,11 +139,12 @@ export default function ClientPortal() {
                       </Badge>
                     </div>
                     {portal.description && <p className="text-sm text-slate-500 dark:text-slate-400 mb-3 line-clamp-2">{portal.description}</p>}
-                    <div className="flex items-center gap-3 text-xs text-slate-400 mb-4">
+                    <div className="flex items-center gap-3 text-xs text-slate-400 mb-4 flex-wrap">
                       <span className="flex items-center gap-1"><Users className="w-3 h-3" />{portal.stakeholder_emails?.length || 0} stakeholders</span>
-                      <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" />{portalComments.length} comments</span>
+                      <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" />{portalComments.length} feedback</span>
+                      <span className="flex items-center gap-1"><Flag className="w-3 h-3" />{tasks.filter(t => t.project_id === portal.project_id && t.status !== 'completed').length} open tasks</span>
                       {pendingApprovals > 0 && (
-                        <Badge className="bg-amber-100 text-amber-700 text-xs">{pendingApprovals} pending</Badge>
+                        <Badge className="bg-amber-100 text-amber-700 text-xs">{pendingApprovals} pending approval</Badge>
                       )}
                     </div>
                     <div className="flex gap-2">

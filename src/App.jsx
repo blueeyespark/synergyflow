@@ -6,6 +6,8 @@ import Templates from './pages/Templates';
 import AIBugMonitor from './pages/AIBugMonitor';
 import TimeTracking from './pages/TimeTracking';
 import Tasks from './pages/Tasks';
+import WorkHub from './pages/WorkHub';
+import WeeklyReports from './pages/WeeklyReports';
 import WorkloadDashboard from './pages/WorkloadDashboard';
 import ClientPortal from './pages/ClientPortal';
 import DiscordBot from './pages/DiscordBot';
@@ -86,6 +88,8 @@ const AuthenticatedApp = () => {
       <Route path="/Invoicing" element={<LayoutWrapper currentPageName="Invoicing"><Invoicing /></LayoutWrapper>} />
       <Route path="/ResourceScheduler" element={<LayoutWrapper currentPageName="ResourceScheduler"><ResourceScheduler /></LayoutWrapper>} />
       <Route path="/AIChangesLog" element={<LayoutWrapper currentPageName="AIChangesLog"><AIChangesLog /></LayoutWrapper>} />
+      <Route path="/WorkHub" element={<LayoutWrapper currentPageName="WorkHub"><WorkHub /></LayoutWrapper>} />
+      <Route path="/WeeklyReports" element={<LayoutWrapper currentPageName="WeeklyReports"><WeeklyReports /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

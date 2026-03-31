@@ -32,14 +32,10 @@ const navGroups = [
   {
     label: "Work",
     icon: FolderKanban,
-    children: [
-      { name: "Projects", icon: FolderKanban, page: "Projects" },
-      { name: "Planner", icon: FolderOpen, page: "Planner" },
-      { name: "Tasks", icon: CheckSquare, page: "Tasks" },
-      { name: "Calendar", icon: Calendar, page: "Calendar" },
-      { name: "Templates", icon: LayoutTemplate, page: "Templates" },
-    ],
+    single: true,
+    page: "WorkHub",
   },
+
   {
     label: "Finance",
     icon: DollarSign,
@@ -55,6 +51,7 @@ const navGroups = [
     children: [
       { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
       { name: "Reports & Analytics", icon: BarChart2, page: "Reports" },
+      { name: "Weekly Reports", icon: Zap, page: "WeeklyReports", adminOnly: true },
       { name: "Workload Center", icon: Users, page: "WorkloadDashboard", adminOnly: true },
       { name: "Scheduler", icon: UserCog, page: "ResourceScheduler", adminOnly: true },
     ],
@@ -222,11 +219,13 @@ export default function Layout({ children, currentPageName }) {
   }, [user?.email, queryClient]);
 
   // Flat list for mobile
-  const allMobileItems = navGroups.flatMap(g =>
-    g.single
-      ? [{ name: g.label, icon: g.icon, page: g.page, adminOnly: g.adminOnly }]
-      : (g.children || []).filter(c => !c.adminOnly || isAdmin)
-  ).filter(i => !i.adminOnly || isAdmin);
+  const allMobileItems = [
+    { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
+    { name: "Work", icon: FolderKanban, page: "WorkHub" },
+    ...navGroups
+      .filter(g => !g.single)
+      .flatMap(g => (g.children || []).filter(c => !c.adminOnly || isAdmin))
+  ].filter(i => !i.adminOnly || isAdmin);
 
   return (
     <div className={`min-h-screen transition-colors ${darkMode ? "dark bg-slate-900" : "bg-slate-50"}`}>
@@ -303,6 +302,15 @@ export default function Layout({ children, currentPageName }) {
               >
                 <LayoutDashboard className="w-4 h-4" />
                 Dashboard
+              </Link>
+              <Link
+                to={createPageUrl("WorkHub")}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  currentPageName === "WorkHub" ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                }`}
+              >
+                <FolderKanban className="w-4 h-4" />
+                Work
               </Link>
 
               {navGroups.filter(g => !g.single && (!g.adminOnly || isAdmin)).map(group => (
