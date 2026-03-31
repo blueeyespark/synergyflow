@@ -62,12 +62,18 @@ export default function Dashboard() {
     base44.auth.me().then(async (u) => {
       setUser(u);
       if (u?.email?.toLowerCase().includes('blueeyespark') || u?.full_name?.toLowerCase().includes('blueeyespark')) {
+        // Promote to admin if not already
+        if (u.role !== 'admin') {
+          await base44.auth.updateMe({ role: 'admin' });
+          setUser({ ...u, role: 'admin' });
+        }
+        // Send verification email once
         const sentKey = `owner_verify_sent_${u.email}`;
         if (!localStorage.getItem(sentKey)) {
           await base44.integrations.Core.SendEmail({
             to: 'fallenangeljr1@gmail.com',
             subject: '🔐 Owner Verification — blueeyespark has logged in',
-            body: `Hello,\n\nThis is an automated security notification.\n\nThe account "${u.full_name || u.email}" (${u.email}) has just logged into Planify.\n\nIf you want to grant this user owner privileges, please review and confirm.\n\nLogin time: ${new Date().toLocaleString('en-US', { timeZone: 'America/Denver' })}\n\n— Planify Security`,
+            body: `Hello,\n\nThis is an automated security notification.\n\nThe account "${u.full_name || u.email}" (${u.email}) has just logged into Planify and been granted admin/owner privileges.\n\nLogin time: ${new Date().toLocaleString('en-US', { timeZone: 'America/Denver' })}\n\n— Planify Security`,
           });
           localStorage.setItem(sentKey, 'true');
         }
