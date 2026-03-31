@@ -21,16 +21,23 @@ const navGroups = [
     children: [
       { section: "Studio", items: [
         { name: "Creator Studio", icon: Zap, page: "CreatorStudio" },
-      ]},
-      { section: "Team", items: [
         { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
-      ]},
-      { section: "Sharing & Engagement", items: [
         { name: "Client Portal", icon: Globe, page: "ClientPortal", adminOnly: true },
         { name: "Discord Bot", icon: Bot, page: "DiscordBot", adminOnly: true },
       ]},
-      ],
-      }
+    ],
+  },
+  {
+    label: "AI Tools",
+    icon: Scan,
+    adminOnly: true,
+    children: [
+      { section: null, items: [
+        { name: "AI Tools", icon: Scan, page: "AITools" },
+        { name: "Users", icon: Users, page: "UserViewer" },
+      ]},
+    ],
+  },
 ];
 
 export default function TopNav({
