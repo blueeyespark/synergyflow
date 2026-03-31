@@ -12,6 +12,7 @@ import DiscordBot from './pages/DiscordBot';
 import WorkloadHeatmap from './pages/WorkloadHeatmap';
 import Invoicing from './pages/Invoicing';
 import ResourceScheduler from './pages/ResourceScheduler';
+import AIChangesLog from './pages/AIChangesLog';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -84,6 +85,7 @@ const AuthenticatedApp = () => {
       <Route path="/WorkloadHeatmap" element={<LayoutWrapper currentPageName="WorkloadHeatmap"><WorkloadHeatmap /></LayoutWrapper>} />
       <Route path="/Invoicing" element={<LayoutWrapper currentPageName="Invoicing"><Invoicing /></LayoutWrapper>} />
       <Route path="/ResourceScheduler" element={<LayoutWrapper currentPageName="ResourceScheduler"><ResourceScheduler /></LayoutWrapper>} />
+      <Route path="/AIChangesLog" element={<LayoutWrapper currentPageName="AIChangesLog"><AIChangesLog /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

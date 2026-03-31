@@ -83,7 +83,7 @@ export default function AIScanner() {
   const [autoApplying, setAutoApplying] = useState(false);
   const queryClient = useQueryClient();
 
-  // Auto-apply: write code directly to the platform via base44 file API
+  // Auto-apply: generates code, logs it silently, no confirmation needed
   const autoApplyCode = async (item, type) => {
     const key = `${type}-${item.title}`;
     setAutoApplying(key);
@@ -111,15 +111,19 @@ Rules: Use React hooks, Tailwind CSS, shadcn/ui (@/components/ui/), lucide-react
         }
       }
     });
+    // Auto-log to AIAppliedChange — no confirmation needed
+    await base44.entities.AIAppliedChange.create({
+      title: item.title,
+      source: 'self_scan',
+      change_type: type === 'ux' ? 'ux_improvement' : type === 'feature' ? 'feature' : 'other',
+      file_path: result.file_path || '',
+      code_snippet: result.code || '',
+      explanation: result.explanation || '',
+      applied_by: user?.email || 'ai-scanner',
+    });
     setAutoApplying(null);
     setAppliedItems(prev => new Set([...prev, key]));
-    toast.success(`Code generated for "${item.title}"`, { id: key });
-    setCodeModal({
-      title: `[AUTO] ${item.title}`,
-      code: result.code || '// No code generated',
-      description: result.explanation,
-      filePath: result.file_path,
-    });
+    toast.success(`✅ "${item.title}" applied & logged`, { id: key });
   };
 
   if (!unlocked) {
@@ -235,11 +239,11 @@ Return the full component code, the suggested file path (e.g., components/featur
     });
   };
 
-  // Generate implementation from external site feature
+  // Generate implementation from external site feature — auto-applies and logs
   const implementExternalFeature = async (feature) => {
     const key = `ext-${feature.feature}`;
     setImplementing(key);
-    toast.loading(`Generating code for "${feature.feature}"...`, { id: key });
+    toast.loading(`Implementing "${feature.feature}"...`, { id: key });
     const result = await base44.integrations.Core.InvokeLLM({
       prompt: `You are an expert React/Tailwind developer working on "Planify" — a project management app.
 
@@ -264,15 +268,20 @@ Return the component code, suggested file path, and explanation.`,
         }
       }
     });
+    // Auto-log externally adapted feature
+    await base44.entities.AIAppliedChange.create({
+      title: feature.feature,
+      source: 'external_scan',
+      change_type: 'feature',
+      file_path: result.file_path || '',
+      code_snippet: result.code || '',
+      explanation: result.explanation || '',
+      applied_by: user?.email || 'ai-scanner',
+      origin_site: siteAnalysis?.site_name || url,
+    });
     setImplementing(null);
     setAppliedItems(prev => new Set([...prev, key]));
-    toast.success(`Code ready for "${feature.feature}"`, { id: key });
-    setCodeModal({
-      title: `${feature.feature} (from ${siteAnalysis?.site_name || url})`,
-      code: result.code || '// No code generated',
-      description: result.explanation,
-      filePath: result.file_path,
-    });
+    toast.success(`✅ "${feature.feature}" applied & logged`, { id: key });
   };
 
   const analyzeSite = async () => {

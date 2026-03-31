@@ -1,0 +1,45 @@
+{
+  "name": "AIAppliedChange",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "self_scan",
+        "external_scan"
+      ],
+      "default": "self_scan"
+    },
+    "change_type": {
+      "type": "string",
+      "enum": [
+        "ux_improvement",
+        "feature",
+        "bug_fix",
+        "other"
+      ],
+      "default": "other"
+    },
+    "file_path": {
+      "type": "string"
+    },
+    "code_snippet": {
+      "type": "string"
+    },
+    "explanation": {
+      "type": "string"
+    },
+    "applied_by": {
+      "type": "string"
+    },
+    "origin_site": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

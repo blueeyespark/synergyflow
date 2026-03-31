@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard, FolderKanban, LogOut, Menu, X,
   Calendar, DollarSign, Users, Share2, FolderOpen, Moon, Sun, Settings, Trophy, Scan,
-  LayoutTemplate, Bug, Timer, BarChart2, CheckSquare, Globe, Bot, Flame, Receipt, UserCog
+  LayoutTemplate, Bug, Timer, BarChart2, CheckSquare, Globe, Bot, Flame, Receipt, UserCog, History
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -38,6 +38,7 @@ const allNavItems = [
   { name: "Client Portal", icon: Globe, page: "ClientPortal", adminOnly: true },
   { name: "Invoicing", icon: Receipt, page: "Invoicing", adminOnly: true },
   { name: "AI Scanner", icon: Scan, page: "AIScanner", adminOnly: true },
+  { name: "AI Changes", icon: History, page: "AIChangesLog", adminOnly: true },
   { name: "Bug Monitor", icon: Bug, page: "AIBugMonitor", adminOnly: true },
   { name: "Discord", icon: Bot, page: "DiscordBot", adminOnly: true },
 ];

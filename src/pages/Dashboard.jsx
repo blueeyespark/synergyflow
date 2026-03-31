@@ -10,6 +10,7 @@ import { isPast, isToday, addDays, isBefore } from "date-fns";
 
 import StatsCard from "@/components/dashboard/StatsCard";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
+import ProjectHealthMonitor from "@/components/ai/ProjectHealthMonitor";
 import UpcomingTasks from "@/components/dashboard/UpcomingTasks";
 import ProjectsOverview from "@/components/dashboard/ProjectsOverview";
 import ProjectForm from "@/components/projects/ProjectForm";
@@ -230,6 +231,10 @@ export default function Dashboard() {
           <ActivityFeed projects={myProjects} />
         </CollapsibleSection>
 
+        <CollapsibleSection title="Project Health Monitor" icon={Brain} defaultOpen={false}>
+          <ProjectHealthMonitor projects={myProjects} tasks={myTasks} />
+        </CollapsibleSection>
+
         {/* Admin-only section */}
         {isAdmin && (
           <CollapsibleSection title="Admin Tools" icon={Zap} defaultOpen={false}>
@@ -244,6 +249,12 @@ export default function Dashboard() {
                 <div className="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
                   <h4 className="font-medium text-slate-800 text-sm">AI Scanner</h4>
                   <p className="text-xs text-slate-500 mt-1">Analyze app health and scan competitor features</p>
+                </div>
+              </Link>
+              <Link to={createPageUrl("AIChangesLog")}>
+                <div className="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+                  <h4 className="font-medium text-slate-800 text-sm">AI Changes Log</h4>
+                  <p className="text-xs text-slate-500 mt-1">Audit all auto-applied AI improvements</p>
                 </div>
               </Link>
             </div>
