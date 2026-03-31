@@ -99,7 +99,7 @@ export default function Layout({ children, currentPageName }) {
   }, [user?.email, queryClient]);
 
   return (
-    <div className={`min-h-screen flex flex-col transition-colors duration-300 ${darkMode ? "dark bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" : "bg-gradient-to-br from-slate-50 via-white to-indigo-50/20"}`}>
+    <div className="min-h-screen flex flex-col bg-background text-foreground relative">
       {pointsEvent && <PointsToast event={pointsEvent} onDismiss={() => setPointsEvent(null)} />}
       <OfflineBanner />
       <AIAssistant projects={projects} tasks={tasks} budget={budget} />
@@ -108,6 +108,7 @@ export default function Layout({ children, currentPageName }) {
       <style>{`
         html {
           scroll-behavior: smooth;
+          background: linear-gradient(135deg, #1a1028 0%, #2d1b4e 50%, #1a1028 100%);
         }
         
         * {
