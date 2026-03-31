@@ -1,13 +1,10 @@
 import { Toaster } from "@/components/ui/toaster"
 import Leaderboard from './pages/Leaderboard';
 import Templates from './pages/Templates';
-import TimeTracking from './pages/TimeTracking';
 import Tasks from './pages/Tasks';
 import WorkHub from './pages/WorkHub';
 import ClientPortal from './pages/ClientPortal';
 import DiscordBot from './pages/DiscordBot';
-import Invoicing from './pages/Invoicing';
-import AIChangesLog from './pages/AIChangesLog';
 import AITools from './pages/AITools';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -70,13 +67,9 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/Leaderboard" element={<LayoutWrapper currentPageName="Leaderboard"><Leaderboard /></LayoutWrapper>} />
       <Route path="/Templates" element={<LayoutWrapper currentPageName="Templates"><Templates /></LayoutWrapper>} />
-      <Route path="/TimeTracking" element={<LayoutWrapper currentPageName="TimeTracking"><TimeTracking /></LayoutWrapper>} />
-
       <Route path="/Tasks" element={<LayoutWrapper currentPageName="Tasks"><Tasks /></LayoutWrapper>} />
       <Route path="/ClientPortal" element={<LayoutWrapper currentPageName="ClientPortal"><ClientPortal /></LayoutWrapper>} />
       <Route path="/DiscordBot" element={<LayoutWrapper currentPageName="DiscordBot"><DiscordBot /></LayoutWrapper>} />
-
-      <Route path="/Invoicing" element={<LayoutWrapper currentPageName="Invoicing"><Invoicing /></LayoutWrapper>} />
       <Route path="/AITools" element={<LayoutWrapper currentPageName="AITools"><AITools /></LayoutWrapper>} />
       <Route path="/WorkHub" element={<LayoutWrapper currentPageName="WorkHub"><WorkHub /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
