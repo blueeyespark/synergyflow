@@ -15,17 +15,22 @@ import NavDropdown from "./NavDropdown";
 
 const navGroups = [
   { label: "Dashboard", icon: LayoutDashboard, page: "Dashboard", single: true },
-  { label: "Creator", icon: Zap, single: true, page: "CreatorStudio" },
   {
-    label: "Team & Collaboration",
-    icon: Users,
+    label: "Creator",
+    icon: Zap,
     children: [
+      { section: "Studio", items: [
+        { name: "Creator Studio", icon: Zap, page: "CreatorStudio" },
+      ]},
       { section: "Team", items: [
         { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
       ]},
       { section: "Sharing & Engagement", items: [
         { name: "Client Portal", icon: Globe, page: "ClientPortal", adminOnly: true },
         { name: "Discord Bot", icon: Bot, page: "DiscordBot", adminOnly: true },
+      ]},
+      { section: "Admin", items: [
+        { name: "Users", icon: Users, page: "UserViewer", adminOnly: true },
       ]},
     ],
   },
@@ -82,18 +87,6 @@ export default function TopNav({
             {navGroups.filter(g => !g.single && (!g.adminOnly || isAdmin)).map(group => (
               <NavDropdown key={group.label} group={group} currentPageName={currentPageName} isAdmin={isAdmin} />
             ))}
-            {isAdmin && (
-              <Link
-                to={createPageUrl('UserViewer')}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold uppercase tracking-wide transition-all duration-200 ${
-                  currentPageName === 'UserViewer' ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/50" : "text-yellow-300 hover:text-yellow-100 hover:bg-yellow-500/20"
-                }`}
-                aria-current={currentPageName === 'UserViewer' ? "page" : "false"}
-              >
-                <Users className="w-4 h-4" />
-                Users
-              </Link>
-            )}
             {navGroups.filter(g => g.single && g.page !== 'Dashboard' && (!g.adminOnly || isAdmin)).map(group => (
               <Link
                 key={group.page}
