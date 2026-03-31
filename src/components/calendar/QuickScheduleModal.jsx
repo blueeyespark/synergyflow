@@ -262,13 +262,18 @@ export default function QuickScheduleModal({ open, onOpenChange, selectedDate })
                   <SelectValue placeholder="Select project type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="marketing">Marketing Campaign</SelectItem>
-                  <SelectItem value="product">Product Launch</SelectItem>
-                  <SelectItem value="design">Design System</SelectItem>
-                  <SelectItem value="engineering">Engineering Sprint</SelectItem>
-                  <SelectItem value="sales">Sales Proposal</SelectItem>
-                  <SelectItem value="hr">Onboarding</SelectItem>
-                  <SelectItem value="operations">Operations</SelectItem>
+                   <SelectItem value="marketing">Marketing Campaign</SelectItem>
+                   <SelectItem value="product">Product Launch</SelectItem>
+                   <SelectItem value="design">Design System</SelectItem>
+                   <SelectItem value="engineering">Engineering Sprint</SelectItem>
+                   <SelectItem value="sales">Sales Proposal</SelectItem>
+                   <SelectItem value="hr">Onboarding</SelectItem>
+                   <SelectItem value="operations">Operations</SelectItem>
+                   <SelectItem value="content">Content Calendar</SelectItem>
+                   <SelectItem value="qa">QA Testing</SelectItem>
+                   <SelectItem value="finance">Financial Planning</SelectItem>
+                   <SelectItem value="customer">Customer Success</SelectItem>
+                   <SelectItem value="infrastructure">Infrastructure</SelectItem>
                 </SelectContent>
               </Select>
               <Button

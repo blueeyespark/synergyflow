@@ -25,6 +25,7 @@ import {
 import { CalendarIcon, Link2, Plus, X, Image, Copy, RefreshCw } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 // Helper function to format date without timezone issues
 const formatDateString = (date) => {
@@ -42,6 +43,8 @@ const parseDateString = (dateStr) => {
 };
 import { Checkbox } from "@/components/ui/checkbox";
 import ReminderSelector from "./ReminderSelector";
+import BlockedIndicator from "./BlockedIndicator";
+import { isTaskBlocked, canChangeTaskStatus } from "@/lib/taskDependencies";
 
 export default function TaskForm({ open, onOpenChange, task, projectId, reminderGroups, teamMembers, allTasks, tasks, customStatuses, onSubmit, isLoading, onDuplicate }) {
   const [formData, setFormData] = useState({
@@ -151,8 +154,20 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Check if trying to complete a blocked task
+    if (formData.status === 'completed' && task) {
+      const { isBlocked, blockedBy } = isTaskBlocked(task, allTasks || tasks || []);
+      if (isBlocked) {
+        toast.error(`Cannot complete: ${blockedBy.length} incomplete ${blockedBy.length === 1 ? 'dependency' : 'dependencies'}`);
+        return;
+      }
+    }
+    
     onSubmit(formData);
   };
+
+  const blockStatus = task ? isTaskBlocked(task, allTasks || tasks || []) : { isBlocked: false, blockedBy: [] };
 
 
   
@@ -201,20 +216,41 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
             />
           </div>
 
+          {blockStatus.isBlocked && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-sm font-medium text-amber-900 mb-2">⚠️ Task Blocked</p>
+              <p className="text-xs text-amber-700 mb-2">
+                This task cannot be completed until the following {blockStatus.blockedBy.length === 1 ? 'dependency is' : 'dependencies are'} finished:
+              </p>
+              <ul className="space-y-1">
+                {blockStatus.blockedBy.map(dep => (
+                  <li key={dep.id} className="text-xs text-amber-700">• {dep.title}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Status</Label>
               <Select
                 value={formData.status}
                 onValueChange={(value) => setFormData({ ...formData, status: value })}
+                disabled={blockStatus.isBlocked && formData.status !== 'completed'}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {statusOptions.map(s => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
+                  {statusOptions.map(s => {
+                    const isCompletedStatus = s.id === 'completed' || s.name?.toLowerCase() === 'completed';
+                    const disabled = blockStatus.isBlocked && isCompletedStatus;
+                    return (
+                      <SelectItem key={s.id} value={s.id} disabled={disabled}>
+                        {disabled ? `${s.name} (blocked)` : s.name}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -468,8 +504,8 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : task ? "Update" : "Create"}
+            <Button type="submit" disabled={isLoading || blockStatus.isBlocked}>
+              {blockStatus.isBlocked ? 'Task Blocked' : isLoading ? "Saving..." : task ? "Update" : "Create"}
             </Button>
           </div>
         </form>
