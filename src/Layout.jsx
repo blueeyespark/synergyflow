@@ -31,6 +31,7 @@ const allNavItems = [
   { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
   { name: "Reports", icon: Share2, page: "Reports" },
   { name: "Analytics", icon: BarChart2, page: "Analytics" },
+  // Note: Reports & Analytics are visible to all users (no adminOnly)
   // Admin-only
   { name: "Workload", icon: Users, page: "WorkloadDashboard", adminOnly: true },
   { name: "Heatmap", icon: Flame, page: "WorkloadHeatmap", adminOnly: true },
