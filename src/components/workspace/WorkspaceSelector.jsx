@@ -3,8 +3,12 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Building2, ChevronDown, Plus, Settings, Users, Check, 
-  User, Briefcase, Crown
+  User, Briefcase, Crown, UserPlus
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { Loader2, CheckCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +18,72 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+
+function InviteDialog() {
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const handleInvite = async () => {
+    if (!email.trim() || !email.includes("@")) {
+      toast.error("Please enter a valid email");
+      return;
+    }
+    setLoading(true);
+    await base44.users.inviteUser(email.trim(), "user");
+    setLoading(false);
+    setSent(true);
+    toast.success(`Invite sent to ${email.trim()}`);
+    setTimeout(() => {
+      setOpen(false);
+      setEmail("");
+      setSent(false);
+    }, 1500);
+  };
+
+  return (
+    <>
+      <DropdownMenuItem onClick={() => setOpen(true)} className="flex items-center gap-2">
+        <UserPlus className="w-4 h-4" />
+        Invite
+      </DropdownMenuItem>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Invite Someone</DialogTitle>
+          </DialogHeader>
+          {sent ? (
+            <div className="flex flex-col items-center gap-3 py-6">
+              <CheckCircle className="w-10 h-10 text-green-500" />
+              <p className="text-sm text-slate-600">Invite sent!</p>
+            </div>
+          ) : (
+            <div className="space-y-4 pt-2">
+              <Input
+                type="email"
+                placeholder="friend@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleInvite()}
+                autoFocus
+              />
+              <Button
+                className="w-full gap-2"
+                onClick={handleInvite}
+                disabled={loading || !email.trim()}
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                Send Invite
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
 export default function WorkspaceSelector({ currentWorkspace, onWorkspaceChange, user }) {
   const queryClient = useQueryClient();
@@ -120,6 +190,7 @@ export default function WorkspaceSelector({ currentWorkspace, onWorkspaceChange,
                 <Check className="w-4 h-4 text-green-500" />
               )}
             </DropdownMenuItem>
+            <InviteDialog />
           </>
         )}
 
