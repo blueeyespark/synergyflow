@@ -99,22 +99,25 @@ export default function Dashboard() {
   });
 
   const { data: projects = [] } = useQuery({
-    queryKey: ['projects'],
+    queryKey: ['projects', user?.email],
     queryFn: () => base44.entities.Project.list('-created_date'),
+    enabled: !!user?.email,
     staleTime: 10 * 60 * 1000,
     refetchInterval: false,
   });
 
   const { data: tasks = [] } = useQuery({
-    queryKey: ['tasks'],
+    queryKey: ['tasks', user?.email],
     queryFn: () => base44.entities.Task.list('-created_date'),
+    enabled: !!user?.email,
     staleTime: 10 * 60 * 1000,
     refetchInterval: false,
   });
 
   const { data: budget = [] } = useQuery({
-    queryKey: ['budget'],
+    queryKey: ['budget', user?.email],
     queryFn: () => base44.entities.Budget.list('-date'),
+    enabled: !!user?.email,
     staleTime: 15 * 60 * 1000,
     refetchInterval: false,
   });
