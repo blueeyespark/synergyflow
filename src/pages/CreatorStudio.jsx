@@ -49,7 +49,7 @@ const tabs = [
 ];
 
 export default function CreatorStudio() {
-  const [activeTab, setActiveTab] = useState("youtube");
+  const [activeTab, setActiveTab] = useState("channel");
 
   const ActiveComponent = tabs.find(t => t.id === activeTab)?.component;
 
