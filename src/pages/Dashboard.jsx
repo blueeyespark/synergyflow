@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, FolderKanban, CheckSquare, Clock, AlertTriangle, Brain, Settings, ChevronDown, ChevronRight, Zap } from "lucide-react";
+import { Plus, FolderKanban, CheckSquare, Clock, AlertTriangle, Brain, Settings, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -235,25 +235,7 @@ export default function Dashboard() {
           <ProjectHealthMonitor projects={myProjects} tasks={myTasks} />
         </CollapsibleSection>
 
-        {/* Admin-only section */}
-        {isAdmin && (
-          <CollapsibleSection title="Admin Tools" icon={Zap} defaultOpen={false}>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <Link to={createPageUrl("Reports")}>
-                <div className="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                  <h4 className="font-medium text-slate-800 text-sm">Reports & Analytics</h4>
-                  <p className="text-xs text-slate-500 mt-1">View team performance and project metrics</p>
-                </div>
-              </Link>
-              <Link to={createPageUrl("AITools")}>
-                <div className="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                  <h4 className="font-medium text-slate-800 text-sm">AI Tools</h4>
-                  <p className="text-xs text-slate-500 mt-1">Scanner, bug monitor, and changes log</p>
-                </div>
-              </Link>
-            </div>
-          </CollapsibleSection>
-        )}
+
       </div>
 
       <ProjectForm
