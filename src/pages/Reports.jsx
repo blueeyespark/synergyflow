@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import BudgetPage from "./Budget";
+import TimeTracking from "./TimeTracking";
+import Invoicing from "./Invoicing";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { format, subDays, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, parseISO, isWithinInterval } from "date-fns";
+import { format, subDays, subMonths, eachDayOfInterval, parseISO, isWithinInterval } from "date-fns";
 import {
-  Download, Filter, BarChart3, PieChart, TrendingUp, Users,
+  Download, BarChart3, TrendingUp, Users,
   CheckCircle2, Clock, DollarSign, FolderKanban, Calendar as CalendarIcon,
   FileText, FileSpreadsheet, Loader2
 } from "lucide-react";
@@ -375,11 +378,14 @@ export default function ReportsPage() {
         </div>
 
         <Tabs defaultValue="tasks" className="space-y-6">
-          <TabsList className="bg-white border shadow-sm">
+          <TabsList className="bg-white border shadow-sm flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="tasks">Task Analytics</TabsTrigger>
             <TabsTrigger value="team">Team Performance</TabsTrigger>
             <TabsTrigger value="budget">Budget Analysis</TabsTrigger>
             <TabsTrigger value="time">Time & Workload</TabsTrigger>
+            <TabsTrigger value="budgetmgr">💰 Budget</TabsTrigger>
+            <TabsTrigger value="timetracker">⏱ Time Tracker</TabsTrigger>
+            <TabsTrigger value="invoicing">🧾 Invoicing</TabsTrigger>
           </TabsList>
 
           <TabsContent value="tasks" className="space-y-6">
@@ -578,6 +584,15 @@ export default function ReportsPage() {
                 </ResponsiveContainer>
               )}
             </div>
+          </TabsContent>
+          <TabsContent value="budgetmgr" className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <BudgetPage />
+          </TabsContent>
+          <TabsContent value="timetracker" className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <TimeTracking />
+          </TabsContent>
+          <TabsContent value="invoicing" className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <Invoicing />
           </TabsContent>
         </Tabs>
       </div>

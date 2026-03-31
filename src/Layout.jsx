@@ -39,12 +39,10 @@ const navGroups = [
   {
     label: "Finance",
     icon: DollarSign,
-    children: [
-      { name: "Budget", icon: DollarSign, page: "Budget" },
-      { name: "Time Tracking", icon: Timer, page: "TimeTracking" },
-      { name: "Invoicing", icon: Receipt, page: "Invoicing", adminOnly: true },
-    ],
+    single: true,
+    page: "Reports",
   },
+
   {
     label: "Team",
     icon: Users,
