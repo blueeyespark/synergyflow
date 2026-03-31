@@ -1,0 +1,98 @@
+{
+  "name": "MediaAsset",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the media asset"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "raw_footage",
+        "thumbnail",
+        "export",
+        "audio",
+        "template",
+        "graphic"
+      ],
+      "description": "Type of media asset"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL of the uploaded file"
+    },
+    "file_size_mb": {
+      "type": "number",
+      "description": "Size of the file in MB"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "description": "Duration in seconds (for video/audio)"
+    },
+    "resolution": {
+      "type": "string",
+      "description": "Video resolution (e.g., 1080p, 4K)"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Custom tags for organization"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category for grouping"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Associated project ID"
+    },
+    "source_video_id": {
+      "type": "string",
+      "description": "ID of the source video performance entry (for thumbnails/exports)"
+    },
+    "used_in_videos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of videos using this asset"
+    },
+    "description": {
+      "type": "string"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "Thumbnail preview of the asset"
+    },
+    "is_favorite": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "name",
+    "asset_type",
+    "file_url"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

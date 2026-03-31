@@ -1,0 +1,105 @@
+{
+  "name": "VideoPerformance",
+  "type": "object",
+  "properties": {
+    "video_title": {
+      "type": "string",
+      "description": "Title of the video"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "youtube",
+        "tiktok",
+        "instagram",
+        "twitch",
+        "other"
+      ],
+      "default": "youtube"
+    },
+    "views": {
+      "type": "number",
+      "default": 0
+    },
+    "watch_time_hours": {
+      "type": "number",
+      "default": 0,
+      "description": "Total watch time in hours"
+    },
+    "engagement_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Percentage engagement (likes, comments, shares)"
+    },
+    "likes": {
+      "type": "number",
+      "default": 0
+    },
+    "comments": {
+      "type": "number",
+      "default": 0
+    },
+    "shares": {
+      "type": "number",
+      "default": 0
+    },
+    "click_through_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "CTR percentage"
+    },
+    "subscribers_gained": {
+      "type": "number",
+      "default": 0
+    },
+    "avg_view_duration_percent": {
+      "type": "number",
+      "default": 0,
+      "description": "Average percentage of video watched"
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "video_length_minutes": {
+      "type": "number",
+      "description": "Length of the video in minutes"
+    },
+    "thumbnail_used": {
+      "type": "string",
+      "description": "ID of the media asset used as thumbnail"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "video_title",
+    "platform",
+    "published_date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
