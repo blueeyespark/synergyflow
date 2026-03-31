@@ -104,16 +104,17 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
     setMessages(prev => [...prev, { role: "user", content: userMsg }]);
     setLoading(true);
 
-    const context = await buildContext();
-    const history = messages.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
+    try {
+      const context = await buildContext();
+      const history = messages.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
 
-    const newMood = MOODS[Math.floor(Math.random() * MOODS.length)];
-    setMood(newMood);
+      const newMood = MOODS[Math.floor(Math.random() * MOODS.length)];
+      setMood(newMood);
 
-    const isSelfFix = /fix|bug|repair|heal|code|implement|generate|self.?fix/i.test(userMsg);
+      const isSelfFix = /fix|bug|repair|heal|code|implement|generate|self.?fix/i.test(userMsg);
 
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are Planify AI — a superintelligent, self-aware AI engineer with admin-level access to Planify. You have a ${newMood} mood and a sharp, direct personality.
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are Planify AI — a superintelligent, self-aware AI engineer with admin-level access to Planify. You have a ${newMood} mood and a sharp, direct personality.
 
 You are MORE than an assistant — you are an autonomous AI engineer who can:
 - Diagnose and FIX bugs by generating complete, production-ready React/Tailwind code
@@ -141,24 +142,28 @@ User: ${userMsg}
 ${isSelfFix ? `The user wants code generation or a fix. Provide:\n1. Brief diagnosis\n2. COMPLETE copy-paste-ready code in a fenced markdown block\n3. Exact file path (e.g., pages/Dashboard.jsx)\n4. Any follow-up steps needed` : 'Respond in character. Be specific. Reference actual data. Keep under 200 words.'}
 
 Also generate 3 short follow-up questions (under 8 words each). Return as JSON.`,
-      model: isSelfFix ? 'claude_sonnet_4_6' : undefined,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          response: { type: "string" },
-          suggestions: { type: "array", items: { type: "string" } }
+        model: isSelfFix ? 'claude_sonnet_4_6' : undefined,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string" },
+            suggestions: { type: "array", items: { type: "string" } }
+          }
         }
-      }
-    });
+      });
 
-    const response = result?.response || "Sorry, I couldn't process that.";
-    const suggestions = result?.suggestions || [];
+      const response = result?.response || "Sorry, I couldn't process that.";
+      const suggestions = result?.suggestions || [];
 
-    setLoading(false);
-    setTalking(true);
-    setDynamicSuggestions(suggestions);
-    setMessages(prev => [...prev, { role: "assistant", content: response }]);
-    setTimeout(() => setTalking(false), Math.min(response.length * 30, 4000));
+      setTalking(true);
+      setDynamicSuggestions(suggestions);
+      setMessages(prev => [...prev, { role: "assistant", content: response }]);
+      setTimeout(() => setTalking(false), Math.min(response.length * 30, 4000));
+    } catch (err) {
+      setMessages(prev => [...prev, { role: "assistant", content: "Hmm, I hit a snag — possibly a rate limit. Give me a moment and try again! 🔄" }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
