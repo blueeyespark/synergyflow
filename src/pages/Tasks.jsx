@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format, isPast, isToday, parseISO } from "date-fns";
 import TaskForm from "@/components/tasks/TaskForm";
+import TaskFilters from "@/components/tasks/TaskFilters";
 import GanttChart from "@/components/gantt/GanttChart";
 import { toast } from "sonner";
 
@@ -121,15 +122,27 @@ export default function Tasks() {
   }, []);
 
   const [autoPrioritizing, setAutoPrioritizing] = useState(false);
+  const [filters, setFilters] = useState({ assignee: "", priority: "", status: "", dueDateFrom: "", dueDateTo: "" });
+  const [sortBy, setSortBy] = useState("created_date");
+  const [sortOrder, setSortOrder] = useState("desc");
 
-  const { data: tasks = [], isLoading } = useQuery({
+  const { data: rawTasks = [], isLoading } = useQuery({
     queryKey: ["all-tasks", user?.email],
     queryFn: () => base44.entities.Task.list("-created_date"),
     enabled: !!user?.email,
-    select: (data) => data.filter(t =>
-      t.created_by === user?.email || t.assigned_to === user?.email
-    ),
   });
+
+  const tasks = rawTasks
+    .filter(t => t.created_by === user?.email || t.assigned_to === user?.email)
+    .filter(t => !filters.priority || t.priority === filters.priority)
+    .filter(t => !filters.status || t.status === filters.status)
+    .filter(t => !filters.assignee || (filters.assignee === 'unassigned' ? !t.assigned_to : t.assigned_to === filters.assignee))
+    .filter(t => !filters.dueDateFrom || (t.due_date && t.due_date >= filters.dueDateFrom))
+    .filter(t => !filters.dueDateTo || (t.due_date && t.due_date <= filters.dueDateTo))
+    .sort((a, b) => {
+      let av = a[sortBy] || "", bv = b[sortBy] || "";
+      return sortOrder === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
 
   const { data: projects = [] } = useQuery({
     queryKey: ["projects"],
@@ -138,13 +151,13 @@ export default function Tasks() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Task.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["all-tasks"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["all-tasks", user?.email] }),
     onError: () => toast.error("Failed to update task"),
   });
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Task.create(data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["all-tasks"] }); setShowForm(false); toast.success("Task created"); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["all-tasks", user?.email] }); setShowForm(false); toast.success("Task created"); },
   });
 
   const autoPrioritize = async () => {
@@ -231,23 +244,15 @@ Return ONLY the JSON — no markdown, no explanation.`,
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">All Tasks</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{tasks.length} tasks across {projects.length} projects</p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 gap-1">
-              {[
-                { id: "kanban", icon: LayoutGrid },
-                { id: "list",   icon: List },
-                { id: "gantt",  icon: BarChart3 },
-              ].map(({ id, icon: Icon }) => (
-                <button key={id} onClick={() => setView(id)}
-                  className={`p-1.5 rounded-md transition-colors ${view === id ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"}`}>
-                  <Icon className="w-4 h-4" />
-                </button>
-              ))}
-            </div>
-            <Button size="sm" variant="outline" onClick={autoPrioritize} disabled={autoPrioritizing} className="gap-1.5 text-indigo-600 border-indigo-200 hover:bg-indigo-50">
-              {autoPrioritizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              Auto-Prioritize
-            </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <TaskFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              teamMembers={[...new Set(rawTasks.map(t => t.assigned_to).filter(Boolean))]}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortChange={(by, order) => { setSortBy(by); setSortOrder(order); }}
+            />
             <Button size="sm" onClick={() => setShowForm(true)}>
               <Plus className="w-4 h-4 mr-1" />New Task
             </Button>
