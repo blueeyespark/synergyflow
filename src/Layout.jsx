@@ -19,7 +19,7 @@ import WorkspaceSelector from "@/components/workspace/WorkspaceSelector";
 import OfflineBanner from "@/components/OfflineBanner";
 import AIAssistant from "@/components/AIAssistant";
 import AIProactivePopup from "@/components/AIProactivePopup";
-import InviteButton from "@/components/InviteButton";
+
 
 // Nav groups — each can be a direct link or a dropdown
 const navGroups = [
@@ -327,7 +327,6 @@ export default function Layout({ children, currentPageName }) {
 
             {/* Right Section */}
             <div className="flex items-center gap-1.5 flex-shrink-0">
-              <InviteButton />
               <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white">
                 {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </Button>
