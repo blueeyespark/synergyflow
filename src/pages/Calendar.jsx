@@ -8,7 +8,7 @@ import {
   addMonths, subMonths, addYears, subYears, startOfYear, endOfYear,
   eachMonthOfInterval
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Share2, Download, Edit2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Share2, Download, Edit2, X } from "lucide-react";
 import GoogleCalendarImport from "@/components/calendar/GoogleCalendarImport";
 import QuickScheduleModal from "@/components/calendar/QuickScheduleModal";
 import EventActionsModal from "@/components/calendar/EventActionsModal";
@@ -29,6 +29,64 @@ const priorityColors = {
   urgent: "bg-red-500"
 };
 
+function EventDetailsPanel({ event, type, onClose, onEdit }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 400 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 400 }}
+      className="fixed right-0 top-0 bottom-0 z-40 w-80 bg-white border-l border-slate-200 shadow-lg p-6 overflow-y-auto"
+    >
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold">{type === 'task' ? 'Task' : 'Meeting'}</h2>
+        <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded">
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+      <div className="space-y-4">
+        <div>
+          <p className="text-xs font-medium text-slate-500 mb-1">Title</p>
+          <p className="text-sm font-medium">{event.title}</p>
+        </div>
+        {event.description && (
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-1">Description</p>
+            <p className="text-sm text-slate-700">{event.description}</p>
+          </div>
+        )}
+        {type === 'task' && event.priority && (
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-1">Priority</p>
+            <span className="text-xs px-2 py-1 rounded-full capitalize bg-slate-100">{event.priority}</span>
+          </div>
+        )}
+        {type === 'task' && event.status && (
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-1">Status</p>
+            <span className="text-xs px-2 py-1 rounded-full capitalize">{event.status.replace('_', ' ')}</span>
+          </div>
+        )}
+        {type === 'meeting' && event.start_time && (
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-1">Time</p>
+            <p className="text-sm">{event.start_time} - {event.end_time}</p>
+          </div>
+        )}
+        {event.assigned_to && (
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-1">Assigned to</p>
+            <p className="text-sm">{event.assigned_to}</p>
+          </div>
+        )}
+      </div>
+      <div className="flex gap-2 mt-8">
+        <Button onClick={onClose} variant="outline" className="flex-1">Close</Button>
+        <Button onClick={onEdit} className="flex-1 bg-indigo-600 hover:bg-indigo-700">Edit</Button>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function CalendarPage() {
   const [user, setUser] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -39,6 +97,7 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [eventType, setEventType] = useState(null);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [showEventDetails, setShowEventDetails] = useState(false);
   const { refetch: refetchTasks } = useQuery({
     queryKey: ['tasks'],
     queryFn: () => base44.entities.Task.list('-due_date'),
@@ -108,10 +167,11 @@ export default function CalendarPage() {
                   <p className="text-sm text-slate-500">{meeting.start_time} - {meeting.end_time}</p>
                 </div>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setSelectedEvent(meeting);
                     setEventType('meeting');
-                    setShowEventModal(true);
+                    setShowEventDetails(true);
                   }}
                   className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-indigo-200 rounded"
                 >
@@ -135,10 +195,11 @@ export default function CalendarPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setSelectedEvent(task);
                     setEventType('task');
-                    setShowEventModal(true);
+                    setShowEventDetails(true);
                   }}
                   className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-200 rounded"
                 >
@@ -204,9 +265,9 @@ export default function CalendarPage() {
                               e.stopPropagation();
                               setSelectedEvent(task);
                               setEventType('task');
-                              setShowEventModal(true);
+                              setShowEventDetails(true);
                             }}
-                            className={`text-xs truncate px-1 py-0.5 rounded ${priorityColors[task.priority]} text-white cursor-pointer hover:opacity-80`}
+                            className={`text-xs truncate px-1 py-0.5 rounded ${priorityColors[task.priority]} text-white cursor-pointer hover:opacity-80 ${selectedEvent?.id === task.id ? 'ring-2 ring-white' : ''}`}
                           >
                             {task.title}
                           </div>
@@ -218,9 +279,9 @@ export default function CalendarPage() {
                               e.stopPropagation();
                               setSelectedEvent(meeting);
                               setEventType('meeting');
-                              setShowEventModal(true);
+                              setShowEventDetails(true);
                             }}
-                            className="text-xs truncate px-1 py-0.5 rounded bg-indigo-500 text-white cursor-pointer hover:opacity-80"
+                            className={`text-xs truncate px-1 py-0.5 rounded bg-indigo-500 text-white cursor-pointer hover:opacity-80 ${selectedEvent?.id === meeting.id ? 'ring-2 ring-white' : ''}`}
                           >
                             {meeting.title}
                           </div>
@@ -338,6 +399,18 @@ export default function CalendarPage() {
           selectedDate={selectedDate}
         />
 
+        {selectedEvent && showEventDetails && (
+          <EventDetailsPanel
+            event={selectedEvent}
+            type={eventType}
+            onClose={() => setShowEventDetails(false)}
+            onEdit={() => {
+              setShowEventDetails(false);
+              setShowEventModal(true);
+            }}
+          />
+        )}
+
         {selectedEvent && (
           <EventActionsModal
             open={showEventModal}
@@ -347,10 +420,12 @@ export default function CalendarPage() {
             onUpdate={() => {
               if (eventType === 'task') refetchTasksData();
               else refetchMeetingsData();
+              setShowEventDetails(false);
             }}
             onDelete={() => {
               if (eventType === 'task') refetchTasksData();
               else refetchMeetingsData();
+              setShowEventDetails(false);
             }}
           />
         )}
