@@ -199,8 +199,11 @@ export default function TopNav({
               { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
               { name: "Work", icon: FolderKanban, page: "WorkHub" },
               ...navGroups
+                .filter(g => g.single && g.page !== 'Dashboard' && g.page !== 'WorkHub' && (!g.adminOnly || isAdmin))
+                .map(g => ({ name: g.label, icon: g.icon, page: g.page })),
+              ...navGroups
                 .filter(g => !g.single && (!g.adminOnly || isAdmin))
-                .flatMap(g => (g.children || []).filter(c => !c.adminOnly || isAdmin))
+                .flatMap(g => (g.children || []).flatMap(section => section.items || []))
             ].map(item => (
               <Link
                 key={item.page}
