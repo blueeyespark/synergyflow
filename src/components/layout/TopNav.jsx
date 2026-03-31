@@ -54,16 +54,16 @@ export default function TopNav({
   const isAdmin = user?.role === "admin";
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/85 dark:bg-gradient-to-r dark:from-slate-900 dark:to-slate-800 backdrop-blur-xl border-b border-slate-200 dark:border-slate-700/50 shadow-sm" role="navigation" aria-label="Main navigation">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 px-1">
           {/* Logo & Workspace */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2 group" title="Go to Dashboard">
+              <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center transform group-hover:scale-105 transition-transform">
                 <span className="text-white font-bold text-lg">P</span>
               </div>
-              <span className="font-semibold text-slate-900 dark:text-slate-100 hidden sm:block">Planify</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100 hidden sm:block text-lg">Planify</span>
             </Link>
             <span className="text-slate-300 hidden sm:block">/</span>
             <div className="hidden sm:block">
@@ -72,21 +72,23 @@ export default function TopNav({
           </div>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-0.5">
+          <div className="hidden md:flex items-center gap-1">
             <Link
               to={createPageUrl("Dashboard")}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                currentPageName === "Dashboard" ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                currentPageName === "Dashboard" ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"
               }`}
+              aria-current={currentPageName === "Dashboard" ? "page" : "false"}
             >
               <LayoutDashboard className="w-4 h-4" />
               Dashboard
             </Link>
             <Link
               to={createPageUrl("WorkHub")}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                currentPageName === "WorkHub" ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                currentPageName === "WorkHub" ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"
               }`}
+              aria-current={currentPageName === "WorkHub" ? "page" : "false"}
             >
               <FolderKanban className="w-4 h-4" />
               Work
@@ -98,9 +100,10 @@ export default function TopNav({
             {isAdmin && (
               <Link
                 to={createPageUrl('UserViewer')}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  currentPageName === 'UserViewer' ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  currentPageName === 'UserViewer' ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"
                 }`}
+                aria-current={currentPageName === 'UserViewer' ? "page" : "false"}
               >
                 <Users className="w-4 h-4" />
                 Users
@@ -110,9 +113,10 @@ export default function TopNav({
               <Link
                 key={group.page}
                 to={createPageUrl(group.page)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  currentPageName === group.page ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  currentPageName === group.page ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"
                 }`}
+                aria-current={currentPageName === group.page ? "page" : "false"}
               >
                 <group.icon className="w-4 h-4" />
                 {group.label}

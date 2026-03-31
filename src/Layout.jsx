@@ -99,13 +99,21 @@ export default function Layout({ children, currentPageName }) {
   }, [user?.email, queryClient]);
 
   return (
-    <div className={`min-h-screen transition-colors ${darkMode ? "dark bg-slate-900" : "bg-slate-50"}`}>
+    <div className={`min-h-screen flex flex-col transition-colors duration-300 ${darkMode ? "dark bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" : "bg-gradient-to-br from-slate-50 via-white to-indigo-50/20"}`}>
       {pointsEvent && <PointsToast event={pointsEvent} onDismiss={() => setPointsEvent(null)} />}
       <OfflineBanner />
       <AIAssistant projects={projects} tasks={tasks} budget={budget} />
       <AIProactivePopup projects={projects} tasks={tasks} />
 
       <style>{`
+        html {
+          scroll-behavior: smooth;
+        }
+        
+        * {
+          scroll-padding-top: 4rem;
+        }
+        
         .dark .bg-white { background-color: rgb(30 41 59) !important; }
         .dark .bg-slate-50 { background-color: rgb(15 23 42) !important; }
         .dark .bg-slate-100 { background-color: rgb(51 65 85) !important; }
@@ -158,7 +166,7 @@ export default function Layout({ children, currentPageName }) {
         onWorkspaceChange={setCurrentWorkspace}
       />
 
-      <main className="pt-16 pb-16 md:pb-0">
+      <main className="flex-1 pt-16 pb-16 md:pb-0">
         {children}
       </main>
       <MobileNav currentPageName={currentPageName} />
