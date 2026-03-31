@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, FolderKanban, CheckSquare, Clock, AlertTriangle, Brain, Settings, ChevronDown, ChevronRight } from "lucide-react";
+import { LineChart, Line, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -160,6 +161,50 @@ export default function Dashboard() {
 
   const isAdmin = user?.role === 'admin';
 
+  const generateTrendData = (tasks) => {
+    const weeks = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i * 7);
+      const weekStart = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const weekEnd = new Date(date.getTime() + 6 * 24 * 60 * 60 * 1000);
+      const total = tasks.filter(t => {
+        const tDate = new Date(t.created_date);
+        return tDate >= date && tDate <= weekEnd;
+      }).length;
+      const completed = tasks.filter(t => {
+        const tDate = new Date(t.created_date);
+        return tDate >= date && tDate <= weekEnd && t.status === 'completed';
+      }).length;
+      weeks.push({ week: weekStart, total, completed });
+    }
+    return weeks;
+  };
+
+  const generatePriorityData = (projects) => {
+    const counts = { urgent: 0, high: 0, medium: 0, low: 0 };
+    projects.forEach(p => counts[p.priority || 'medium']++);
+    return [
+      { name: 'Urgent', value: counts.urgent },
+      { name: 'High', value: counts.high },
+      { name: 'Medium', value: counts.medium },
+      { name: 'Low', value: counts.low }
+    ];
+  };
+
+  const generateWeeklyHeatmap = (tasks) => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const counts = new Array(7).fill(0);
+    const today = new Date();
+    tasks.forEach(t => {
+      const tDate = new Date(t.created_date);
+      if (tDate.getTime() > today.getTime() - 7 * 24 * 60 * 60 * 1000) {
+        counts[tDate.getDay()]++;
+      }
+    });
+    return days.map((name, i) => ({ name, count: counts[i] }));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
@@ -233,6 +278,55 @@ export default function Dashboard() {
 
         <CollapsibleSection title="Project Health Monitor" icon={Brain} defaultOpen={false}>
           <ProjectHealthMonitor projects={myProjects} tasks={myTasks} />
+        </CollapsibleSection>
+
+        {/* Task Completion Trend */}
+        <CollapsibleSection title="Task Completion Trend" icon={CheckSquare} defaultOpen={false}>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={generateTrendData(myTasks)}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="week" stroke="#64748b" />
+              <YAxis stroke="#64748b" />
+              <Tooltip contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #475569", borderRadius: "8px", color: "#f1f5f9" }} />
+              <Legend />
+              <Line type="monotone" dataKey="completed" stroke="#22c55e" strokeWidth={2} dot={{ fill: "#22c55e" }} />
+              <Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={2} dot={{ fill: "#3b82f6" }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </CollapsibleSection>
+
+        {/* Project Priority Distribution */}
+        <CollapsibleSection title="Project Priority Distribution" icon={AlertTriangle} defaultOpen={false}>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie data={generatePriorityData(myProjects)} cx="50%" cy="50%" labelLine={false} label={({ name, value }) => `${name}: ${value}`} outerRadius={100} fill="#8884d8" dataKey="value">
+                <Cell fill="#ef4444" />
+                <Cell fill="#f59e0b" />
+                <Cell fill="#3b82f6" />
+                <Cell fill="#6b7280" />
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </CollapsibleSection>
+
+        {/* Weekly Activity Heatmap */}
+        <CollapsibleSection title="Weekly Activity" icon={Clock} defaultOpen={false}>
+          <div className="grid grid-cols-7 gap-2">
+            {generateWeeklyHeatmap(myTasks).map((day, i) => (
+              <div key={i} className="text-center">
+                <p className="text-xs font-medium text-slate-600 mb-2">{day.name}</p>
+                <div className={`h-12 rounded-lg flex items-center justify-center font-bold text-white transition-colors ${
+                  day.count === 0 ? 'bg-slate-200' :
+                  day.count <= 2 ? 'bg-green-300' :
+                  day.count <= 5 ? 'bg-green-500' :
+                  'bg-green-700'
+                }`}>
+                  {day.count}
+                </div>
+              </div>
+            ))}
+          </div>
         </CollapsibleSection>
 
 

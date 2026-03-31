@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
-import { User, Bell, Palette, Shield, Save, Check } from "lucide-react";
+import { User, Bell, Palette, Shield, Save, Check, Calendar, Loader2 } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 export default function SettingsPage() {
   const [user, setUser] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [settings, setSettings] = useState({
     full_name: "",
     email: "",
@@ -33,7 +35,8 @@ export default function SettingsPage() {
         email_reminders: u?.email_reminders ?? true,
         weekly_digest: u?.weekly_digest ?? false,
         theme: u?.theme || "light",
-        default_view: u?.default_view || "list"
+        default_view: u?.default_view || "list",
+        calendar_sync_enabled: u?.calendar_sync_enabled ?? false
       }));
     });
   }, []);
@@ -46,13 +49,26 @@ export default function SettingsPage() {
         email_reminders: settings.email_reminders,
         weekly_digest: settings.weekly_digest,
         theme: settings.theme,
-        default_view: settings.default_view
+        default_view: settings.default_view,
+        calendar_sync_enabled: settings.calendar_sync_enabled
       });
       toast.success("Settings saved successfully");
     } catch (error) {
       toast.error("Failed to save settings");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSyncNow = async () => {
+    setSyncing(true);
+    try {
+      await base44.functions.invoke('syncTasksToGoogleCalendar', {});
+      toast.success("Tasks synced to Google Calendar");
+    } catch (error) {
+      toast.error("Sync failed. Ensure Google Calendar is connected.");
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -80,6 +96,9 @@ export default function SettingsPage() {
             </TabsTrigger>
             <TabsTrigger value="appearance" className="gap-2 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 rounded-lg">
               <Palette className="w-4 h-4" /> Appearance
+            </TabsTrigger>
+            <TabsTrigger value="calendar" className="gap-2 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 rounded-lg">
+              <Calendar className="w-4 h-4" /> Calendar Sync
             </TabsTrigger>
           </TabsList>
 
@@ -206,6 +225,38 @@ export default function SettingsPage() {
                   ))}
                 </div>
               </div>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="calendar">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4"
+            >
+              <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                <div>
+                  <p className="font-medium text-slate-900">Google Calendar Sync</p>
+                  <p className="text-sm text-slate-500">Automatically push tasks to Google Calendar</p>
+                </div>
+                <Switch
+                  checked={settings.calendar_sync_enabled || false}
+                  onCheckedChange={(v) => setSettings({ ...settings, calendar_sync_enabled: v })}
+                />
+              </div>
+              {settings.calendar_sync_enabled && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+                  <p className="text-sm text-indigo-700 mb-3">Sync tasks with due dates to your Google Calendar</p>
+                  <button
+                    onClick={handleSyncNow}
+                    disabled={syncing}
+                    className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calendar className="w-4 h-4" />}
+                    {syncing ? "Syncing..." : "Sync Now"}
+                  </button>
+                </motion.div>
+              )}
             </motion.div>
           </TabsContent>
         </Tabs>
