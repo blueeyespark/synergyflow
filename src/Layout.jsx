@@ -29,9 +29,9 @@ const allNavItems = [
   { name: "Blog", icon: Users, page: "Blog" },
   { name: "Templates", icon: LayoutTemplate, page: "Templates" },
   { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
+  { name: "Reports", icon: Share2, page: "Reports" },
+  { name: "Analytics", icon: BarChart2, page: "Analytics" },
   // Admin-only
-  { name: "Reports", icon: Share2, page: "Reports", adminOnly: true },
-  { name: "Analytics", icon: BarChart2, page: "Analytics", adminOnly: true },
   { name: "Workload", icon: Users, page: "WorkloadDashboard", adminOnly: true },
   { name: "Heatmap", icon: Flame, page: "WorkloadHeatmap", adminOnly: true },
   { name: "Scheduler", icon: UserCog, page: "ResourceScheduler", adminOnly: true },

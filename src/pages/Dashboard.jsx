@@ -9,6 +9,7 @@ import { createPageUrl } from "@/utils";
 import { isPast, isToday, addDays, isBefore } from "date-fns";
 
 import StatsCard from "@/components/dashboard/StatsCard";
+import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import UpcomingTasks from "@/components/dashboard/UpcomingTasks";
 import ProjectsOverview from "@/components/dashboard/ProjectsOverview";
 import ProjectForm from "@/components/projects/ProjectForm";
@@ -223,6 +224,10 @@ export default function Dashboard() {
 
         <CollapsibleSection title="Projects Overview" icon={FolderKanban} badge={myProjects.length} defaultOpen={true}>
           <ProjectsOverview projects={myProjects} tasks={tasks} />
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Activity Feed" icon={CheckSquare} defaultOpen={true}>
+          <ActivityFeed projects={myProjects} />
         </CollapsibleSection>
 
         {/* Admin-only section */}
