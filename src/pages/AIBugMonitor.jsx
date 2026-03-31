@@ -152,6 +152,7 @@ function BugCard({ bug, onAnalyze, onUpdateStatus, onAutoFix, isAdmin, generatin
 export default function AIBugMonitor() {
   const [user, setUser] = useState(null);
   const [showReport, setShowReport] = useState(false);
+  const isAdmin = user?.role === 'admin';
   const [analyzingAll, setAnalyzingAll] = useState(false);
   const [selfFixing, setSelfFixing] = useState(false);
   const [selfFixLog, setSelfFixLog] = useState([]);
@@ -164,8 +165,6 @@ export default function AIBugMonitor() {
   const queryClient = useQueryClient();
 
   useEffect(() => { base44.auth.me().then(setUser); }, []);
-
-  const isAdmin = user?.role === 'admin';
 
   const { data: bugs = [], isLoading } = useQuery({
     queryKey: ['bug-reports'],
@@ -356,6 +355,14 @@ Provide: complete copy-paste-ready code, the file path to edit, and a brief expl
   const openBugs = bugs.filter(b => !['resolved', 'wont_fix'].includes(b.status));
   const resolvedBugs = bugs.filter(b => ['resolved', 'wont_fix'].includes(b.status));
   const unanalyzedCount = openBugs.filter(b => !b.ai_analysis).length;
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-slate-500 dark:text-slate-400">Admin access required.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
