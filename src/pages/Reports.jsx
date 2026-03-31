@@ -592,8 +592,7 @@ export default function ReportsPage() {
               </div>
             </div>
           </TabsContent>
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h3 className="font-semibold mb-4">Task Activity Trend</h3>
+          <TabsContent value="budgetmgr" className="-mx-4 sm:-mx-6 lg:-mx-8">
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={dailyCompletion}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
