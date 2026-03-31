@@ -1,128 +1,456 @@
-import { useState } from "react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
+import { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Plus, Filter } from "lucide-react";
+import { 
+  format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, 
+  eachDayOfInterval, isSameMonth, isSameDay, isToday,
+  addMonths, subMonths, addYears, subYears, startOfYear, endOfYear,
+  eachMonthOfInterval
+} from "date-fns";
+import { ChevronLeft, ChevronRight, Download, Edit2, X } from "lucide-react";
+import GoogleCalendarImport from "@/components/calendar/GoogleCalendarImport";
+import QuickScheduleModal from "@/components/calendar/QuickScheduleModal";
+import EventActionsModal from "@/components/calendar/EventActionsModal";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-const platformColors = {
-  blog: "bg-blue-100 text-blue-700 dark:bg-blue-900/40",
-  twitter: "bg-sky-100 text-sky-700 dark:bg-sky-900/40",
-  instagram: "bg-pink-100 text-pink-700 dark:bg-pink-900/40",
-  linkedin: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40",
-  tiktok: "bg-black text-white",
-  youtube: "bg-red-100 text-red-700 dark:bg-red-900/40",
+const priorityColors = {
+  low: "bg-slate-400",
+  medium: "bg-blue-500",
+  high: "bg-amber-500",
+  urgent: "bg-red-500"
 };
 
+function EventDetailsPanel({ event, type, onClose, onEdit }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 400 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 400 }}
+      className="fixed right-0 top-0 bottom-0 z-40 w-80 bg-white border-l border-slate-200 shadow-lg p-6 overflow-y-auto"
+    >
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold">{type === 'task' ? 'Task' : 'Meeting'}</h2>
+        <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded">
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+      <div className="space-y-4">
+        <div>
+          <p className="text-xs font-medium text-slate-500 mb-1">Title</p>
+          <p className="text-sm font-medium">{event.title}</p>
+        </div>
+        {event.description && (
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-1">Description</p>
+            <p className="text-sm text-slate-700">{event.description}</p>
+          </div>
+        )}
+        {type === 'task' && event.priority && (
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-1">Priority</p>
+            <span className="text-xs px-2 py-1 rounded-full capitalize bg-slate-100">{event.priority}</span>
+          </div>
+        )}
+        {type === 'task' && event.status && (
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-1">Status</p>
+            <span className="text-xs px-2 py-1 rounded-full capitalize">{event.status.replace('_', ' ')}</span>
+          </div>
+        )}
+        {type === 'meeting' && event.start_time && (
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-1">Time</p>
+            <p className="text-sm">{event.start_time} - {event.end_time}</p>
+          </div>
+        )}
+        {event.assigned_to && (
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-1">Assigned to</p>
+            <p className="text-sm">{event.assigned_to}</p>
+          </div>
+        )}
+      </div>
+      <div className="flex gap-2 mt-8">
+        <Button onClick={onClose} variant="outline" className="flex-1">Close</Button>
+        <Button onClick={onEdit} className="flex-1 bg-indigo-600 hover:bg-indigo-700">Edit</Button>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function ContentCalendar({ blogPosts = [], socialPosts = [] }) {
+  const [user, setUser] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("month");
+  const [showGCalImport, setShowGCalImport] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [eventType, setEventType] = useState(null);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [showEventDetails, setShowEventDetails] = useState(false);
 
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(currentDate);
-  const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  useEffect(() => {
+    base44.auth.me().then(setUser);
+  }, []);
 
-  // Group content by date
-  const contentByDate = {};
-  [...blogPosts, ...socialPosts].forEach(post => {
-    const dateKey = post.posted_date || post.created_date;
-    if (dateKey) {
-      const dateStr = format(new Date(dateKey), "yyyy-MM-dd");
-      if (!contentByDate[dateStr]) contentByDate[dateStr] = [];
-      contentByDate[dateStr].push({ ...post, type: post.platform ? "social" : "blog", platform: post.platform || "blog" });
-    }
+  const { data: tasks = [], refetch: refetchTasksData } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: () => base44.entities.Task.list('-due_date'),
   });
 
-  return (
-    <div className="space-y-6">
-      {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-            {format(currentDate, "MMMM yyyy")}
-          </h2>
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentDate(new Date())}
-            >
-              Today
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-        <Button className="gap-2">
-          <Plus className="w-4 h-4" />
-          Schedule Content
-        </Button>
-      </div>
+  const { data: meetings = [], refetch: refetchMeetingsData } = useQuery({
+    queryKey: ['meetings'],
+    queryFn: () => base44.entities.Meeting.list('-date'),
+  });
 
-      {/* Calendar Grid */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-        {/* Weekday headers */}
-        <div className="grid grid-cols-7 gap-0 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
-            <div key={day} className="p-4 text-center font-semibold text-slate-700 dark:text-slate-300">
+  const { data: allBlogPosts = [] } = useQuery({
+    queryKey: ['blogPosts'],
+    queryFn: () => base44.entities.BlogPost.list('-created_date'),
+  });
+
+  const { data: allSocialPosts = [] } = useQuery({
+    queryKey: ['socialPosts'],
+    queryFn: () => base44.entities.SocialPost.list('-posted_date'),
+  });
+
+  const getTasksForDay = (day) => {
+    return tasks.filter(task => {
+      if (!task.due_date) return false;
+      const taskDate = new Date(task.due_date + 'T12:00:00');
+      return isSameDay(taskDate, day);
+    });
+  };
+
+  const getMeetingsForDay = (day) => {
+    return meetings.filter(meeting => {
+      if (!meeting.date) return false;
+      const meetingDate = new Date(meeting.date + 'T12:00:00');
+      return isSameDay(meetingDate, day);
+    });
+  };
+
+  const getContentForDay = (day) => {
+    const dayStr = format(day, 'yyyy-MM-dd');
+    const blog = allBlogPosts.filter(post => {
+      if (!post.created_date) return false;
+      return format(new Date(post.created_date), 'yyyy-MM-dd') === dayStr;
+    });
+    const social = allSocialPosts.filter(post => {
+      if (!post.posted_date) return false;
+      return format(new Date(post.posted_date), 'yyyy-MM-dd') === dayStr;
+    });
+    return { blog, social };
+  };
+
+  const navigatePrev = () => {
+    if (view === "year") setCurrentDate(subYears(currentDate, 1));
+    else setCurrentDate(subMonths(currentDate, 1));
+  };
+
+  const navigateNext = () => {
+    if (view === "year") setCurrentDate(addYears(currentDate, 1));
+    else setCurrentDate(addMonths(currentDate, 1));
+  };
+
+  const renderDayView = () => {
+    const dayTasks = getTasksForDay(currentDate);
+    const dayMeetings = getMeetingsForDay(currentDate);
+    const dayContent = getContentForDay(currentDate);
+    
+    return (
+      <div className="bg-white rounded-2xl border border-slate-100 p-6">
+        <h3 className="text-xl font-semibold mb-4">{format(currentDate, "EEEE, MMMM d, yyyy")}</h3>
+
+        {(dayContent.blog.length > 0 || dayContent.social.length > 0) && (
+          <div className="mb-6">
+            <h4 className="text-sm font-medium text-slate-500 mb-2">Content</h4>
+            {dayContent.blog.map((post) => (
+              <div key={post.id} className="p-3 bg-blue-50 rounded-lg mb-2 border-l-4 border-blue-500">
+                <p className="font-medium text-sm">{post.title}</p>
+                <p className="text-xs text-slate-500 mt-1">Blog Post</p>
+              </div>
+            ))}
+            {dayContent.social.map((post) => (
+              <div key={post.id} className="p-3 bg-pink-50 rounded-lg mb-2 border-l-4 border-pink-500">
+                <p className="font-medium text-sm">{post.title}</p>
+                <p className="text-xs text-slate-500 mt-1 capitalize">{post.platform}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {dayTasks.length > 0 ? (
+          <div>
+            <h4 className="text-sm font-medium text-slate-500 mb-2">Tasks Due</h4>
+            {dayTasks.map((task) => (
+              <div key={task.id} className="p-3 bg-slate-50 rounded-lg mb-2 flex items-center gap-3 justify-between group">
+                <div className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full ${priorityColors[task.priority]}`} />
+                  <div>
+                    <p className="font-medium">{task.title}</p>
+                    <p className="text-xs text-slate-500 capitalize">{task.status.replace('_', ' ')}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedEvent(task);
+                    setEventType('task');
+                    setShowEventDetails(true);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-200 rounded"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-slate-500">No tasks due on this day</p>
+        )}
+      </div>
+    );
+  };
+
+  const renderMonthView = () => {
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    const calendarStart = startOfWeek(monthStart);
+    const calendarEnd = endOfWeek(monthEnd);
+    const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+
+    return (
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        <div className="grid grid-cols-7 border-b border-slate-100">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            <div key={day} className="p-3 text-center text-xs font-medium text-slate-500">
               {day}
             </div>
           ))}
         </div>
-
-        {/* Days */}
         <div className="grid grid-cols-7">
-          {days.map((day, idx) => {
-            const dateStr = format(day, "yyyy-MM-dd");
-            const dayContent = contentByDate[dateStr] || [];
-            const isToday = isSameDay(day, new Date());
-
+          {days.map((day, index) => {
+            const dayTasks = getTasksForDay(day);
+            const dayMeetings = getMeetingsForDay(day);
+            const dayContent = getContentForDay(day);
+            const isCurrentMonth = isSameMonth(day, currentDate);
+            
             return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className={`min-h-32 p-3 border-b border-r border-slate-200 dark:border-slate-700 ${
-                  isToday ? "bg-indigo-50 dark:bg-indigo-900/20" : ""
-                }`}
-              >
-                <div className={`text-sm font-semibold mb-2 ${isToday ? "text-indigo-600" : "text-slate-600 dark:text-slate-400"}`}>
-                  {format(day, "d")}
-                </div>
-                <div className="space-y-1">
-                  {dayContent.map((post, i) => (
-                    <div key={i} className={`text-xs px-2 py-1 rounded truncate font-medium cursor-pointer hover:shadow-md transition-all ${platformColors[post.platform]}`}>
-                      {post.title || post.content_title}
+              <TooltipProvider key={index}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      onClick={() => {
+                        setSelectedDate(day);
+                        setShowScheduleModal(true);
+                      }}
+                      className={`min-h-24 p-2 border-b border-r border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors ${
+                        !isCurrentMonth ? 'bg-slate-50/50' : ''
+                      } ${isToday(day) ? 'bg-indigo-50/50' : ''}`}
+                    >
+                      <span className={`text-sm ${
+                        isToday(day) 
+                          ? 'bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center' 
+                          : isCurrentMonth ? 'text-slate-900' : 'text-slate-400'
+                      }`}>
+                        {format(day, 'd')}
+                      </span>
+                      <div className="mt-1 space-y-0.5">
+                        {dayContent.blog.slice(0, 1).map((post) => (
+                          <div
+                            key={post.id}
+                            className="text-xs truncate px-1 py-0.5 rounded bg-blue-500 text-white cursor-pointer hover:opacity-80"
+                          >
+                            📝 {post.title}
+                          </div>
+                        ))}
+                        {dayContent.social.slice(0, 1).map((post) => (
+                          <div
+                            key={post.id}
+                            className="text-xs truncate px-1 py-0.5 rounded bg-pink-500 text-white cursor-pointer hover:opacity-80"
+                          >
+                            📱 {post.title}
+                          </div>
+                        ))}
+                        {dayTasks.slice(0, 1).map((task) => (
+                          <div 
+                            key={task.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedEvent(task);
+                              setEventType('task');
+                              setShowEventDetails(true);
+                            }}
+                            className={`text-xs truncate px-1 py-0.5 rounded ${priorityColors[task.priority]} text-white cursor-pointer hover:opacity-80 ${selectedEvent?.id === task.id ? 'ring-2 ring-white' : ''}`}
+                          >
+                            {task.title}
+                          </div>
+                        ))}
+                        {dayMeetings.slice(0, 1).map((meeting) => (
+                          <div
+                            key={meeting.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedEvent(meeting);
+                              setEventType('meeting');
+                              setShowEventDetails(true);
+                            }}
+                            className={`text-xs truncate px-1 py-0.5 rounded bg-indigo-500 text-white cursor-pointer hover:opacity-80 ${selectedEvent?.id === meeting.id ? 'ring-2 ring-white' : ''}`}
+                          >
+                            {meeting.title}
+                          </div>
+                        ))}
+                        {(dayTasks.length + dayMeetings.length + dayContent.blog.length + dayContent.social.length) > 3 && (
+                          <span className="text-xs text-slate-400">+{dayTasks.length + dayMeetings.length + dayContent.blog.length + dayContent.social.length - 3} more</span>
+                        )}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </motion.div>
+                  </TooltipTrigger>
+                  {(dayTasks.length > 0 || dayMeetings.length > 0 || dayContent.blog.length > 0 || dayContent.social.length > 0) && (
+                   <TooltipContent>
+                      <p className="font-medium">{format(day, 'MMM d')}</p>
+                      <p className="text-xs">{dayTasks.length} tasks, {dayMeetings.length} meetings, {dayContent.blog.length} blog, {dayContent.social.length} social</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
             );
           })}
         </div>
       </div>
+    );
+  };
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3">
-        {Object.entries(platformColors).map(([platform, color]) => (
-          <div key={platform} className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded ${color}`} />
-            <span className="text-sm text-slate-600 dark:text-slate-400 capitalize">{platform}</span>
-          </div>
-        ))}
+  const renderYearView = () => {
+    const yearStart = startOfYear(currentDate);
+    const yearEnd = endOfYear(currentDate);
+    const months = eachMonthOfInterval({ start: yearStart, end: yearEnd });
+
+    return (
+      <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
+        {months.map((month) => {
+          const monthTasks = tasks.filter(t => t.due_date && isSameMonth(new Date(t.due_date + 'T12:00:00'), month));
+          
+          return (
+            <div
+              key={month.toISOString()}
+              onClick={() => {
+                setCurrentDate(month);
+                setView("month");
+              }}
+              className="bg-white rounded-xl border border-slate-100 p-4 cursor-pointer hover:shadow-md transition-shadow"
+            >
+              <h4 className="font-medium text-slate-900">{format(month, 'MMMM')}</h4>
+              <p className="text-sm text-slate-500 mt-1">{monthTasks.length} tasks</p>
+              <div className="flex gap-1 mt-2">
+                {monthTasks.slice(0, 4).map((t, i) => (
+                  <div key={i} className={`w-2 h-2 rounded-full ${priorityColors[t.priority]}`} />
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+      >
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={navigatePrev}>
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <h2 className="text-2xl font-bold text-slate-900">
+            {view === "year" 
+              ? format(currentDate, 'yyyy')
+              : view === "day"
+              ? format(currentDate, 'MMMM d, yyyy')
+              : format(currentDate, 'MMMM yyyy')
+            }
+          </h2>
+          <Button variant="outline" size="icon" onClick={navigateNext}>
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())}>
+            Today
+          </Button>
+          <Tabs value={view} onValueChange={setView}>
+            <TabsList>
+              <TabsTrigger value="day">Day</TabsTrigger>
+              <TabsTrigger value="month">Month</TabsTrigger>
+              <TabsTrigger value="year">Year</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Button variant="outline" size="sm" onClick={() => setShowGCalImport(true)}>
+            <Download className="w-4 h-4 mr-2" />
+            Import Google
+          </Button>
+        </div>
+      </motion.div>
+
+      {view === "day" && renderDayView()}
+      {view === "month" && renderMonthView()}
+      {view === "year" && renderYearView()}
+
+      <GoogleCalendarImport
+        open={showGCalImport}
+        onOpenChange={setShowGCalImport}
+        onImported={() => setShowGCalImport(false)}
+      />
+
+      <QuickScheduleModal
+        open={showScheduleModal}
+        onOpenChange={setShowScheduleModal}
+        selectedDate={selectedDate}
+      />
+
+      {selectedEvent && showEventDetails && (
+        <EventDetailsPanel
+          event={selectedEvent}
+          type={eventType}
+          onClose={() => setShowEventDetails(false)}
+          onEdit={() => {
+            setShowEventDetails(false);
+            setShowEventModal(true);
+          }}
+        />
+      )}
+
+      {selectedEvent && (
+        <EventActionsModal
+          open={showEventModal}
+          onOpenChange={setShowEventModal}
+          event={selectedEvent}
+          type={eventType}
+          onUpdate={() => {
+            if (eventType === 'task') refetchTasksData();
+            else refetchMeetingsData();
+            setShowEventDetails(false);
+          }}
+          onDelete={() => {
+            if (eventType === 'task') refetchTasksData();
+            else refetchMeetingsData();
+            setShowEventDetails(false);
+          }}
+        />
+      )}
     </div>
   );
 }
