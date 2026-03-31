@@ -16,6 +16,7 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 import MobileNav from "@/components/MobileNav";
 import PointsToast from "@/components/gamification/PointsToast";
 import WorkspaceSelector from "@/components/workspace/WorkspaceSelector";
+import InviteButton from "@/components/InviteButton";
 import OfflineBanner from "@/components/OfflineBanner";
 import AIAssistant from "@/components/AIAssistant";
 import AIProactivePopup from "@/components/AIProactivePopup";
@@ -281,8 +282,9 @@ export default function Layout({ children, currentPageName }) {
                 <span className="font-semibold text-slate-900 dark:text-slate-100 hidden sm:block">Planify</span>
               </Link>
               <span className="text-slate-300 hidden sm:block">/</span>
-              <div className="hidden sm:block">
+              <div className="hidden sm:flex items-center gap-2">
                 <WorkspaceSelector currentWorkspace={currentWorkspace} onWorkspaceChange={setCurrentWorkspace} user={user} />
+                <InviteButton />
               </div>
             </div>
 
