@@ -188,8 +188,9 @@ export default function AIBugMonitor() {
 
   const analyzeBug = async (bug) => {
     updateMutation.mutate({ id: bug.id, data: { status: 'analyzing' } });
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are an expert frontend developer analyzing a bug report for "Planify" — a React/Tailwind project management app.
+     try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are an expert frontend developer analyzing a bug report for "Planify" — a React/Tailwind project management app.
 
 Bug Title: ${bug.title}
 Description: ${bug.description}
@@ -217,24 +218,29 @@ Provide:
       }
     });
 
-    const analysis = `**Root Cause:** ${result.root_cause}\n\n**How to Confirm:** ${result.how_to_confirm}`;
-    const fixSuggestion = result.fix_suggestion + (result.code_example ? `\n\n\`\`\`jsx\n${result.code_example}\n\`\`\`` : '') + `\n\n*Estimated effort: ${result.effort}*`;
+      const analysis = `**Root Cause:** ${result.root_cause}\n\n**How to Confirm:** ${result.how_to_confirm}`;
+      const fixSuggestion = result.fix_suggestion + (result.code_example ? `\n\n\`\`\`jsx\n${result.code_example}\n\`\`\`` : '') + `\n\n*Estimated effort: ${result.effort}*`;
 
-    updateMutation.mutate({
-      id: bug.id,
-      data: {
-        status: result.is_valid_bug ? 'in_progress' : 'wont_fix',
-        ai_analysis: analysis,
-        ai_fix_suggestion: fixSuggestion,
-        ai_analyzed_at: new Date().toISOString(),
-      }
-    });
+      updateMutation.mutate({
+        id: bug.id,
+        data: {
+          status: result.is_valid_bug ? 'in_progress' : 'wont_fix',
+          ai_analysis: analysis,
+          ai_fix_suggestion: fixSuggestion,
+          ai_analyzed_at: new Date().toISOString(),
+        }
+      });
+    } catch (err) {
+      console.error('Analysis failed:', err);
+      updateMutation.mutate({ id: bug.id, data: { status: 'open' } });
+    }
   };
 
   const autoFixBug = async (bug) => {
     setGeneratingFix(bug.id);
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are an expert React/Tailwind developer. Generate a complete, production-ready code fix for this bug in "Planify" — a React/Tailwind/base44 project management app.
+     try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are an expert React/Tailwind developer. Generate a complete, production-ready code fix for this bug in "Planify" — a React/Tailwind/base44 project management app.
 
 Bug: ${bug.title}
 Description: ${bug.description}
@@ -257,28 +263,36 @@ Make the code complete and copy-paste ready.`,
         }
       }
     });
-    setGeneratingFix(null);
-    updateMutation.mutate({
-      id: bug.id,
-      data: {
-        status: 'resolved',
-        resolution_notes: `AI fix generated at ${new Date().toLocaleString()}. File: ${result.file_path}. ${result.explanation}`,
-      }
-    });
-    setCodeModal({
-      title: `Fix: ${bug.title}`,
-      code: result.code || '// No code generated',
-      description: result.explanation,
-      filePath: result.file_path,
-    });
-    toast.success(`Fix code generated for "${bug.title}" — copy and apply it`);
+      setGeneratingFix(null);
+      updateMutation.mutate({
+        id: bug.id,
+        data: {
+          status: 'resolved',
+          resolution_notes: `AI fix generated at ${new Date().toLocaleString()}. File: ${result.file_path}. ${result.explanation}`,
+        }
+      });
+      setCodeModal({
+        title: `Fix: ${bug.title}`,
+        code: result.code || '// No code generated',
+        description: result.explanation,
+        filePath: result.file_path,
+      });
+      toast.success(`Fix code generated for "${bug.title}" — copy and apply it`);
+    } catch (err) {
+      console.error('Fix generation failed:', err);
+      setGeneratingFix(null);
+      toast.error('Failed to generate fix code');
+    }
   };
 
   const analyzeAll = async () => {
     const unanalyzed = bugs.filter(b => b.status === 'open' && !b.ai_analysis);
     if (unanalyzed.length === 0) return;
     setAnalyzingAll(true);
-    for (const bug of unanalyzed) await analyzeBug(bug);
+    for (const bug of unanalyzed) {
+      await analyzeBug(bug);
+      await new Promise(r => setTimeout(r, 2000)); // 2s delay between requests
+    }
     setAnalyzingAll(false);
   };
 
@@ -316,7 +330,7 @@ AI Analysis: ${currentBug.ai_analysis || ''}
 Fix Suggestion: ${currentBug.ai_fix_suggestion || ''}
 
 Provide: complete copy-paste-ready code, the file path to edit, and a brief explanation.`,
-        model: 'claude_sonnet_4_6',
+        model: 'gpt_5_mini',
         response_json_schema: {
           type: 'object',
           properties: {
