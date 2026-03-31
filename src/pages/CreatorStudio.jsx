@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Radio, Image, Calendar, Lightbulb, BarChart3, Youtube, Twitch, DollarSign, FileText, Layout, MessageSquare, Clock, Users, Settings } from "lucide-react";
+import { Video, Radio, Image, Calendar, Lightbulb, BarChart3, Youtube, Twitch, DollarSign, FileText, Layout, MessageSquare, Clock, Users, Settings, Upload } from "lucide-react";
 import VideoEditor from "./VideoEditor";
 import ThumbnailMaker from "./ThumbnailMaker";
 import IntroOutroMaker from "./IntroOutroMaker";
@@ -15,6 +15,8 @@ import BudgetPage from "./Budget";
 import MediaLibrary from "./MediaLibrary";
 import Templates from "./Templates";
 import Blog from "./Blog";
+import ChannelPage from "./ChannelPage";
+import VideoUpload from "./VideoUpload";
 import Reports from "./Reports";
 import VideoAnalytics from "./VideoAnalytics";
 import TimeTrackingAnalytics from "./TimeTrackingAnalytics";
@@ -23,6 +25,8 @@ import Planner from "./Planner";
 import SocialMedia from "./SocialMedia";
 
 const tabs = [
+  { id: "channel", label: "My Channel", icon: Users, component: ChannelPage },
+  { id: "upload", label: "Upload Video", icon: Upload, component: VideoUpload },
   { id: "youtube", label: "YouTube Publisher", icon: Youtube, component: YouTubePublisher },
   { id: "twitch", label: "Twitch Streamer", icon: Twitch, component: TwitchStreamer },
   { id: "editor", label: "Video Editor", icon: Video, component: VideoEditor },
