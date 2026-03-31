@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard, FolderKanban, LogOut, Menu, X,
   Calendar, DollarSign, Users, Share2, FolderOpen, Moon, Sun, Settings, Trophy, Scan,
-  LayoutTemplate, Bug, Timer, BarChart2, CheckSquare
+  LayoutTemplate, Bug, Timer, BarChart2, CheckSquare, Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -33,6 +33,7 @@ const navItems = [
   { name: "Analytics", icon: BarChart2, page: "Analytics" },
   { name: "Tasks", icon: CheckSquare, page: "Tasks" },
   { name: "Workload", icon: Users, page: "WorkloadDashboard" },
+  { name: "Client Portal", icon: Globe, page: "ClientPortal" },
 ];
 
 export default function Layout({ children, currentPageName }) {

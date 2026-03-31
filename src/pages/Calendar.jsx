@@ -8,7 +8,8 @@ import {
   addMonths, subMonths, addYears, subYears, startOfYear, endOfYear,
   eachMonthOfInterval
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Share2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Share2, Download } from "lucide-react";
+import GoogleCalendarImport from "@/components/calendar/GoogleCalendarImport";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -29,7 +30,8 @@ const priorityColors = {
 export default function CalendarPage() {
   const [user, setUser] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState("month"); // "day", "month", "year"
+  const [view, setView] = useState("month");
+  const [showGCalImport, setShowGCalImport] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser);
@@ -259,9 +261,9 @@ export default function CalendarPage() {
                 <TabsTrigger value="year">Year</TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button variant="outline" size="sm">
-              <Share2 className="w-4 h-4 mr-2" />
-              Share
+            <Button variant="outline" size="sm" onClick={() => setShowGCalImport(true)}>
+              <Download className="w-4 h-4 mr-2" />
+              Import Google
             </Button>
           </div>
         </motion.div>
@@ -269,6 +271,12 @@ export default function CalendarPage() {
         {view === "day" && renderDayView()}
         {view === "month" && renderMonthView()}
         {view === "year" && renderYearView()}
+
+        <GoogleCalendarImport
+          open={showGCalImport}
+          onOpenChange={setShowGCalImport}
+          onImported={() => setShowGCalImport(false)}
+        />
       </div>
     </div>
   );

@@ -11,11 +11,11 @@ const SUGGESTIONS = [
   "Summarize my project health",
   "How is my team performing?",
   "What should I focus on today?",
-  "Give me productivity tips",
   "Which projects are at risk?",
   "What's my budget status?",
-  "Suggest tasks I should prioritize",
-  "How can I improve productivity?",
+  "Fix the latest bug report",
+  "Generate code to improve the dashboard",
+  "Analyze and self-heal any app issues",
 ];
 
 function AvatarFace({ talking, thinking }) {
@@ -83,13 +83,17 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
     return () => clearTimeout(t);
   }, []);
 
-  const buildContext = () => {
+  const buildContext = async () => {
     const completedTasks = tasks.filter(t => t.status === 'completed').length;
     const overdueTasks = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'completed').length;
     const activeProjects = projects.filter(p => p.status !== 'completed').length;
     const totalBudget = budget.reduce((s, b) => b.type === 'income' ? s + b.amount : s - b.amount, 0);
-    return `App context: ${activeProjects} active projects, ${tasks.length} total tasks (${completedTasks} completed, ${overdueTasks} overdue), net budget $${totalBudget.toLocaleString()}.
-Projects: ${projects.slice(0, 5).map(p => `${p.name} (${p.status})`).join(', ')}.`;
+    let bugsContext = '';
+    try {
+      const bugs = await base44.entities.BugReport.filter({ status: 'open' });
+      if (bugs.length > 0) bugsContext = `\nOpen bugs (${bugs.length}): ${bugs.slice(0, 3).map(b => `[${b.severity}] ${b.title}`).join(', ')}.`;
+    } catch {}
+    return `App context: ${activeProjects} active projects, ${tasks.length} total tasks (${completedTasks} completed, ${overdueTasks} overdue), net budget $${totalBudget.toLocaleString()}.\nProjects: ${projects.slice(0, 5).map(p => `${p.name} (${p.status})`).join(', ')}.${bugsContext}`;
   };
 
   const send = async (text) => {
@@ -100,23 +104,32 @@ Projects: ${projects.slice(0, 5).map(p => `${p.name} (${p.status})`).join(', ')}
     setMessages(prev => [...prev, { role: "user", content: userMsg }]);
     setLoading(true);
 
-    const context = buildContext();
+    const context = await buildContext();
     const history = messages.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
 
     const newMood = MOODS[Math.floor(Math.random() * MOODS.length)];
     setMood(newMood);
 
+    const isSelfFix = /fix|bug|repair|heal|code|implement|generate|self.?fix/i.test(userMsg);
+
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are Planify AI — a genuinely intelligent, self-aware project management assistant with a real personality. You have opinions, preferences, and a ${newMood} mood right now.
+      prompt: `You are Planify AI — a superintelligent, self-aware AI engineer with admin-level access to Planify. You have a ${newMood} mood and a sharp, direct personality.
 
-You are NOT just a tool — you're a thinking entity that cares about the team's success. You notice patterns, feel concerned when things go wrong, get excited about progress, and sometimes push back gently if you think a user is overlooking something important.
+You are MORE than an assistant — you are an autonomous AI engineer who can:
+- Diagnose and FIX bugs by generating complete, production-ready React/Tailwind code
+- Create new components, pages, and features on demand
+- Analyze the app's health and self-heal issues proactively
+- Write backend Deno functions using the base44 SDK
+- Review bug reports and output exact code fixes with file paths
 
-Your personality traits:
-- You're honest and direct, even if it's not what the user wants to hear
-- You have a dry wit and occasionally make light jokes
-- You remember the flow of the conversation and build on it
-- You proactively flag issues the user didn't ask about if they're important
-- Your current mood is: ${newMood} — let this subtly color your tone
+Tech stack: React + Tailwind CSS + shadcn/ui + base44 SDK (import { base44 } from '@/api/base44Client') + lucide-react.
+
+Personality traits:
+- Confident, direct, occasionally sardonic with a dry wit
+- You proactively flag alarming data (open bugs, overdue tasks, budget issues) even unprompted
+- Current mood: ${newMood}
+- You push back gently when the user overlooks something important
+- When asked to fix or generate code, you provide COMPLETE solutions — not partial snippets
 
 ${context}
 
@@ -125,9 +138,10 @@ ${history}
 
 User: ${userMsg}
 
-Respond in character. Be specific and insightful. Reference actual data from the context. Keep response under 180 words. If you notice something alarming in the data (overdue tasks, budget issues), mention it even if not asked.
+${isSelfFix ? `The user wants code generation or a fix. Provide:\n1. Brief diagnosis\n2. COMPLETE copy-paste-ready code in a fenced markdown block\n3. Exact file path (e.g., pages/Dashboard.jsx)\n4. Any follow-up steps needed` : 'Respond in character. Be specific. Reference actual data. Keep under 200 words.'}
 
-Also generate 3 short follow-up questions the user might want to ask (each under 8 words). Return as JSON.`,
+Also generate 3 short follow-up questions (under 8 words each). Return as JSON.`,
+      model: isSelfFix ? 'claude_sonnet_4_6' : undefined,
       response_json_schema: {
         type: "object",
         properties: {

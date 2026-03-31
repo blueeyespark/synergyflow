@@ -7,6 +7,7 @@ import TimeTracking from './pages/TimeTracking';
 import Analytics from './pages/Analytics';
 import Tasks from './pages/Tasks';
 import WorkloadDashboard from './pages/WorkloadDashboard';
+import ClientPortal from './pages/ClientPortal';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
       <Route path="/Analytics" element={<LayoutWrapper currentPageName="Analytics"><Analytics /></LayoutWrapper>} />
       <Route path="/Tasks" element={<LayoutWrapper currentPageName="Tasks"><Tasks /></LayoutWrapper>} />
       <Route path="/WorkloadDashboard" element={<LayoutWrapper currentPageName="WorkloadDashboard"><WorkloadDashboard /></LayoutWrapper>} />
+      <Route path="/ClientPortal" element={<LayoutWrapper currentPageName="ClientPortal"><ClientPortal /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
