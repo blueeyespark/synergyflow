@@ -17,6 +17,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReactMarkdown from "react-markdown";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import CodePreviewModal from "@/components/scanner/CodePreviewModal";
 
 const SEVERITY_STYLES = {
   low: "bg-blue-100 text-blue-700",
@@ -41,25 +43,25 @@ const STATUS_ICONS = {
   wont_fix: ShieldAlert,
 };
 
-function BugCard({ bug, onAnalyze, onUpdateStatus, onAutoFix, isAdmin }) {
+function BugCard({ bug, onAnalyze, onUpdateStatus, onAutoFix, isAdmin, generatingFix }) {
   const [expanded, setExpanded] = useState(false);
   const StatusIcon = STATUS_ICONS[bug.status] || Bug;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-start gap-3 p-4 hover:bg-slate-50 transition-colors text-left"
+        className="w-full flex items-start gap-3 p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
       >
         <StatusIcon className="w-4 h-4 mt-0.5 flex-shrink-0 text-slate-400" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="font-medium text-slate-900 text-sm">{bug.title}</span>
+            <span className="font-medium text-slate-900 dark:text-slate-100 text-sm">{bug.title}</span>
             <Badge className={`text-xs ${SEVERITY_STYLES[bug.severity]}`}>{bug.severity}</Badge>
             <Badge className={`text-xs ${STATUS_STYLES[bug.status]}`}>{bug.status?.replace('_', ' ')}</Badge>
             {bug.page && <span className="text-xs text-slate-400">/{bug.page}</span>}
           </div>
-          <p className="text-xs text-slate-500 line-clamp-1">{bug.description}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{bug.description}</p>
         </div>
         {expanded ? <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" /> : <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />}
       </button>
@@ -67,36 +69,42 @@ function BugCard({ bug, onAnalyze, onUpdateStatus, onAutoFix, isAdmin }) {
       <AnimatePresence>
         {expanded && (
           <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }}
-            className="overflow-hidden border-t border-slate-100">
+            className="overflow-hidden border-t border-slate-100 dark:border-slate-700">
             <div className="p-4 space-y-3">
               <div>
                 <p className="text-xs font-medium text-slate-500 mb-1">Description</p>
-                <p className="text-sm text-slate-700">{bug.description}</p>
+                <p className="text-sm text-slate-700 dark:text-slate-300">{bug.description}</p>
               </div>
               {bug.steps_to_reproduce && (
                 <div>
                   <p className="text-xs font-medium text-slate-500 mb-1">Steps to Reproduce</p>
-                  <p className="text-sm text-slate-700 whitespace-pre-wrap">{bug.steps_to_reproduce}</p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{bug.steps_to_reproduce}</p>
                 </div>
               )}
               {bug.ai_analysis && (
-                <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
-                  <p className="text-xs font-semibold text-purple-700 mb-2 flex items-center gap-1">
+                <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-800">
+                  <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 mb-2 flex items-center gap-1">
                     <Brain className="w-3 h-3" /> AI Analysis
                   </p>
-                  <div className="text-sm text-slate-700 prose prose-sm max-w-none">
+                  <div className="text-sm text-slate-700 dark:text-slate-300 prose prose-sm max-w-none">
                     <ReactMarkdown>{bug.ai_analysis}</ReactMarkdown>
                   </div>
                 </div>
               )}
               {bug.ai_fix_suggestion && (
-                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                  <p className="text-xs font-semibold text-green-700 mb-2 flex items-center gap-1">
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800">
+                  <p className="text-xs font-semibold text-green-700 dark:text-green-400 mb-2 flex items-center gap-1">
                     <Wrench className="w-3 h-3" /> Fix Suggestion
                   </p>
-                  <div className="text-sm text-slate-700 prose prose-sm max-w-none">
+                  <div className="text-sm text-slate-700 dark:text-slate-300 prose prose-sm max-w-none">
                     <ReactMarkdown>{bug.ai_fix_suggestion}</ReactMarkdown>
                   </div>
+                </div>
+              )}
+              {bug.resolution_notes && (
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                  <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-1">Resolution Notes</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{bug.resolution_notes}</p>
                 </div>
               )}
               {isAdmin && (
@@ -107,8 +115,15 @@ function BugCard({ bug, onAnalyze, onUpdateStatus, onAutoFix, isAdmin }) {
                     </Button>
                   )}
                   {bug.ai_fix_suggestion && bug.status !== 'resolved' && (
-                    <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50" onClick={() => onAutoFix(bug)}>
-                      <Wand2 className="w-3 h-3 mr-1.5" /> Apply Fix
+                    <Button size="sm" variant="outline"
+                      className="text-green-600 border-green-200 hover:bg-green-50"
+                      onClick={() => onAutoFix(bug)}
+                      disabled={generatingFix === bug.id}
+                    >
+                      {generatingFix === bug.id
+                        ? <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                        : <Wand2 className="w-3 h-3 mr-1.5" />}
+                      {generatingFix === bug.id ? 'Generating...' : 'Generate Fix Code'}
                     </Button>
                   )}
                   <Select value={bug.status} onValueChange={(v) => onUpdateStatus(bug.id, v)}>
@@ -138,6 +153,8 @@ export default function AIBugMonitor() {
   const [user, setUser] = useState(null);
   const [showReport, setShowReport] = useState(false);
   const [analyzingAll, setAnalyzingAll] = useState(false);
+  const [codeModal, setCodeModal] = useState(null);
+  const [generatingFix, setGeneratingFix] = useState(null);
   const [form, setForm] = useState({
     title: "", description: "", steps_to_reproduce: "",
     expected_behavior: "", actual_behavior: "", severity: "medium", page: ""
@@ -159,6 +176,7 @@ export default function AIBugMonitor() {
       queryClient.invalidateQueries({ queryKey: ['bug-reports'] });
       setShowReport(false);
       setForm({ title: "", description: "", steps_to_reproduce: "", expected_behavior: "", actual_behavior: "", severity: "medium", page: "" });
+      toast.success("Bug report submitted");
     },
   });
 
@@ -181,7 +199,7 @@ Page: ${bug.page || 'Unknown'}
 Severity: ${bug.severity}
 
 Provide:
-1. Root cause analysis — what likely causes this bug
+1. Root cause analysis
 2. How to reproduce/confirm the issue
 3. A concrete fix suggestion with code example if applicable
 4. Estimated effort to fix (low/medium/high)`,
@@ -213,24 +231,53 @@ Provide:
   };
 
   const autoFixBug = async (bug) => {
-    // Mark as resolved with resolution note and auto-generate a fix task
+    setGeneratingFix(bug.id);
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `You are an expert React/Tailwind developer. Generate a complete, production-ready code fix for this bug in "Planify" — a React/Tailwind/base44 project management app.
+
+Bug: ${bug.title}
+Description: ${bug.description}
+Page: ${bug.page || 'Unknown'}
+AI Analysis: ${bug.ai_analysis || ''}
+Fix Suggestion: ${bug.ai_fix_suggestion || ''}
+
+Generate:
+1. The exact code fix (complete component or relevant snippet)
+2. The file path to edit (e.g., pages/Dashboard.jsx)
+3. A brief explanation of what was fixed
+
+Make the code complete and copy-paste ready.`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          code: { type: "string" },
+          file_path: { type: "string" },
+          explanation: { type: "string" }
+        }
+      }
+    });
+    setGeneratingFix(null);
     updateMutation.mutate({
       id: bug.id,
       data: {
         status: 'resolved',
-        resolution_notes: `AI auto-fix applied at ${new Date().toLocaleString()}. Fix: ${bug.ai_fix_suggestion?.slice(0, 200)}...`,
+        resolution_notes: `AI fix generated at ${new Date().toLocaleString()}. File: ${result.file_path}. ${result.explanation}`,
       }
     });
-    toast.success(`Bug "${bug.title}" marked as resolved with AI fix applied`);
+    setCodeModal({
+      title: `Fix: ${bug.title}`,
+      code: result.code || '// No code generated',
+      description: result.explanation,
+      filePath: result.file_path,
+    });
+    toast.success(`Fix code generated for "${bug.title}" — copy and apply it`);
   };
 
   const analyzeAll = async () => {
     const unanalyzed = bugs.filter(b => b.status === 'open' && !b.ai_analysis);
     if (unanalyzed.length === 0) return;
     setAnalyzingAll(true);
-    for (const bug of unanalyzed) {
-      await analyzeBug(bug);
-    }
+    for (const bug of unanalyzed) await analyzeBug(bug);
     setAnalyzingAll(false);
   };
 
@@ -239,15 +286,27 @@ Provide:
   const unanalyzedCount = openBugs.filter(b => !b.ai_analysis).length;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-3xl mx-auto px-4 py-8">
+
+        {codeModal && (
+          <CodePreviewModal
+            open={!!codeModal}
+            onOpenChange={() => setCodeModal(null)}
+            title={codeModal.title}
+            code={codeModal.code}
+            description={codeModal.description}
+            filePath={codeModal.filePath}
+          />
+        )}
+
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Bug className="w-6 h-6 text-red-500" /> Bug Monitor
             </h1>
-            <p className="text-sm text-slate-500 mt-1">AI-powered bug tracking and analysis</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">AI-powered bug tracking, analysis, and auto-fix code generation</p>
           </div>
           <div className="flex gap-2">
             {isAdmin && unanalyzedCount > 0 && (
@@ -265,14 +324,14 @@ Provide:
         {/* Stats */}
         <div className="grid grid-cols-4 gap-3 mb-6">
           {[
-            { label: "Total", value: bugs.length, color: "text-slate-700", bg: "bg-white" },
-            { label: "Open", value: openBugs.length, color: "text-orange-600", bg: "bg-orange-50" },
-            { label: "Resolved", value: resolvedBugs.length, color: "text-green-600", bg: "bg-green-50" },
-            { label: "AI Analyzed", value: bugs.filter(b => b.ai_analysis).length, color: "text-purple-600", bg: "bg-purple-50" },
+            { label: "Total", value: bugs.length, color: "text-slate-700 dark:text-slate-300", bg: "bg-white dark:bg-slate-800" },
+            { label: "Open", value: openBugs.length, color: "text-orange-600", bg: "bg-orange-50 dark:bg-orange-900/20" },
+            { label: "Resolved", value: resolvedBugs.length, color: "text-green-600", bg: "bg-green-50 dark:bg-green-900/20" },
+            { label: "AI Analyzed", value: bugs.filter(b => b.ai_analysis).length, color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-900/20" },
           ].map(s => (
-            <div key={s.label} className={`${s.bg} rounded-xl p-3 text-center border border-slate-100`}>
+            <div key={s.label} className={`${s.bg} rounded-xl p-3 text-center border border-slate-100 dark:border-slate-700`}>
               <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-              <p className="text-xs text-slate-500">{s.label}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{s.label}</p>
             </div>
           ))}
         </div>
@@ -287,16 +346,16 @@ Provide:
             {isLoading ? (
               <div className="text-center py-8 text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
             ) : openBugs.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-2xl border border-slate-100">
+              <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                 <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-3" />
-                <p className="font-medium text-slate-700">No open bugs!</p>
+                <p className="font-medium text-slate-700 dark:text-slate-300">No open bugs!</p>
                 <p className="text-sm text-slate-400">The app is running smoothly.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {openBugs.map(bug => (
                   <BugCard key={bug.id} bug={bug} onAnalyze={analyzeBug} isAdmin={isAdmin}
-                    onAutoFix={autoFixBug}
+                    onAutoFix={autoFixBug} generatingFix={generatingFix}
                     onUpdateStatus={(id, status) => updateMutation.mutate({ id, data: { status } })} />
                 ))}
               </div>
@@ -307,6 +366,7 @@ Provide:
             <div className="space-y-3">
               {resolvedBugs.map(bug => (
                 <BugCard key={bug.id} bug={bug} onAnalyze={analyzeBug} isAdmin={isAdmin}
+                  generatingFix={generatingFix} onAutoFix={autoFixBug}
                   onUpdateStatus={(id, status) => updateMutation.mutate({ id, data: { status } })} />
               ))}
             </div>
