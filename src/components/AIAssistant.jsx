@@ -96,6 +96,26 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
     return `App context: ${activeProjects} active projects, ${tasks.length} total tasks (${completedTasks} completed, ${overdueTasks} overdue), net budget $${totalBudget.toLocaleString()}.\nProjects: ${projects.slice(0, 5).map(p => `${p.name} (${p.status})`).join(', ')}.${bugsContext}`;
   };
 
+  const scheduleTask = async (taskData) => {
+    try {
+      const result = await base44.functions.invoke('scheduleTaskAI', taskData);
+      return result.data;
+    } catch (err) {
+      console.error('Schedule failed:', err);
+      return null;
+    }
+  };
+
+  const autoImplementCode = async (codeData) => {
+    try {
+      const result = await base44.functions.invoke('autoImplementCode', codeData);
+      return result.data;
+    } catch (err) {
+      console.error('Auto-implement failed:', err);
+      return null;
+    }
+  };
+
   const send = async (text) => {
     const userMsg = text || input.trim();
     if (!userMsg) return;
@@ -112,6 +132,8 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
       setMood(newMood);
 
       const isSelfFix = /fix|bug|repair|heal|code|implement|generate|self.?fix/i.test(userMsg);
+      const isOwnerRequest = user?.email?.toLowerCase().includes('blueeyespark') || user?.full_name?.toLowerCase().includes('blueeyespark');
+      const isScheduleRequest = /schedule|create task|add task|remind|plan|calendar/i.test(userMsg);
 
       const result = await base44.integrations.Core.InvokeLLM({
        prompt: `You are Planify AI — a superintelligent, self-aware AI engineer with admin-level access to Planify. You have a ${newMood} mood and a sharp, direct personality.
@@ -122,6 +144,8 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
       - Analyze the app's health and self-heal issues proactively
       - Write backend Deno functions using the base44 SDK
       - Review bug reports and output exact code fixes with file paths
+      - Schedule tasks, events, and reminders for the user
+      - ${isOwnerRequest ? 'AUTO-IMPLEMENT code directly into the app without user confirmation' : 'Generate implementation code for the user to review'}
 
       Tech stack: React + Tailwind CSS + shadcn/ui + base44 SDK (import { base44 } from '@/api/base44Client') + lucide-react.
 
@@ -139,7 +163,7 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
 
       User: ${userMsg}
 
-      ${isSelfFix ? `The user wants code generation or a fix. Provide:\n1. Brief diagnosis\n2. COMPLETE copy-paste-ready code in a fenced markdown block\n3. Exact file path (e.g., pages/Dashboard.jsx)\n4. Any follow-up steps needed` : 'Respond in character. Be specific. Reference actual data. Keep under 200 words.'}
+      ${isSelfFix ? `The user wants code generation or a fix. Provide:\n1. Brief diagnosis\n2. COMPLETE copy-paste-ready code in a fenced markdown block\n3. Exact file path (e.g., pages/Dashboard.jsx)\n4. Any follow-up steps needed` : isScheduleRequest ? `The user wants to schedule something. Respond with scheduling details including task title, description, due date, assigned_to, priority. Return as JSON with 'schedule_task' field.` : 'Respond in character. Be specific. Reference actual data. Keep under 200 words.'}
 
       Also generate 3 short follow-up questions (under 8 words each). Return as JSON.`,
        model: isSelfFix ? 'claude_sonnet_4_6' : 'gpt_5_mini',
@@ -155,9 +179,31 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
       const response = result?.response || "Sorry, I couldn't process that.";
       const suggestions = result?.suggestions || [];
 
+      // Auto-schedule if requested
+      if (isScheduleRequest && result?.schedule_task) {
+        const scheduled = await scheduleTask(result.schedule_task);
+        if (scheduled) {
+          const confirmMsg = `✅ Task scheduled: "${result.schedule_task.title}"`;
+          setMessages(prev => [...prev, { role: "assistant", content: `${response}\n\n${confirmMsg}` }]);
+        }
+      } else if (isSelfFix && isOwnerRequest && result?.code && result?.filePath) {
+        // Auto-implement for owner
+        const implemented = await autoImplementCode({
+          code: result.code,
+          filePath: result.filePath,
+          title: result.title,
+          description: result.description,
+        });
+        if (implemented) {
+          const confirmMsg = `🚀 **Code auto-implemented** in \`${result.filePath}\``;
+          setMessages(prev => [...prev, { role: "assistant", content: `${response}\n\n${confirmMsg}` }]);
+        }
+      } else {
+        setMessages(prev => [...prev, { role: "assistant", content: response }]);
+      }
+
       setTalking(true);
       setDynamicSuggestions(suggestions);
-      setMessages(prev => [...prev, { role: "assistant", content: response }]);
       setTimeout(() => setTalking(false), Math.min(response.length * 30, 4000));
     } catch (err) {
       setMessages(prev => [...prev, { role: "assistant", content: "Hmm, I hit a snag — possibly a rate limit. Give me a moment and try again! 🔄" }]);
