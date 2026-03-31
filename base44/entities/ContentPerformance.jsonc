@@ -1,0 +1,102 @@
+{
+  "name": "ContentPerformance",
+  "type": "object",
+  "properties": {
+    "content_id": {
+      "type": "string",
+      "description": "ID of the blog post or social media content"
+    },
+    "content_title": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "blog",
+        "twitter",
+        "instagram",
+        "linkedin",
+        "tiktok",
+        "youtube"
+      ]
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "views": {
+      "type": "number",
+      "default": 0
+    },
+    "engagement": {
+      "type": "number",
+      "default": 0,
+      "description": "Likes, comments, shares, clicks combined"
+    },
+    "shares": {
+      "type": "number",
+      "default": 0
+    },
+    "comments": {
+      "type": "number",
+      "default": 0
+    },
+    "click_through_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Percentage"
+    },
+    "conversion": {
+      "type": "number",
+      "default": 0,
+      "description": "Conversions or sales attributed"
+    },
+    "audience_growth": {
+      "type": "number",
+      "default": 0,
+      "description": "New followers/subscribers"
+    },
+    "sentiment": {
+      "type": "string",
+      "enum": [
+        "positive",
+        "neutral",
+        "negative"
+      ],
+      "default": "neutral"
+    },
+    "top_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "content_id",
+    "content_title",
+    "platform",
+    "published_date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

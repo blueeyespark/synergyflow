@@ -6,6 +6,7 @@ import WorkHub from './pages/WorkHub';
 import ClientPortal from './pages/ClientPortal';
 import DiscordBot from './pages/DiscordBot';
 import AITools from './pages/AITools';
+import ContentCreator from './pages/ContentCreator';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
       <Route path="/DiscordBot" element={<LayoutWrapper currentPageName="DiscordBot"><DiscordBot /></LayoutWrapper>} />
       <Route path="/AITools" element={<LayoutWrapper currentPageName="AITools"><AITools /></LayoutWrapper>} />
       <Route path="/WorkHub" element={<LayoutWrapper currentPageName="WorkHub"><WorkHub /></LayoutWrapper>} />
+      <Route path="/ContentCreator" element={<LayoutWrapper currentPageName="ContentCreator"><ContentCreator /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
