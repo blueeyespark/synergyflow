@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Radio, Image, Calendar, Lightbulb, BarChart3, Youtube, Twitch } from "lucide-react";
+import { Video, Radio, Image, Calendar, Lightbulb, BarChart3, Youtube, Twitch, DollarSign } from "lucide-react";
 import VideoEditor from "./VideoEditor";
 import ThumbnailMaker from "./ThumbnailMaker";
 import IntroOutroMaker from "./IntroOutroMaker";
@@ -10,6 +10,8 @@ import ContentIdeas from "./ContentIdeas";
 import ContentAnalytics from "./ContentAnalytics";
 import YouTubePublisher from "./YouTubePublisher";
 import TwitchStreamer from "./TwitchStreamer";
+import CalendarPage from "./Calendar";
+import BudgetPage from "./Budget";
 
 const tabs = [
   { id: "youtube", label: "YouTube Publisher", icon: Youtube, component: YouTubePublisher },
@@ -17,9 +19,11 @@ const tabs = [
   { id: "editor", label: "Video Editor", icon: Video, component: VideoEditor },
   { id: "thumbnail", label: "Thumbnail Maker", icon: Image, component: ThumbnailMaker },
   { id: "intro", label: "Intro/Outro", icon: Radio, component: IntroOutroMaker },
-  { id: "calendar", label: "Content Calendar", icon: Calendar, component: ContentCalendar },
+  { id: "content-calendar", label: "Content Calendar", icon: Calendar, component: ContentCalendar },
   { id: "ideas", label: "Content Ideas", icon: Lightbulb, component: ContentIdeas },
   { id: "analytics", label: "Analytics", icon: BarChart3, component: ContentAnalytics },
+  { id: "schedule", label: "Schedule", icon: Calendar, component: CalendarPage },
+  { id: "budget", label: "Budget", icon: DollarSign, component: BudgetPage },
 ];
 
 export default function CreatorStudio() {
