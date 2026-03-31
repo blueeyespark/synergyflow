@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -65,6 +65,46 @@ export default function ReportsPage() {
     queryKey: ['budget'],
     queryFn: () => base44.entities.Budget.list(),
   });
+
+  const { data: timeEntries = [] } = useQuery({
+    queryKey: ['time-entries'],
+    queryFn: () => base44.entities.TimeEntry.list(),
+  });
+
+  const [analyticsRange, setAnalyticsRange] = useState("30");
+
+  const billableData = useMemo(() => {
+    const billable = timeEntries.filter(e => e.is_billable).reduce((s, e) => s + (e.duration_seconds || 0), 0);
+    const nonBillable = timeEntries.filter(e => !e.is_billable).reduce((s, e) => s + (e.duration_seconds || 0), 0);
+    const toHours = s => parseFloat((s / 3600).toFixed(1));
+    return [{ name: "Billable", value: toHours(billable) }, { name: "Non-Billable", value: toHours(nonBillable) }];
+  }, [timeEntries]);
+
+  const billableByProject = useMemo(() => {
+    const map = {};
+    timeEntries.forEach(e => {
+      const key = e.project_name || "Unknown";
+      if (!map[key]) map[key] = { name: key, billable: 0, nonBillable: 0 };
+      const hrs = (e.duration_seconds || 0) / 3600;
+      if (e.is_billable) map[key].billable += hrs; else map[key].nonBillable += hrs;
+    });
+    return Object.values(map).map(d => ({ ...d, billable: parseFloat(d.billable.toFixed(1)), nonBillable: parseFloat(d.nonBillable.toFixed(1)) }))
+      .sort((a, b) => (b.billable + b.nonBillable) - (a.billable + a.nonBillable)).slice(0, 7);
+  }, [timeEntries]);
+
+  const workloadData = useMemo(() => {
+    const map = {};
+    tasks.forEach(t => {
+      const key = t.assigned_to || "Unassigned";
+      if (!map[key]) map[key] = { name: key.split("@")[0], todo: 0, in_progress: 0, completed: 0 };
+      if (t.status === "completed") map[key].completed++;
+      else if (t.status === "in_progress") map[key].in_progress++;
+      else map[key].todo++;
+    });
+    return Object.values(map).sort((a, b) => (b.todo + b.in_progress + b.completed) - (a.todo + a.in_progress + a.completed)).slice(0, 8);
+  }, [tasks]);
+
+  const totalBillableHrs = parseFloat((timeEntries.filter(e => e.is_billable).reduce((s, e) => s + (e.duration_seconds || 0), 0) / 3600).toFixed(1));
 
   // Get all unique users
   const allUsers = [...new Set([
@@ -339,6 +379,7 @@ export default function ReportsPage() {
             <TabsTrigger value="tasks">Task Analytics</TabsTrigger>
             <TabsTrigger value="team">Team Performance</TabsTrigger>
             <TabsTrigger value="budget">Budget Analysis</TabsTrigger>
+            <TabsTrigger value="time">Time & Workload</TabsTrigger>
           </TabsList>
 
           <TabsContent value="tasks" className="space-y-6">
@@ -476,6 +517,66 @@ export default function ReportsPage() {
                   </p>
                 </div>
               </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="time" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <h3 className="font-semibold mb-1">Billable vs Non-Billable Hours</h3>
+                <p className="text-xs text-slate-400 mb-4">Total: {totalBillableHrs}h billable</p>
+                {billableData.every(d => d.value === 0) ? (
+                  <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No time entries yet</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <RePieChart>
+                      <Pie data={billableData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={4} dataKey="value" label={({ name, value }) => `${name}: ${value}h`} labelLine={false}>
+                        <Cell fill="#6366f1" />
+                        <Cell fill="#e2e8f0" />
+                      </Pie>
+                      <Tooltip formatter={(v) => `${v}h`} contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
+                      <Legend wrapperStyle={{ fontSize: 12 }} />
+                    </RePieChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <h3 className="font-semibold mb-1">Hours by Project</h3>
+                <p className="text-xs text-slate-400 mb-4">Billable & non-billable per project</p>
+                {billableByProject.length === 0 ? (
+                  <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No time entries yet</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <BarChart data={billableByProject} layout="vertical" margin={{ top: 4, right: 16, bottom: 0, left: 8 }} barSize={12}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                      <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} unit="h" />
+                      <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} width={80} />
+                      <Tooltip formatter={(v) => `${v}h`} contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
+                      <Legend wrapperStyle={{ fontSize: 12 }} />
+                      <Bar dataKey="billable" name="Billable" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="nonBillable" name="Non-Billable" fill="#e2e8f0" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+              <h3 className="font-semibold mb-4">Workload Distribution by Member</h3>
+              {workloadData.length === 0 ? (
+                <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No assigned tasks yet</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={workloadData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }} barSize={18}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                    <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Bar dataKey="todo" name="To Do" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="in_progress" name="In Progress" fill="#f97316" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="completed" name="Completed" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </TabsContent>
         </Tabs>

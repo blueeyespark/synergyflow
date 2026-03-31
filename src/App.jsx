@@ -1,15 +1,15 @@
 import { Toaster } from "@/components/ui/toaster"
 import Leaderboard from './pages/Leaderboard';
 import AIScanner from './pages/AIScanner';
+// Analytics merged into Reports; WorkloadHeatmap merged into WorkloadDashboard
 import Templates from './pages/Templates';
 import AIBugMonitor from './pages/AIBugMonitor';
 import TimeTracking from './pages/TimeTracking';
-import Analytics from './pages/Analytics';
 import Tasks from './pages/Tasks';
 import WorkloadDashboard from './pages/WorkloadDashboard';
 import ClientPortal from './pages/ClientPortal';
 import DiscordBot from './pages/DiscordBot';
-import WorkloadHeatmap from './pages/WorkloadHeatmap';
+
 import Invoicing from './pages/Invoicing';
 import ResourceScheduler from './pages/ResourceScheduler';
 import AIChangesLog from './pages/AIChangesLog';
@@ -77,12 +77,12 @@ const AuthenticatedApp = () => {
       <Route path="/Templates" element={<LayoutWrapper currentPageName="Templates"><Templates /></LayoutWrapper>} />
       <Route path="/AIBugMonitor" element={<LayoutWrapper currentPageName="AIBugMonitor"><AIBugMonitor /></LayoutWrapper>} />
       <Route path="/TimeTracking" element={<LayoutWrapper currentPageName="TimeTracking"><TimeTracking /></LayoutWrapper>} />
-      <Route path="/Analytics" element={<LayoutWrapper currentPageName="Analytics"><Analytics /></LayoutWrapper>} />
+
       <Route path="/Tasks" element={<LayoutWrapper currentPageName="Tasks"><Tasks /></LayoutWrapper>} />
       <Route path="/WorkloadDashboard" element={<LayoutWrapper currentPageName="WorkloadDashboard"><WorkloadDashboard /></LayoutWrapper>} />
       <Route path="/ClientPortal" element={<LayoutWrapper currentPageName="ClientPortal"><ClientPortal /></LayoutWrapper>} />
       <Route path="/DiscordBot" element={<LayoutWrapper currentPageName="DiscordBot"><DiscordBot /></LayoutWrapper>} />
-      <Route path="/WorkloadHeatmap" element={<LayoutWrapper currentPageName="WorkloadHeatmap"><WorkloadHeatmap /></LayoutWrapper>} />
+
       <Route path="/Invoicing" element={<LayoutWrapper currentPageName="Invoicing"><Invoicing /></LayoutWrapper>} />
       <Route path="/ResourceScheduler" element={<LayoutWrapper currentPageName="ResourceScheduler"><ResourceScheduler /></LayoutWrapper>} />
       <Route path="/AIChangesLog" element={<LayoutWrapper currentPageName="AIChangesLog"><AIChangesLog /></LayoutWrapper>} />

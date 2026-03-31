@@ -54,10 +54,8 @@ const navGroups = [
     icon: Users,
     children: [
       { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
-      { name: "Reports", icon: Share2, page: "Reports" },
-      { name: "Analytics", icon: BarChart2, page: "Analytics" },
-      { name: "Workload", icon: Users, page: "WorkloadDashboard", adminOnly: true },
-      { name: "Heatmap", icon: Flame, page: "WorkloadHeatmap", adminOnly: true },
+      { name: "Reports & Analytics", icon: BarChart2, page: "Reports" },
+      { name: "Workload Center", icon: Users, page: "WorkloadDashboard", adminOnly: true },
       { name: "Scheduler", icon: UserCog, page: "ResourceScheduler", adminOnly: true },
     ],
   },
