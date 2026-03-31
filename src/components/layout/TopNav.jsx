@@ -29,12 +29,21 @@ const navGroups = [
         { name: "Client Portal", icon: Globe, page: "ClientPortal", adminOnly: true },
         { name: "Discord Bot", icon: Bot, page: "DiscordBot", adminOnly: true },
       ]},
+    ],
+  },
+  {
+    label: "AI Tools",
+    icon: Scan,
+    adminOnly: true,
+    children: [
+      { section: "Tools", items: [
+        { name: "AI Tools", icon: Scan, page: "AITools" },
+      ]},
       { section: "Admin", items: [
-        { name: "Users", icon: Users, page: "UserViewer", adminOnly: true },
+        { name: "Users", icon: Users, page: "UserViewer" },
       ]},
     ],
   },
-  { label: "AI Tools", icon: Scan, single: true, page: "AITools", adminOnly: true },
 ];
 
 export default function TopNav({
