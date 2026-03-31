@@ -245,16 +245,10 @@ export default function Dashboard() {
                   <p className="text-xs text-slate-500 mt-1">View team performance and project metrics</p>
                 </div>
               </Link>
-              <Link to={createPageUrl("AIScanner")}>
+              <Link to={createPageUrl("AITools")}>
                 <div className="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                  <h4 className="font-medium text-slate-800 text-sm">AI Scanner</h4>
-                  <p className="text-xs text-slate-500 mt-1">Analyze app health and scan competitor features</p>
-                </div>
-              </Link>
-              <Link to={createPageUrl("AIChangesLog")}>
-                <div className="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                  <h4 className="font-medium text-slate-800 text-sm">AI Changes Log</h4>
-                  <p className="text-xs text-slate-500 mt-1">Audit all auto-applied AI improvements</p>
+                  <h4 className="font-medium text-slate-800 text-sm">AI Tools</h4>
+                  <p className="text-xs text-slate-500 mt-1">Scanner, bug monitor, and changes log</p>
                 </div>
               </Link>
             </div>
