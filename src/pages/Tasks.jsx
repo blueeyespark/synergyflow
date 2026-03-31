@@ -113,13 +113,22 @@ export default function Tasks() {
   const [view, setView] = useState("kanban");
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [user, setUser] = useState(null);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    base44.auth.me().then(setUser);
+  }, []);
 
   const [autoPrioritizing, setAutoPrioritizing] = useState(false);
 
   const { data: tasks = [], isLoading } = useQuery({
-    queryKey: ["all-tasks"],
+    queryKey: ["all-tasks", user?.email],
     queryFn: () => base44.entities.Task.list("-created_date"),
+    enabled: !!user?.email,
+    select: (data) => data.filter(t =>
+      t.created_by === user?.email || t.assigned_to === user?.email
+    ),
   });
 
   const { data: projects = [] } = useQuery({
