@@ -66,12 +66,9 @@ const navGroups = [
   {
     label: "AI Tools",
     icon: Scan,
+    single: true,
+    page: "AITools",
     adminOnly: true,
-    children: [
-      { name: "AI Scanner", icon: Scan, page: "AIScanner" },
-      { name: "AI Changes", icon: History, page: "AIChangesLog" },
-      { name: "Bug Monitor", icon: Bug, page: "AIBugMonitor" },
-    ],
   },
 ];
 
@@ -313,6 +310,18 @@ export default function Layout({ children, currentPageName }) {
 
               {navGroups.filter(g => !g.single && (!g.adminOnly || isAdmin)).map(group => (
                 <NavDropdown key={group.label} group={group} currentPageName={currentPageName} isAdmin={isAdmin} />
+              ))}
+              {navGroups.filter(g => g.single && g.page !== 'Dashboard' && g.page !== 'WorkHub' && g.page !== 'Reports' && (!g.adminOnly || isAdmin)).map(group => (
+                <Link
+                  key={group.page}
+                  to={createPageUrl(group.page)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPageName === group.page ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  <group.icon className="w-4 h-4" />
+                  {group.label}
+                </Link>
               ))}
             </div>
 
