@@ -1,19 +1,14 @@
 import { Toaster } from "@/components/ui/toaster"
 import Leaderboard from './pages/Leaderboard';
 import AIScanner from './pages/AIScanner';
-// Analytics merged into Reports; WorkloadHeatmap merged into WorkloadDashboard
 import Templates from './pages/Templates';
 import AIBugMonitor from './pages/AIBugMonitor';
 import TimeTracking from './pages/TimeTracking';
 import Tasks from './pages/Tasks';
 import WorkHub from './pages/WorkHub';
-import WeeklyReports from './pages/WeeklyReports';
-import WorkloadDashboard from './pages/WorkloadDashboard';
 import ClientPortal from './pages/ClientPortal';
 import DiscordBot from './pages/DiscordBot';
-
 import Invoicing from './pages/Invoicing';
-import ResourceScheduler from './pages/ResourceScheduler';
 import AIChangesLog from './pages/AIChangesLog';
 import AITools from './pages/AITools';
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -82,16 +77,13 @@ const AuthenticatedApp = () => {
       <Route path="/TimeTracking" element={<LayoutWrapper currentPageName="TimeTracking"><TimeTracking /></LayoutWrapper>} />
 
       <Route path="/Tasks" element={<LayoutWrapper currentPageName="Tasks"><Tasks /></LayoutWrapper>} />
-      <Route path="/WorkloadDashboard" element={<LayoutWrapper currentPageName="WorkloadDashboard"><WorkloadDashboard /></LayoutWrapper>} />
       <Route path="/ClientPortal" element={<LayoutWrapper currentPageName="ClientPortal"><ClientPortal /></LayoutWrapper>} />
       <Route path="/DiscordBot" element={<LayoutWrapper currentPageName="DiscordBot"><DiscordBot /></LayoutWrapper>} />
 
       <Route path="/Invoicing" element={<LayoutWrapper currentPageName="Invoicing"><Invoicing /></LayoutWrapper>} />
-      <Route path="/ResourceScheduler" element={<LayoutWrapper currentPageName="ResourceScheduler"><ResourceScheduler /></LayoutWrapper>} />
       <Route path="/AIChangesLog" element={<LayoutWrapper currentPageName="AIChangesLog"><AIChangesLog /></LayoutWrapper>} />
       <Route path="/AITools" element={<LayoutWrapper currentPageName="AITools"><AITools /></LayoutWrapper>} />
       <Route path="/WorkHub" element={<LayoutWrapper currentPageName="WorkHub"><WorkHub /></LayoutWrapper>} />
-      <Route path="/WeeklyReports" element={<LayoutWrapper currentPageName="WeeklyReports"><WeeklyReports /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
