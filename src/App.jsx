@@ -1,8 +1,6 @@
 import { Toaster } from "@/components/ui/toaster"
 import Leaderboard from './pages/Leaderboard';
-import AIScanner from './pages/AIScanner';
 import Templates from './pages/Templates';
-import AIBugMonitor from './pages/AIBugMonitor';
 import TimeTracking from './pages/TimeTracking';
 import Tasks from './pages/Tasks';
 import WorkHub from './pages/WorkHub';
@@ -71,9 +69,7 @@ const AuthenticatedApp = () => {
         />
       ))}
       <Route path="/Leaderboard" element={<LayoutWrapper currentPageName="Leaderboard"><Leaderboard /></LayoutWrapper>} />
-      <Route path="/AIScanner" element={<LayoutWrapper currentPageName="AIScanner"><AIScanner /></LayoutWrapper>} />
       <Route path="/Templates" element={<LayoutWrapper currentPageName="Templates"><Templates /></LayoutWrapper>} />
-      <Route path="/AIBugMonitor" element={<LayoutWrapper currentPageName="AIBugMonitor"><AIBugMonitor /></LayoutWrapper>} />
       <Route path="/TimeTracking" element={<LayoutWrapper currentPageName="TimeTracking"><TimeTracking /></LayoutWrapper>} />
 
       <Route path="/Tasks" element={<LayoutWrapper currentPageName="Tasks"><Tasks /></LayoutWrapper>} />
@@ -81,7 +77,6 @@ const AuthenticatedApp = () => {
       <Route path="/DiscordBot" element={<LayoutWrapper currentPageName="DiscordBot"><DiscordBot /></LayoutWrapper>} />
 
       <Route path="/Invoicing" element={<LayoutWrapper currentPageName="Invoicing"><Invoicing /></LayoutWrapper>} />
-      <Route path="/AIChangesLog" element={<LayoutWrapper currentPageName="AIChangesLog"><AIChangesLog /></LayoutWrapper>} />
       <Route path="/AITools" element={<LayoutWrapper currentPageName="AITools"><AITools /></LayoutWrapper>} />
       <Route path="/WorkHub" element={<LayoutWrapper currentPageName="WorkHub"><WorkHub /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
