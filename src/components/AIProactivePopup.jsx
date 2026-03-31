@@ -57,11 +57,31 @@ export default function AIProactivePopup({ tasks = [], projects = [] }) {
     setVisible(true);
     setMessages([]);
 
+    // Smart trigger: prioritize insights based on app health
     const overdue = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'completed').length;
-    const prompt = PROACTIVE_PROMPTS[Math.floor(Math.random() * PROACTIVE_PROMPTS.length)];
+    const completed = tasks.filter(t => t.status === 'completed').length;
+    const completionRate = tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0;
+    const unassigned = tasks.filter(t => !t.assigned_to).length;
+    const blocked = tasks.filter(t => t.depends_on?.length > 0).length;
+    const income = budget.filter(b => b.type === 'income').reduce((s, b) => s + (b.amount || 0), 0);
+    const expenses = budget.filter(b => b.type === 'expense').reduce((s, b) => s + Math.abs(b.amount || 0), 0);
+
+    let priority = 'standard';
+    if (overdue > 0) priority = 'overdue';
+    else if (completionRate > 75) priority = 'momentum';
+    else if (unassigned > tasks.length * 0.3) priority = 'assignment';
 
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are Planify AI, a friendly project management assistant. Context: ${projects.length} projects, ${tasks.length} tasks, ${overdue} overdue tasks. ${prompt} Be warm, brief (max 30 words), and address the user directly.`,
+      prompt: `You are Planify AI, a friendly yet insightful project management assistant. Be warm, brief (max 35 words), and address the user directly.
+
+Context:
+- ${projects.length} projects, ${tasks.length} tasks (${completed} done, ${completionRate}% complete)
+- Overdue: ${overdue} | Unassigned: ${unassigned} | Blocked: ${blocked}
+- Budget: $${income.toFixed(0)} income, $${expenses.toFixed(0)} expenses
+- Priority insight: ${priority === 'overdue' ? 'URGENT - Address overdue tasks!' : priority === 'momentum' ? 'CELEBRATE - Great progress momentum!' : priority === 'assignment' ? 'ORGANIZE - Assign pending tasks' : 'OPTIMIZE - Keep workflow smooth'}
+
+Generate a contextual message matching this priority. Be specific and encouraging.`,
+      model: 'gpt_5_mini',
     });
 
     const msg = typeof result === 'string' ? result : result?.response || "Stay focused — you've got this! 🚀";
@@ -79,10 +99,21 @@ export default function AIProactivePopup({ tasks = [], projects = [] }) {
     setMessages(updated);
 
     const overdue = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'completed').length;
+    const completed = tasks.filter(t => t.status === 'completed').length;
+    const completionRate = tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0;
+    const assigned = tasks.filter(t => t.assigned_to).length;
     const history = updated.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
 
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are Planify AI — friendly, sharp, concise. Context: ${projects.length} projects, ${tasks.length} tasks, ${overdue} overdue.\n\nConversation:\n${history}\n\nRespond naturally in 1-3 sentences max. Stay warm and helpful.`,
+      prompt: `You are Planify AI — friendly, sharp, concise, data-aware.
+
+Context: ${projects.length} projects, ${tasks.length} tasks (${completionRate}% done, ${assigned} assigned, ${overdue} overdue).
+
+Conversation:
+${history}
+
+Respond naturally in 1-3 sentences max. Reference actual data if relevant. Stay warm and helpful.`,
+      model: 'gpt_5_mini',
     });
 
     const reply = typeof result === 'string' ? result : result?.response || "Happy to help! 😊";
