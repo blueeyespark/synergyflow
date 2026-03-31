@@ -6,7 +6,7 @@ import {
   LayoutDashboard, FolderKanban, LogOut, Menu, X, Users,
   Moon, Sun, Settings, ChevronDown, BarChart2, CheckSquare,
   Globe, Bot, Receipt, UserCog, History, Scan, Bug, Timer,
-  Trophy, FolderOpen, LayoutTemplate, Share2, Zap
+  Trophy, FolderOpen, LayoutTemplate, Share2, Zap, Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -17,6 +17,7 @@ const navGroups = [
   { label: "Dashboard", icon: LayoutDashboard, page: "Dashboard", single: true },
   { label: "Work", icon: FolderKanban, single: true, page: "WorkHub" },
   { label: "Finance", icon: Receipt, single: true, page: "Reports" },
+  { label: "Time Tracking", icon: Timer, single: true, page: "TimeTrackingAnalytics", adminOnly: false },
   {
     label: "Team",
     icon: Users,

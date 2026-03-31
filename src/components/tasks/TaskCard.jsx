@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import TaskProgressBar from "./TaskProgressBar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -131,6 +132,12 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange, index
               <span>All dependencies completed</span>
             </div>
           )}
+          {/* Progress bar inline */}
+          <div className="mt-3 bg-slate-50 p-2 rounded-lg">
+            <TaskProgressBar task={task} onStageChange={(stage) => {
+              // Parent component should handle this
+            }} />
+          </div>
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <Badge variant="secondary" className={priorityColors[task.priority]}>
               {task.priority}

@@ -62,6 +62,7 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
     reminders: [],
     steps: [],
     image_urls: [],
+    stage: "not_started",
     recurring: { enabled: false, frequency: "weekly", interval: 1, end_date: "", days_of_week: [] }
   });
   const [newStep, setNewStep] = useState("");
@@ -83,7 +84,8 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
         depends_on: task.depends_on || [],
         reminders: task.reminders || [],
         steps: task.steps || [],
-        image_urls: task.image_urls || []
+        image_urls: task.image_urls || [],
+        stage: task.stage || "not_started"
       });
     } else {
       setFormData({
@@ -100,6 +102,7 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
         reminders: [],
         steps: [],
         image_urls: [],
+        stage: "not_started",
         recurring: { enabled: false, frequency: "weekly", interval: 1, end_date: "", days_of_week: [] }
       });
     }
@@ -495,6 +498,24 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
               </Select>
             </div>
           )}
+
+          <div>
+            <Label>Progress Stage</Label>
+            <Select
+              value={formData.stage}
+              onValueChange={(value) => setFormData({ ...formData, stage: value })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="not_started">Not Started</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="testing">Testing</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           {availableTasksForDeps.length > 0 && (
             <div>

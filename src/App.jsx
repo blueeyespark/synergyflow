@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster"
 import Leaderboard from './pages/Leaderboard';
 import Templates from './pages/Templates';
 import UserViewer from './pages/UserViewer';
+import TimeTrackingAnalytics from './pages/TimeTrackingAnalytics';
 import Tasks from './pages/Tasks';
 import WorkHub from './pages/WorkHub';
 import ClientPortal from './pages/ClientPortal';
@@ -76,6 +77,7 @@ const AuthenticatedApp = () => {
       <Route path="/WorkHub" element={<LayoutWrapper currentPageName="WorkHub"><WorkHub /></LayoutWrapper>} />
       <Route path="/ContentCreator" element={<LayoutWrapper currentPageName="ContentCreator"><ContentCreator /></LayoutWrapper>} />
       <Route path="/UserViewer" element={<LayoutWrapper currentPageName="UserViewer"><UserViewer /></LayoutWrapper>} />
+      <Route path="/TimeTrackingAnalytics" element={<LayoutWrapper currentPageName="TimeTrackingAnalytics"><TimeTrackingAnalytics /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
