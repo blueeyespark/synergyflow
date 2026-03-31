@@ -29,19 +29,8 @@ const navGroups = [
         { name: "Client Portal", icon: Globe, page: "ClientPortal", adminOnly: true },
         { name: "Discord Bot", icon: Bot, page: "DiscordBot", adminOnly: true },
       ]},
-    ],
-  },
-  {
-    label: "AI Tools",
-    icon: Scan,
-    adminOnly: true,
-    children: [
-      { section: null, items: [
-        { name: "AI Tools", icon: Scan, page: "AITools" },
-        { name: "Users", icon: Users, page: "UserViewer" },
-      ]},
-    ],
-  },
+      ],
+      }
 ];
 
 export default function TopNav({
