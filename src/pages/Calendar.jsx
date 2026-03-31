@@ -121,6 +121,16 @@ export default function CalendarPage() {
     queryFn: () => base44.entities.Meeting.list('-date'),
   });
 
+  const { data: blogPosts = [] } = useQuery({
+    queryKey: ['blogPosts'],
+    queryFn: () => base44.entities.BlogPost.list('-created_date'),
+  });
+
+  const { data: socialPosts = [] } = useQuery({
+    queryKey: ['socialPosts'],
+    queryFn: () => base44.entities.SocialPost.list('-posted_date'),
+  });
+
   const getTasksForDay = (day) => {
     return tasks.filter(task => {
       if (!task.due_date) return false;
@@ -135,6 +145,19 @@ export default function CalendarPage() {
       const meetingDate = new Date(meeting.date + 'T12:00:00');
       return isSameDay(meetingDate, day);
     });
+  };
+
+  const getContentForDay = (day) => {
+    const dayStr = format(day, 'yyyy-MM-dd');
+    const blog = blogPosts.filter(post => {
+      if (!post.created_date) return false;
+      return format(new Date(post.created_date), 'yyyy-MM-dd') === dayStr;
+    });
+    const social = socialPosts.filter(post => {
+      if (!post.posted_date) return false;
+      return format(new Date(post.posted_date), 'yyyy-MM-dd') === dayStr;
+    });
+    return { blog, social };
   };
 
   const navigatePrev = () => {
@@ -152,31 +175,25 @@ export default function CalendarPage() {
   const renderDayView = () => {
     const dayTasks = getTasksForDay(currentDate);
     const dayMeetings = getMeetingsForDay(currentDate);
+    const dayContent = getContentForDay(currentDate);
     
     return (
       <div className="bg-white rounded-2xl border border-slate-100 p-6">
         <h3 className="text-xl font-semibold mb-4">{format(currentDate, "EEEE, MMMM d, yyyy")}</h3>
-        
-        {dayMeetings.length > 0 && (
+
+        {(dayContent.blog.length > 0 || dayContent.social.length > 0) && (
           <div className="mb-6">
-            <h4 className="text-sm font-medium text-slate-500 mb-2">Meetings</h4>
-            {dayMeetings.map((meeting) => (
-              <div key={meeting.id} className="p-3 bg-indigo-50 rounded-lg mb-2 border-l-4 border-indigo-500 flex items-start justify-between group">
-                <div>
-                  <p className="font-medium">{meeting.title}</p>
-                  <p className="text-sm text-slate-500">{meeting.start_time} - {meeting.end_time}</p>
-                </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedEvent(meeting);
-                    setEventType('meeting');
-                    setShowEventDetails(true);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-indigo-200 rounded"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
+            <h4 className="text-sm font-medium text-slate-500 mb-2">Content</h4>
+            {dayContent.blog.map((post) => (
+              <div key={post.id} className="p-3 bg-blue-50 rounded-lg mb-2 border-l-4 border-blue-500">
+                <p className="font-medium text-sm">{post.title}</p>
+                <p className="text-xs text-slate-500 mt-1">Blog Post</p>
+              </div>
+            ))}
+            {dayContent.social.map((post) => (
+              <div key={post.id} className="p-3 bg-pink-50 rounded-lg mb-2 border-l-4 border-pink-500">
+                <p className="font-medium text-sm">{post.title}</p>
+                <p className="text-xs text-slate-500 mt-1 capitalize">{post.platform}</p>
               </div>
             ))}
           </div>
@@ -235,6 +252,7 @@ export default function CalendarPage() {
           {days.map((day, index) => {
             const dayTasks = getTasksForDay(day);
             const dayMeetings = getMeetingsForDay(day);
+            const dayContent = getContentForDay(day);
             const isCurrentMonth = isSameMonth(day, currentDate);
             
             return (
@@ -258,7 +276,23 @@ export default function CalendarPage() {
                         {format(day, 'd')}
                       </span>
                       <div className="mt-1 space-y-0.5">
-                        {dayTasks.slice(0, 2).map((task) => (
+                        {dayContent.blog.slice(0, 1).map((post) => (
+                          <div
+                            key={post.id}
+                            className="text-xs truncate px-1 py-0.5 rounded bg-blue-500 text-white cursor-pointer hover:opacity-80"
+                          >
+                            📝 {post.title}
+                          </div>
+                        ))}
+                        {dayContent.social.slice(0, 1).map((post) => (
+                          <div
+                            key={post.id}
+                            className="text-xs truncate px-1 py-0.5 rounded bg-pink-500 text-white cursor-pointer hover:opacity-80"
+                          >
+                            📱 {post.title}
+                          </div>
+                        ))}
+                        {dayTasks.slice(0, 1).map((task) => (
                           <div 
                             key={task.id}
                             onClick={(e) => {
@@ -286,17 +320,17 @@ export default function CalendarPage() {
                             {meeting.title}
                           </div>
                         ))}
-                        {(dayTasks.length + dayMeetings.length) > 3 && (
-                          <span className="text-xs text-slate-400">+{dayTasks.length + dayMeetings.length - 3} more</span>
+                        {(dayTasks.length + dayMeetings.length + dayContent.blog.length + dayContent.social.length) > 3 && (
+                          <span className="text-xs text-slate-400">+{dayTasks.length + dayMeetings.length + dayContent.blog.length + dayContent.social.length - 3} more</span>
                         )}
                       </div>
                     </div>
                   </TooltipTrigger>
-                  {(dayTasks.length > 0 || dayMeetings.length > 0) && (
-                    <TooltipContent>
-                      <p className="font-medium">{format(day, 'MMM d')}</p>
-                      <p className="text-xs">{dayTasks.length} tasks, {dayMeetings.length} meetings</p>
-                    </TooltipContent>
+                  {(dayTasks.length > 0 || dayMeetings.length > 0 || dayContent.blog.length > 0 || dayContent.social.length > 0) && (
+                   <TooltipContent>
+                     <p className="font-medium">{format(day, 'MMM d')}</p>
+                     <p className="text-xs">{dayTasks.length} tasks, {dayMeetings.length} meetings, {dayContent.blog.length} blog, {dayContent.social.length} social</p>
+                   </TooltipContent>
                   )}
                 </Tooltip>
               </TooltipProvider>
