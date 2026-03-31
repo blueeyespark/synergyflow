@@ -72,7 +72,7 @@ export default function AIProactivePopup({ tasks = [], projects = [], budget = [
     else if (unassigned > tasks.length * 0.3) priority = 'assignment';
 
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are Planify AI, a friendly yet insightful project management assistant. Be warm, brief (max 35 words), and address the user directly.
+      prompt: `You are Planify AI, a friendly project management assistant. Be warm, brief (max 25 words), and address the user directly.
 
 Context:
 - ${projects.length} projects, ${tasks.length} tasks (${completed} done, ${completionRate}% complete)
@@ -126,14 +126,14 @@ Respond naturally in 1-3 sentences max. Reference actual data if relevant. Stay 
       const first = setTimeout(() => {
         shownRef.current = true;
         triggerPopup();
-      }, 45000);
+      }, 120000); // 2 minutes initial delay
       return () => clearTimeout(first);
     }
   }, [tasks.length]);
 
   useEffect(() => {
     const schedule = () => {
-      const delay = (8 + Math.random() * 7) * 60 * 1000;
+      const delay = (20 + Math.random() * 10) * 60 * 1000; // 20-30 min intervals
       return setTimeout(() => {
         triggerPopup();
         timerRef.current = schedule();

@@ -72,6 +72,8 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
   const [pulsing, setPulsing] = useState(true);
   const [dynamicSuggestions, setDynamicSuggestions] = useState([]);
   const bottomRef = useRef(null);
+  const lastRequestTimeRef = useRef(0);
+  const MIN_REQUEST_INTERVAL = 1000; // 1 second throttle between requests
 
   useEffect(() => {
     if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -119,6 +121,14 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
   const send = async (text) => {
     const userMsg = text || input.trim();
     if (!userMsg) return;
+    
+    // Rate limit: prevent rapid-fire requests
+    const now = Date.now();
+    if (now - lastRequestTimeRef.current < MIN_REQUEST_INTERVAL) {
+      return; // Silent fail to prevent spam
+    }
+    lastRequestTimeRef.current = now;
+    
     setInput("");
     setDynamicSuggestions([]);
     setMessages(prev => [...prev, { role: "user", content: userMsg }]);
@@ -166,7 +176,7 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
       ${isSelfFix ? `The user wants code generation or a fix. Provide:\n1. Brief diagnosis\n2. COMPLETE copy-paste-ready code in a fenced markdown block\n3. Exact file path (e.g., pages/Dashboard.jsx)\n4. Any follow-up steps needed` : isScheduleRequest ? `The user wants to schedule something. Respond with scheduling details including task title, description, due date, assigned_to, priority. Return as JSON with 'schedule_task' field.` : 'Respond in character. Be specific. Reference actual data. Keep under 200 words.'}
 
       Also generate 3 short follow-up questions (under 8 words each). Return as JSON.`,
-       model: isSelfFix ? 'claude_sonnet_4_6' : 'gpt_5_mini',
+       model: 'gpt_5_mini', // Always use cheaper model to reduce costs
         response_json_schema: {
           type: "object",
           properties: {
@@ -206,7 +216,7 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
       setDynamicSuggestions(suggestions);
       setTimeout(() => setTalking(false), Math.min(response.length * 30, 4000));
     } catch (err) {
-      setMessages(prev => [...prev, { role: "assistant", content: "Hmm, I hit a snag — possibly a rate limit. Give me a moment and try again! 🔄" }]);
+      setMessages(prev => [...prev, { role: "assistant", content: "Hmm, I hit a snag. Give me a moment and try again! 🔄" }]);
     } finally {
       setLoading(false);
     }
@@ -314,7 +324,7 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
               />
               <button
                 onClick={() => send()}
-                disabled={loading || !input.trim()}
+                disabled={loading || !input.trim() || (Date.now() - lastRequestTimeRef.current < MIN_REQUEST_INTERVAL)}
                 className="w-9 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 flex items-center justify-center transition-colors flex-shrink-0"
               >
                 <Send className="w-4 h-4 text-white" />
