@@ -18,27 +18,28 @@ import OfflineBanner from "@/components/OfflineBanner";
 import AIAssistant from "@/components/AIAssistant";
 import AIProactivePopup from "@/components/AIProactivePopup";
 
-const navItems = [
+const allNavItems = [
   { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
   { name: "Projects", icon: FolderKanban, page: "Projects" },
   { name: "Planner", icon: FolderOpen, page: "Planner" },
   { name: "Calendar", icon: Calendar, page: "Calendar" },
+  { name: "Tasks", icon: CheckSquare, page: "Tasks" },
+  { name: "Time Tracking", icon: Timer, page: "TimeTracking" },
   { name: "Budget", icon: DollarSign, page: "Budget" },
-  { name: "Reports", icon: Share2, page: "Reports" },
   { name: "Blog", icon: Users, page: "Blog" },
   { name: "Templates", icon: LayoutTemplate, page: "Templates" },
   { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
-  { name: "AI Scanner", icon: Scan, page: "AIScanner" },
-  { name: "Bug Monitor", icon: Bug, page: "AIBugMonitor" },
-  { name: "Time Tracking", icon: Timer, page: "TimeTracking" },
-  { name: "Analytics", icon: BarChart2, page: "Analytics" },
-  { name: "Tasks", icon: CheckSquare, page: "Tasks" },
-  { name: "Workload", icon: Users, page: "WorkloadDashboard" },
-  { name: "Client Portal", icon: Globe, page: "ClientPortal" },
-  { name: "Discord", icon: Bot, page: "DiscordBot" },
-  { name: "Heatmap", icon: Flame, page: "WorkloadHeatmap" },
-  { name: "Invoicing", icon: Receipt, page: "Invoicing" },
-  { name: "Scheduler", icon: UserCog, page: "ResourceScheduler" },
+  // Admin-only
+  { name: "Reports", icon: Share2, page: "Reports", adminOnly: true },
+  { name: "Analytics", icon: BarChart2, page: "Analytics", adminOnly: true },
+  { name: "Workload", icon: Users, page: "WorkloadDashboard", adminOnly: true },
+  { name: "Heatmap", icon: Flame, page: "WorkloadHeatmap", adminOnly: true },
+  { name: "Scheduler", icon: UserCog, page: "ResourceScheduler", adminOnly: true },
+  { name: "Client Portal", icon: Globe, page: "ClientPortal", adminOnly: true },
+  { name: "Invoicing", icon: Receipt, page: "Invoicing", adminOnly: true },
+  { name: "AI Scanner", icon: Scan, page: "AIScanner", adminOnly: true },
+  { name: "Bug Monitor", icon: Bug, page: "AIBugMonitor", adminOnly: true },
+  { name: "Discord", icon: Bot, page: "DiscordBot", adminOnly: true },
 ];
 
 export default function Layout({ children, currentPageName }) {
@@ -80,6 +81,9 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     base44.auth.me().then(setUser);
   }, []);
+
+  const isAdmin = user?.role === 'admin';
+  const navItems = allNavItems.filter(item => !item.adminOnly || isAdmin);
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
