@@ -1,0 +1,45 @@
+{
+  "name": "ClientComment",
+  "type": "object",
+  "properties": {
+    "portal_id": {
+      "type": "string"
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "author_name": {
+      "type": "string"
+    },
+    "author_email": {
+      "type": "string"
+    },
+    "is_approval": {
+      "type": "boolean",
+      "default": false
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "approval_note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "portal_id",
+    "content",
+    "author_name"
+  ]
+}
