@@ -225,7 +225,7 @@ Also generate 3 short follow-up questions (under 8 words each). Return as JSON.`
                           : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-100 shadow-sm border border-slate-100 dark:border-slate-600 rounded-bl-sm'
                   }`}>
                     {msg.role === 'assistant'
-                      ? <ReactMarkdown className="prose prose-sm prose-invert dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">{msg.content}</ReactMarkdown>
+                      ? <ReactMarkdown className="prose prose-sm prose-slate dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">{msg.content}</ReactMarkdown>
                       : msg.content
                     }
                   </div>
