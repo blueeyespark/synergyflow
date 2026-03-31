@@ -95,6 +95,17 @@ export default function TopNav({
             {navGroups.filter(g => !g.single && (!g.adminOnly || isAdmin)).map(group => (
               <NavDropdown key={group.label} group={group} currentPageName={currentPageName} isAdmin={isAdmin} />
             ))}
+            {isAdmin && (
+              <Link
+                to={createPageUrl('UserViewer')}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  currentPageName === 'UserViewer' ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                }`}
+              >
+                <Users className="w-4 h-4" />
+                Users
+              </Link>
+            )}
             {navGroups.filter(g => g.single && g.page !== 'Dashboard' && g.page !== 'WorkHub' && g.page !== 'Reports' && (!g.adminOnly || isAdmin)).map(group => (
               <Link
                 key={group.page}
