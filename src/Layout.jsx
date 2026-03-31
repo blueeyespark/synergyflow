@@ -218,7 +218,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-1 overflow-x-auto max-w-[55vw] scrollbar-none" style={{scrollbarWidth:'none'}}>
               {navItems.map((item) => {
                 const isActive = currentPageName === item.page;
                 return (
