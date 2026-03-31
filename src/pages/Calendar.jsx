@@ -8,9 +8,10 @@ import {
   addMonths, subMonths, addYears, subYears, startOfYear, endOfYear,
   eachMonthOfInterval
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Share2, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Share2, Download, Edit2 } from "lucide-react";
 import GoogleCalendarImport from "@/components/calendar/GoogleCalendarImport";
 import QuickScheduleModal from "@/components/calendar/QuickScheduleModal";
+import EventActionsModal from "@/components/calendar/EventActionsModal";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -35,17 +36,28 @@ export default function CalendarPage() {
   const [showGCalImport, setShowGCalImport] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [eventType, setEventType] = useState(null);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const { refetch: refetchTasks } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: () => base44.entities.Task.list('-due_date'),
+  });
+  const { refetch: refetchMeetings } = useQuery({
+    queryKey: ['meetings'],
+    queryFn: () => base44.entities.Meeting.list('-date'),
+  });
 
   useEffect(() => {
     base44.auth.me().then(setUser);
   }, []);
 
-  const { data: tasks = [] } = useQuery({
+  const { data: tasks = [], refetch: refetchTasksData } = useQuery({
     queryKey: ['tasks'],
     queryFn: () => base44.entities.Task.list('-due_date'),
   });
 
-  const { data: meetings = [] } = useQuery({
+  const { data: meetings = [], refetch: refetchMeetingsData } = useQuery({
     queryKey: ['meetings'],
     queryFn: () => base44.entities.Meeting.list('-date'),
   });
@@ -90,9 +102,21 @@ export default function CalendarPage() {
           <div className="mb-6">
             <h4 className="text-sm font-medium text-slate-500 mb-2">Meetings</h4>
             {dayMeetings.map((meeting) => (
-              <div key={meeting.id} className="p-3 bg-indigo-50 rounded-lg mb-2 border-l-4 border-indigo-500">
-                <p className="font-medium">{meeting.title}</p>
-                <p className="text-sm text-slate-500">{meeting.start_time} - {meeting.end_time}</p>
+              <div key={meeting.id} className="p-3 bg-indigo-50 rounded-lg mb-2 border-l-4 border-indigo-500 flex items-start justify-between group">
+                <div>
+                  <p className="font-medium">{meeting.title}</p>
+                  <p className="text-sm text-slate-500">{meeting.start_time} - {meeting.end_time}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setSelectedEvent(meeting);
+                    setEventType('meeting');
+                    setShowEventModal(true);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-indigo-200 rounded"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
               </div>
             ))}
           </div>
@@ -102,12 +126,24 @@ export default function CalendarPage() {
           <div>
             <h4 className="text-sm font-medium text-slate-500 mb-2">Tasks Due</h4>
             {dayTasks.map((task) => (
-              <div key={task.id} className="p-3 bg-slate-50 rounded-lg mb-2 flex items-center gap-3">
-                <div className={`w-2 h-2 rounded-full ${priorityColors[task.priority]}`} />
-                <div>
-                  <p className="font-medium">{task.title}</p>
-                  <p className="text-xs text-slate-500 capitalize">{task.status.replace('_', ' ')}</p>
+              <div key={task.id} className="p-3 bg-slate-50 rounded-lg mb-2 flex items-center gap-3 justify-between group">
+                <div className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full ${priorityColors[task.priority]}`} />
+                  <div>
+                    <p className="font-medium">{task.title}</p>
+                    <p className="text-xs text-slate-500 capitalize">{task.status.replace('_', ' ')}</p>
+                  </div>
                 </div>
+                <button
+                  onClick={() => {
+                    setSelectedEvent(task);
+                    setEventType('task');
+                    setShowEventModal(true);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-200 rounded"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
               </div>
             ))}
           </div>
@@ -163,14 +199,29 @@ export default function CalendarPage() {
                       <div className="mt-1 space-y-0.5">
                         {dayTasks.slice(0, 2).map((task) => (
                           <div 
-                            key={task.id} 
-                            className={`text-xs truncate px-1 py-0.5 rounded ${priorityColors[task.priority]} text-white`}
+                            key={task.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedEvent(task);
+                              setEventType('task');
+                              setShowEventModal(true);
+                            }}
+                            className={`text-xs truncate px-1 py-0.5 rounded ${priorityColors[task.priority]} text-white cursor-pointer hover:opacity-80`}
                           >
                             {task.title}
                           </div>
                         ))}
                         {dayMeetings.slice(0, 1).map((meeting) => (
-                          <div key={meeting.id} className="text-xs truncate px-1 py-0.5 rounded bg-indigo-500 text-white">
+                          <div
+                            key={meeting.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedEvent(meeting);
+                              setEventType('meeting');
+                              setShowEventModal(true);
+                            }}
+                            className="text-xs truncate px-1 py-0.5 rounded bg-indigo-500 text-white cursor-pointer hover:opacity-80"
+                          >
                             {meeting.title}
                           </div>
                         ))}
@@ -286,6 +337,23 @@ export default function CalendarPage() {
           onOpenChange={setShowScheduleModal}
           selectedDate={selectedDate}
         />
+
+        {selectedEvent && (
+          <EventActionsModal
+            open={showEventModal}
+            onOpenChange={setShowEventModal}
+            event={selectedEvent}
+            type={eventType}
+            onUpdate={() => {
+              if (eventType === 'task') refetchTasksData();
+              else refetchMeetingsData();
+            }}
+            onDelete={() => {
+              if (eventType === 'task') refetchTasksData();
+              else refetchMeetingsData();
+            }}
+          />
+        )}
       </div>
     </div>
   );
