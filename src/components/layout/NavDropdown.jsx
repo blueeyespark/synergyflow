@@ -6,10 +6,29 @@ import { ChevronDown } from "lucide-react";
 
 export default function NavDropdown({ group, currentPageName, isAdmin }) {
   const [open, setOpen] = useState(false);
-  const children = group.children?.filter(c => !c.adminOnly || isAdmin) || [];
-  const isActive = children.some(c => c.page === currentPageName);
+  
+  // Handle both flat and sectioned structures
+  const hasSections = group.children?.[0]?.section;
+  let isActive = false;
+  let flatChildren = [];
+  
+  if (hasSections) {
+    // New sectioned format
+    group.children.forEach(section => {
+      section.items.forEach(item => {
+        if (!item.adminOnly || isAdmin) {
+          flatChildren.push(item);
+          if (item.page === currentPageName) isActive = true;
+        }
+      });
+    });
+  } else {
+    // Old flat format
+    flatChildren = group.children?.filter(c => !c.adminOnly || isAdmin) || [];
+    isActive = flatChildren.some(c => c.page === currentPageName);
+  }
 
-  if (children.length === 0) return null;
+  if (flatChildren.length === 0) return null;
 
   return (
     <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
@@ -30,22 +49,53 @@ export default function NavDropdown({ group, currentPageName, isAdmin }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.12 }}
-            className="absolute top-full left-0 mt-1 w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-1.5 z-50"
+            className="absolute top-full left-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-1.5 z-50 min-w-max"
           >
-            {children.map(item => (
-              <Link
-                key={item.page}
-                to={createPageUrl(item.page)}
-                className={`flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${
-                  currentPageName === item.page
-                    ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 font-medium"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
-                }`}
-              >
-                <item.icon className="w-4 h-4" />
-                {item.name}
-              </Link>
-            ))}
+            {hasSections ? (
+              // Sectioned layout
+              group.children.map((section, idx) => {
+                const visibleItems = section.items.filter(i => !i.adminOnly || isAdmin);
+                if (visibleItems.length === 0) return null;
+                return (
+                  <div key={idx}>
+                    <div className="px-3 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                      {section.section}
+                    </div>
+                    {visibleItems.map(item => (
+                      <Link
+                        key={item.page}
+                        to={createPageUrl(item.page)}
+                        className={`flex items-center gap-2.5 px-3 py-2 text-sm transition-colors whitespace-nowrap ${
+                          currentPageName === item.page
+                            ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 font-medium"
+                            : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4 flex-shrink-0" />
+                        {item.name}
+                      </Link>
+                    ))}
+                    {idx < group.children.length - 1 && <div className="border-t border-slate-100 dark:border-slate-700 my-1" />}
+                  </div>
+                );
+              })
+            ) : (
+              // Flat layout (legacy)
+              flatChildren.map(item => (
+                <Link
+                  key={item.page}
+                  to={createPageUrl(item.page)}
+                  className={`flex items-center gap-2.5 px-3 py-2 text-sm transition-colors whitespace-nowrap ${
+                    currentPageName === item.page
+                      ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 font-medium"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  <item.icon className="w-4 h-4 flex-shrink-0" />
+                  {item.name}
+                </Link>
+              ))
+            )}
           </motion.div>
         )}
       </AnimatePresence>

@@ -16,30 +16,46 @@ import NavDropdown from "./NavDropdown";
 const navGroups = [
   { label: "Dashboard", icon: LayoutDashboard, page: "Dashboard", single: true },
   { label: "Work", icon: FolderKanban, single: true, page: "WorkHub" },
-  { label: "Video Tools", icon: Zap, children: [
-    { name: "Video Editor", icon: Clock, page: "VideoEditor" },
-    { name: "Intro/Outro", icon: Clock, page: "IntroOutroMaker" },
-    { name: "Thumbnails", icon: Clock, page: "ThumbnailMaker" },
-    { name: "Analytics", icon: Clock, page: "VideoAnalytics" },
-    { name: "Media Library", icon: Clock, page: "MediaLibrary" },
-  ]},
-  { label: "Finance", icon: Receipt, single: true, page: "Reports" },
-  { label: "Time Tracking", icon: Timer, single: true, page: "TimeTrackingAnalytics", adminOnly: false },
   {
-    label: "Team",
-    icon: Users,
+    label: "Create & Produce",
+    icon: Zap,
     children: [
-      { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
-      { name: "Reports & Analytics", icon: BarChart2, page: "Reports" },
+      { section: "Video Production", items: [
+        { name: "Video Editor", icon: Clock, page: "VideoEditor" },
+        { name: "Intro/Outro Maker", icon: Clock, page: "IntroOutroMaker" },
+        { name: "Thumbnail Creator", icon: Clock, page: "ThumbnailMaker" },
+      ]},
+      { section: "Content Management", items: [
+        { name: "Media Library", icon: Folder, page: "MediaLibrary" },
+        { name: "Templates", icon: LayoutTemplate, page: "Templates" },
+        { name: "Blog", icon: Globe, page: "Blog" },
+      ]},
     ],
   },
   {
-    label: "Content",
-    icon: Globe,
+    label: "Insights & Analytics",
+    icon: BarChart2,
     children: [
-      { name: "Blog", icon: Globe, page: "Blog" },
-      { name: "Client Portal", icon: Globe, page: "ClientPortal", adminOnly: true },
-      { name: "Discord Bot", icon: Bot, page: "DiscordBot", adminOnly: true },
+      { section: "Video Performance", items: [
+        { name: "Video Analytics", icon: TrendingUp, page: "VideoAnalytics" },
+      ]},
+      { section: "Business Metrics", items: [
+        { name: "Time Tracking", icon: Timer, page: "TimeTrackingAnalytics" },
+        { name: "Reports", icon: Receipt, page: "Reports" },
+      ]},
+    ],
+  },
+  {
+    label: "Team & Collaboration",
+    icon: Users,
+    children: [
+      { section: "Team", items: [
+        { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
+      ]},
+      { section: "Sharing & Engagement", items: [
+        { name: "Client Portal", icon: Globe, page: "ClientPortal", adminOnly: true },
+        { name: "Discord Bot", icon: Bot, page: "DiscordBot", adminOnly: true },
+      ]},
     ],
   },
   { label: "AI Tools", icon: Scan, single: true, page: "AITools", adminOnly: true },
