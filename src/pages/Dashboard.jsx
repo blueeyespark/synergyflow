@@ -98,18 +98,22 @@ export default function Dashboard() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => base44.entities.Project.list('-created_date'),
-    refetchInterval: 30000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: false,
   });
 
   const { data: tasks = [] } = useQuery({
     queryKey: ['tasks'],
     queryFn: () => base44.entities.Task.list('-created_date'),
-    refetchInterval: 30000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: false,
   });
 
   const { data: budget = [] } = useQuery({
     queryKey: ['budget'],
     queryFn: () => base44.entities.Budget.list('-date'),
+    staleTime: 15 * 60 * 1000,
+    refetchInterval: false,
   });
 
   const createProjectMutation = useMutation({
