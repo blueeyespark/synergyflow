@@ -10,6 +10,7 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Share2, Download } from "lucide-react";
 import GoogleCalendarImport from "@/components/calendar/GoogleCalendarImport";
+import QuickScheduleModal from "@/components/calendar/QuickScheduleModal";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -32,6 +33,8 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("month");
   const [showGCalImport, setShowGCalImport] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
     base44.auth.me().then(setUser);
@@ -143,8 +146,8 @@ export default function CalendarPage() {
                   <TooltipTrigger asChild>
                     <div
                       onClick={() => {
-                        setCurrentDate(day);
-                        setView("day");
+                        setSelectedDate(day);
+                        setShowScheduleModal(true);
                       }}
                       className={`min-h-24 p-2 border-b border-r border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors ${
                         !isCurrentMonth ? 'bg-slate-50/50' : ''
@@ -276,6 +279,12 @@ export default function CalendarPage() {
           open={showGCalImport}
           onOpenChange={setShowGCalImport}
           onImported={() => setShowGCalImport(false)}
+        />
+
+        <QuickScheduleModal
+          open={showScheduleModal}
+          onOpenChange={setShowScheduleModal}
+          selectedDate={selectedDate}
         />
       </div>
     </div>
