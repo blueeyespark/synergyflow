@@ -9,6 +9,9 @@ import ClientPortal from './pages/ClientPortal';
 import DiscordBot from './pages/DiscordBot';
 import AITools from './pages/AITools';
 import ContentCreator from './pages/ContentCreator';
+import VideoEditor from './pages/VideoEditor';
+import IntroOutroMaker from './pages/IntroOutroMaker';
+import ThumbnailMaker from './pages/ThumbnailMaker';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -78,6 +81,9 @@ const AuthenticatedApp = () => {
       <Route path="/ContentCreator" element={<LayoutWrapper currentPageName="ContentCreator"><ContentCreator /></LayoutWrapper>} />
       <Route path="/UserViewer" element={<LayoutWrapper currentPageName="UserViewer"><UserViewer /></LayoutWrapper>} />
       <Route path="/TimeTrackingAnalytics" element={<LayoutWrapper currentPageName="TimeTrackingAnalytics"><TimeTrackingAnalytics /></LayoutWrapper>} />
+      <Route path="/VideoEditor" element={<LayoutWrapper currentPageName="VideoEditor"><VideoEditor /></LayoutWrapper>} />
+      <Route path="/IntroOutroMaker" element={<LayoutWrapper currentPageName="IntroOutroMaker"><IntroOutroMaker /></LayoutWrapper>} />
+      <Route path="/ThumbnailMaker" element={<LayoutWrapper currentPageName="ThumbnailMaker"><ThumbnailMaker /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
