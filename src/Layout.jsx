@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard, FolderKanban, LogOut, Menu, X,
   Calendar, DollarSign, Users, Share2, FolderOpen, Moon, Sun, Settings, Trophy, Scan,
-  LayoutTemplate, Bug, Timer, BarChart2, CheckSquare, Globe
+  LayoutTemplate, Bug, Timer, BarChart2, CheckSquare, Globe, Bot
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -16,6 +16,7 @@ import PointsToast from "@/components/gamification/PointsToast";
 import WorkspaceSelector from "@/components/workspace/WorkspaceSelector";
 import OfflineBanner from "@/components/OfflineBanner";
 import AIAssistant from "@/components/AIAssistant";
+import AIProactivePopup from "@/components/AIProactivePopup";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
@@ -34,6 +35,7 @@ const navItems = [
   { name: "Tasks", icon: CheckSquare, page: "Tasks" },
   { name: "Workload", icon: Users, page: "WorkloadDashboard" },
   { name: "Client Portal", icon: Globe, page: "ClientPortal" },
+  { name: "Discord", icon: Bot, page: "DiscordBot" },
 ];
 
 export default function Layout({ children, currentPageName }) {
@@ -145,6 +147,7 @@ export default function Layout({ children, currentPageName }) {
       {pointsEvent && <PointsToast event={pointsEvent} onDismiss={() => setPointsEvent(null)} />}
       <OfflineBanner />
       <AIAssistant projects={projects} tasks={tasks} budget={budget} />
+      <AIProactivePopup projects={projects} tasks={tasks} />
       <style>{`
         .dark { --background: 15 23 42; --foreground: 248 250 252; }
         .dark .bg-white { background-color: rgb(30 41 59) !important; }

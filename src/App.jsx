@@ -8,6 +8,7 @@ import Analytics from './pages/Analytics';
 import Tasks from './pages/Tasks';
 import WorkloadDashboard from './pages/WorkloadDashboard';
 import ClientPortal from './pages/ClientPortal';
+import DiscordBot from './pages/DiscordBot';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -76,6 +77,7 @@ const AuthenticatedApp = () => {
       <Route path="/Tasks" element={<LayoutWrapper currentPageName="Tasks"><Tasks /></LayoutWrapper>} />
       <Route path="/WorkloadDashboard" element={<LayoutWrapper currentPageName="WorkloadDashboard"><WorkloadDashboard /></LayoutWrapper>} />
       <Route path="/ClientPortal" element={<LayoutWrapper currentPageName="ClientPortal"><ClientPortal /></LayoutWrapper>} />
+      <Route path="/DiscordBot" element={<LayoutWrapper currentPageName="DiscordBot"><DiscordBot /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
