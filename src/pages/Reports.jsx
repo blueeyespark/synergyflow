@@ -377,18 +377,221 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="tasks" className="space-y-6">
+        <Tabs defaultValue="dashboard" className="space-y-6">
           <TabsList className="bg-white border shadow-sm flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="tasks">Task Analytics</TabsTrigger>
-            <TabsTrigger value="team">Team Performance</TabsTrigger>
-            <TabsTrigger value="budget">Budget Analysis</TabsTrigger>
-            <TabsTrigger value="time">Time & Workload</TabsTrigger>
+            <TabsTrigger value="dashboard">📊 Dashboard</TabsTrigger>
             <TabsTrigger value="budgetmgr">💰 Budget</TabsTrigger>
             <TabsTrigger value="timetracker">⏱ Time Tracker</TabsTrigger>
             <TabsTrigger value="invoicing">🧾 Invoicing</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="tasks" className="space-y-6">
+          <TabsContent value="dashboard" className="space-y-6">
+            {/* Task Analytics */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 text-slate-900">Task Analytics</h2>
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mb-6">
+                <h3 className="font-semibold mb-4">Task Activity Trend</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={dailyCompletion}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
+                    <YAxis stroke="#64748b" fontSize={12} />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="created" stackId="1" stroke="#6366f1" fill="#6366f1" fillOpacity={0.3} name="Created" />
+                    <Area type="monotone" dataKey="completed" stackId="2" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} name="Completed" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="grid lg:grid-cols-2 gap-6 mb-6">
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                  <h3 className="font-semibold mb-4">Tasks by Status</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <RePieChart>
+                      <Pie data={tasksByStatus} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => percent > 0 ? `${name} ${(percent * 100).toFixed(0)}%` : ''}>
+                        {tasksByStatus.map((_, index) => (
+                          <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </RePieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                  <h3 className="font-semibold mb-4">Tasks by Priority</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={tasksByPriority}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="name" stroke="#64748b" />
+                      <YAxis stroke="#64748b" />
+                      <Tooltip />
+                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                        {tasksByPriority.map((_, index) => (
+                          <Cell key={index} fill={['#3b82f6', '#f59e0b', '#f97316', '#ef4444'][index]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+
+            {/* Team Performance */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 text-slate-900">Team Performance</h2>
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mb-6">
+                <h3 className="font-semibold mb-4">Team Performance</h3>
+                {teamPerformance.length === 0 ? (
+                  <p className="text-center text-slate-400 py-8">No team data available for selected filters</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={teamPerformance} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis type="number" stroke="#64748b" />
+                      <YAxis dataKey="name" type="category" stroke="#64748b" width={100} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="completed" fill="#22c55e" name="Completed" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="total" fill="#e2e8f0" name="Total" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4 mb-6">
+                {teamPerformance.slice(0, 6).map((member, index) => (
+                  <div key={member.email} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold ${
+                        index === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-600' : 
+                        index === 1 ? 'bg-gradient-to-br from-slate-400 to-slate-600' : 
+                        index === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-800' :
+                        'bg-gradient-to-br from-indigo-400 to-indigo-600'
+                      }`}>
+                        {index < 3 ? index + 1 : member.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-semibold">{member.name}</p>
+                        <p className="text-sm text-slate-500">{member.completed} / {member.total} tasks</p>
+                      </div>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all" style={{ width: `${member.rate}%` }} />
+                    </div>
+                    <p className="text-right text-sm text-slate-500 mt-1">{member.rate}% completion</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Budget Analysis */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 text-slate-900">Budget Analysis</h2>
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mb-6">
+                <h3 className="font-semibold mb-4">Budget by Category</h3>
+                {budgetByCategory.length === 0 ? (
+                  <p className="text-center text-slate-400 py-8">No budget data available for selected filters</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={budgetByCategory}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="name" stroke="#64748b" />
+                      <YAxis stroke="#64748b" />
+                      <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                      <Legend />
+                      <Bar dataKey="income" fill="#22c55e" name="Income" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="expense" fill="#ef4444" name="Expense" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mb-6">
+                <h3 className="font-semibold mb-4">Budget Summary</h3>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="p-4 bg-green-50 rounded-xl">
+                    <p className="text-sm text-green-600 mb-1">Total Income</p>
+                    <p className="text-2xl font-bold text-green-700">${totalIncome.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 bg-red-50 rounded-xl">
+                    <p className="text-sm text-red-600 mb-1">Total Expenses</p>
+                    <p className="text-2xl font-bold text-red-700">${totalExpenses.toLocaleString()}</p>
+                  </div>
+                  <div className={`p-4 rounded-xl ${totalIncome - totalExpenses >= 0 ? 'bg-indigo-50' : 'bg-amber-50'}`}>
+                    <p className={`text-sm mb-1 ${totalIncome - totalExpenses >= 0 ? 'text-indigo-600' : 'text-amber-600'}`}>Net</p>
+                    <p className={`text-2xl font-bold ${totalIncome - totalExpenses >= 0 ? 'text-indigo-700' : 'text-amber-700'}`}>
+                      ${(totalIncome - totalExpenses).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Time & Workload */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 text-slate-900">Time & Workload</h2>
+              <div className="grid lg:grid-cols-2 gap-6 mb-6">
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                  <h3 className="font-semibold mb-1">Billable vs Non-Billable Hours</h3>
+                  <p className="text-xs text-slate-400 mb-4">Total: {totalBillableHrs}h billable</p>
+                  {billableData.every(d => d.value === 0) ? (
+                    <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No time entries yet</div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height={220}>
+                      <RePieChart>
+                        <Pie data={billableData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={4} dataKey="value" label={({ name, value }) => `${name}: ${value}h`} labelLine={false}>
+                          <Cell fill="#6366f1" />
+                          <Cell fill="#e2e8f0" />
+                        </Pie>
+                        <Tooltip formatter={(v) => `${v}h`} contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
+                        <Legend wrapperStyle={{ fontSize: 12 }} />
+                      </RePieChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                  <h3 className="font-semibold mb-1">Hours by Project</h3>
+                  <p className="text-xs text-slate-400 mb-4">Billable & non-billable per project</p>
+                  {billableByProject.length === 0 ? (
+                    <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No time entries yet</div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={billableByProject} layout="vertical" margin={{ top: 4, right: 16, bottom: 0, left: 8 }} barSize={12}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                        <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} unit="h" />
+                        <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} width={80} />
+                        <Tooltip formatter={(v) => `${v}h`} contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
+                        <Legend wrapperStyle={{ fontSize: 12 }} />
+                        <Bar dataKey="billable" name="Billable" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                        <Bar dataKey="nonBillable" name="Non-Billable" fill="#e2e8f0" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <h3 className="font-semibold mb-4">Workload Distribution by Member</h3>
+                {workloadData.length === 0 ? (
+                  <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No assigned tasks yet</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={workloadData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }} barSize={18}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                      <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
+                      <Legend wrapperStyle={{ fontSize: 12 }} />
+                      <Bar dataKey="todo" name="To Do" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="in_progress" name="In Progress" fill="#f97316" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="completed" name="Completed" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+          </TabsContent>
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
               <h3 className="font-semibold mb-4">Task Activity Trend</h3>
               <ResponsiveContainer width="100%" height={300}>
@@ -435,154 +638,6 @@ export default function ReportsPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="team" className="space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h3 className="font-semibold mb-4">Team Performance</h3>
-              {teamPerformance.length === 0 ? (
-                <p className="text-center text-slate-400 py-8">No team data available for selected filters</p>
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={teamPerformance} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis type="number" stroke="#64748b" />
-                    <YAxis dataKey="name" type="category" stroke="#64748b" width={100} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="completed" fill="#22c55e" name="Completed" radius={[0, 4, 4, 0]} />
-                    <Bar dataKey="total" fill="#e2e8f0" name="Total" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-4">
-              {teamPerformance.slice(0, 6).map((member, index) => (
-                <div key={member.email} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold ${
-                      index === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-600' : 
-                      index === 1 ? 'bg-gradient-to-br from-slate-400 to-slate-600' : 
-                      index === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-800' :
-                      'bg-gradient-to-br from-indigo-400 to-indigo-600'
-                    }`}>
-                      {index < 3 ? index + 1 : member.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="font-semibold">{member.name}</p>
-                      <p className="text-sm text-slate-500">{member.completed} / {member.total} tasks</p>
-                    </div>
-                  </div>
-                  <div className="w-full bg-slate-100 rounded-full h-2">
-                    <div className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all" style={{ width: `${member.rate}%` }} />
-                  </div>
-                  <p className="text-right text-sm text-slate-500 mt-1">{member.rate}% completion</p>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="budget" className="space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h3 className="font-semibold mb-4">Budget by Category</h3>
-              {budgetByCategory.length === 0 ? (
-                <p className="text-center text-slate-400 py-8">No budget data available for selected filters</p>
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={budgetByCategory}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="name" stroke="#64748b" />
-                    <YAxis stroke="#64748b" />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-                    <Legend />
-                    <Bar dataKey="income" fill="#22c55e" name="Income" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="expense" fill="#ef4444" name="Expense" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-
-            {/* Budget Summary */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h3 className="font-semibold mb-4">Budget Summary</h3>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="p-4 bg-green-50 rounded-xl">
-                  <p className="text-sm text-green-600 mb-1">Total Income</p>
-                  <p className="text-2xl font-bold text-green-700">${totalIncome.toLocaleString()}</p>
-                </div>
-                <div className="p-4 bg-red-50 rounded-xl">
-                  <p className="text-sm text-red-600 mb-1">Total Expenses</p>
-                  <p className="text-2xl font-bold text-red-700">${totalExpenses.toLocaleString()}</p>
-                </div>
-                <div className={`p-4 rounded-xl ${totalIncome - totalExpenses >= 0 ? 'bg-indigo-50' : 'bg-amber-50'}`}>
-                  <p className={`text-sm mb-1 ${totalIncome - totalExpenses >= 0 ? 'text-indigo-600' : 'text-amber-600'}`}>Net</p>
-                  <p className={`text-2xl font-bold ${totalIncome - totalExpenses >= 0 ? 'text-indigo-700' : 'text-amber-700'}`}>
-                    ${(totalIncome - totalExpenses).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-          <TabsContent value="time" className="space-y-6">
-            <div className="grid lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                <h3 className="font-semibold mb-1">Billable vs Non-Billable Hours</h3>
-                <p className="text-xs text-slate-400 mb-4">Total: {totalBillableHrs}h billable</p>
-                {billableData.every(d => d.value === 0) ? (
-                  <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No time entries yet</div>
-                ) : (
-                  <ResponsiveContainer width="100%" height={220}>
-                    <RePieChart>
-                      <Pie data={billableData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={4} dataKey="value" label={({ name, value }) => `${name}: ${value}h`} labelLine={false}>
-                        <Cell fill="#6366f1" />
-                        <Cell fill="#e2e8f0" />
-                      </Pie>
-                      <Tooltip formatter={(v) => `${v}h`} contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
-                      <Legend wrapperStyle={{ fontSize: 12 }} />
-                    </RePieChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                <h3 className="font-semibold mb-1">Hours by Project</h3>
-                <p className="text-xs text-slate-400 mb-4">Billable & non-billable per project</p>
-                {billableByProject.length === 0 ? (
-                  <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No time entries yet</div>
-                ) : (
-                  <ResponsiveContainer width="100%" height={220}>
-                    <BarChart data={billableByProject} layout="vertical" margin={{ top: 4, right: 16, bottom: 0, left: 8 }} barSize={12}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-                      <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} unit="h" />
-                      <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} width={80} />
-                      <Tooltip formatter={(v) => `${v}h`} contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
-                      <Legend wrapperStyle={{ fontSize: 12 }} />
-                      <Bar dataKey="billable" name="Billable" fill="#6366f1" radius={[0, 4, 4, 0]} />
-                      <Bar dataKey="nonBillable" name="Non-Billable" fill="#e2e8f0" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </div>
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h3 className="font-semibold mb-4">Workload Distribution by Member</h3>
-              {workloadData.length === 0 ? (
-                <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No assigned tasks yet</div>
-              ) : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={workloadData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }} barSize={18}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} allowDecimals={false} />
-                    <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="todo" name="To Do" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="in_progress" name="In Progress" fill="#f97316" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="completed" name="Completed" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
             </div>
           </TabsContent>
           <TabsContent value="budgetmgr" className="-mx-4 sm:-mx-6 lg:-mx-8">
