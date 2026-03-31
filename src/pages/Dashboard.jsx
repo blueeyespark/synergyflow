@@ -228,7 +228,7 @@ export default function Dashboard() {
         </CollapsibleSection>
 
         <CollapsibleSection title="Activity Feed" icon={CheckSquare} defaultOpen={true}>
-          <ActivityFeed projects={myProjects} />
+          <ActivityFeed projects={myProjects} userEmail={user?.email} />
         </CollapsibleSection>
 
         <CollapsibleSection title="Project Health Monitor" icon={Brain} defaultOpen={false}>

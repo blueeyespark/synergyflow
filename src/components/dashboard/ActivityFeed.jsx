@@ -16,9 +16,9 @@ const ACTION_CONFIG = {
   assigned:       { icon: Activity,   color: "bg-indigo-100 text-indigo-600", label: "Assigned" },
 };
 
-export default function ActivityFeed({ projects = [] }) {
+export default function ActivityFeed({ projects = [], userEmail }) {
   const [filterProject, setFilterProject] = useState("all");
-  const [filterMember, setFilterMember] = useState("all");
+  const [filterMember, setFilterMember] = useState(userEmail || "all");
 
   const { data: logs = [], isLoading } = useQuery({
     queryKey: ["activity-logs"],
@@ -59,7 +59,7 @@ export default function ActivityFeed({ projects = [] }) {
   const filtered = allActivity.filter(a => {
     if (filterProject !== "all" && a.parent_id !== filterProject) return false;
     if (filterMember !== "all" && a.user_email !== filterMember) return false;
-    return true;
+    return a.user_email === userEmail;
   }).slice(0, 50);
 
   return (
@@ -80,17 +80,9 @@ export default function ActivityFeed({ projects = [] }) {
               ))}
             </SelectContent>
           </Select>
-          <Select value={filterMember} onValueChange={setFilterMember}>
-            <SelectTrigger className="h-7 text-xs w-32 border-slate-200">
-              <SelectValue placeholder="All members" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Members</SelectItem>
-              {members.map(m => (
-                <SelectItem key={m} value={m}>{m.split("@")[0]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {userEmail && (
+            <span className="text-xs text-slate-500 px-2">Your activity</span>
+          )}
         </div>
       </div>
 
