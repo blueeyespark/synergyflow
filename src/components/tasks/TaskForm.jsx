@@ -45,6 +45,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ReminderSelector from "./ReminderSelector";
 import BlockedIndicator from "./BlockedIndicator";
 import { isTaskBlocked, canChangeTaskStatus } from "@/lib/taskDependencies";
+import TaskAIAssistant from "./TaskAIAssistant";
 
 export default function TaskForm({ open, onOpenChange, task, projectId, reminderGroups, teamMembers, allTasks, tasks, customStatuses, onSubmit, isLoading, onDuplicate }) {
   const [formData, setFormData] = useState({
@@ -65,6 +66,7 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
   });
   const [newStep, setNewStep] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   useEffect(() => {
     if (task) {
@@ -215,6 +217,35 @@ export default function TaskForm({ open, onOpenChange, task, projectId, reminder
               rows={3}
             />
           </div>
+
+          {showAIAssistant && (
+            <TaskAIAssistant
+              taskTitle={formData.title}
+              taskDescription={formData.description}
+              projectId={projectId}
+              onApplySuggestions={(suggestions) => {
+                setFormData(prev => ({
+                  ...prev,
+                  priority: suggestions.suggestedPriority,
+                  due_date: prev.due_date || formatDateString(new Date(Date.now() + suggestions.estimatedDays * 24 * 60 * 60 * 1000)),
+                  steps: [...prev.steps, ...suggestions.subtasks.map((s, i) => ({ id: Date.now().toString() + i, title: s.title, completed: false }))]
+                }));
+                setShowAIAssistant(false);
+              }}
+            />
+          )}
+
+          {!showAIAssistant && (
+            <Button
+              type="button"
+              onClick={() => setShowAIAssistant(true)}
+              disabled={!formData.title}
+              variant="outline"
+              className="w-full"
+            >
+              ✨ Get AI Suggestions
+            </Button>
+          )}
 
           {blockStatus.isBlocked && (
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
