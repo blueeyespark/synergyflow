@@ -59,6 +59,7 @@ const navGroups = [
     ],
   },
   { label: "AI Tools", icon: Scan, single: true, page: "AITools", adminOnly: true },
+  { label: "Creator Studio", icon: Zap, single: true, page: "CreatorStudio" },
 ];
 
 export default function TopNav({
@@ -133,7 +134,7 @@ export default function TopNav({
                 Users
               </Link>
             )}
-            {navGroups.filter(g => g.single && g.page !== 'Dashboard' && g.page !== 'WorkHub' && g.page !== 'Reports' && (!g.adminOnly || isAdmin)).map(group => (
+            {navGroups.filter(g => g.single && g.page !== 'Dashboard' && g.page !== 'WorkHub' && (!g.adminOnly || isAdmin)).map(group => (
               <Link
                 key={group.page}
                 to={createPageUrl(group.page)}

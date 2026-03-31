@@ -9,6 +9,9 @@ import ClientPortal from './pages/ClientPortal';
 import DiscordBot from './pages/DiscordBot';
 import AITools from './pages/AITools';
 import ContentCreator from './pages/ContentCreator';
+import CreatorStudio from './pages/CreatorStudio';
+import YouTubePublisher from './pages/YouTubePublisher';
+import TwitchStreamer from './pages/TwitchStreamer';
 import VideoEditor from './pages/VideoEditor';
 import IntroOutroMaker from './pages/IntroOutroMaker';
 import ThumbnailMaker from './pages/ThumbnailMaker';
@@ -84,6 +87,9 @@ const AuthenticatedApp = () => {
       <Route path="/VideoEditor" element={<LayoutWrapper currentPageName="VideoEditor"><VideoEditor /></LayoutWrapper>} />
       <Route path="/IntroOutroMaker" element={<LayoutWrapper currentPageName="IntroOutroMaker"><IntroOutroMaker /></LayoutWrapper>} />
       <Route path="/ThumbnailMaker" element={<LayoutWrapper currentPageName="ThumbnailMaker"><ThumbnailMaker /></LayoutWrapper>} />
+      <Route path="/CreatorStudio" element={<LayoutWrapper currentPageName="CreatorStudio"><CreatorStudio /></LayoutWrapper>} />
+      <Route path="/YouTubePublisher" element={<LayoutWrapper currentPageName="YouTubePublisher"><YouTubePublisher /></LayoutWrapper>} />
+      <Route path="/TwitchStreamer" element={<LayoutWrapper currentPageName="TwitchStreamer"><TwitchStreamer /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
