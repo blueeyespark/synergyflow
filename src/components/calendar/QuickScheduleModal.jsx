@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { FolderKanban, CheckSquare, ListTodo, LayoutTemplate, Loader2 } from "lucide-react";
+import { FolderKanban, CheckSquare, ListTodo, LayoutTemplate, Loader2, Sparkles } from "lucide-react";
 
 export default function QuickScheduleModal({ open, onOpenChange, selectedDate }) {
   const [tab, setTab] = useState("task");
@@ -29,11 +29,31 @@ export default function QuickScheduleModal({ open, onOpenChange, selectedDate })
     enabled: open,
   });
 
-  const { data: templates = [] } = useQuery({
+  const { data: templates = [], isLoading: loadingTemplates } = useQuery({
     queryKey: ["templates"],
     queryFn: () => base44.entities.ProjectTemplate.list(),
     enabled: open,
   });
+
+  const [projectType, setProjectType] = useState("");
+  const [generatingTemplate, setGeneratingTemplate] = useState(false);
+
+  const handleGenerateTemplate = async () => {
+    if (!projectType) { toast.error("Select project type"); return; }
+    setGeneratingTemplate(true);
+    try {
+      const res = await base44.functions.invoke('generateAITemplates', { projectType });
+      if (res.data?.template) {
+        queryClient.invalidateQueries({ queryKey: ["templates"] });
+        toast.success(`AI template created: ${res.data.template.name}`);
+        setProjectType("");
+      }
+    } catch (err) {
+      toast.error("Failed to generate template");
+    } finally {
+      setGeneratingTemplate(false);
+    }
+  };
 
   const handleCreateTask = async () => {
     if (!form.title) { toast.error("Title required"); return; }
@@ -218,10 +238,14 @@ export default function QuickScheduleModal({ open, onOpenChange, selectedDate })
               <Label>Select Template</Label>
               <Select value={form.project_id} onValueChange={(v) => setForm({ ...form, project_id: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choose template" />
+                  <SelectValue placeholder={loadingTemplates ? "Loading..." : "Choose template"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {templates.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                  {templates && templates.length > 0 ? (
+                    templates.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)
+                  ) : (
+                    <div className="p-2 text-xs text-slate-500">No templates available</div>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -229,6 +253,34 @@ export default function QuickScheduleModal({ open, onOpenChange, selectedDate })
               {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Create from Template
             </Button>
+
+            {/* AI Template Generator */}
+            <div className="border-t pt-3 mt-3">
+              <Label className="text-sm font-semibold mb-2">Or Generate AI Template</Label>
+              <Select value={projectType} onValueChange={setProjectType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select project type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="marketing">Marketing Campaign</SelectItem>
+                  <SelectItem value="product">Product Launch</SelectItem>
+                  <SelectItem value="design">Design System</SelectItem>
+                  <SelectItem value="engineering">Engineering Sprint</SelectItem>
+                  <SelectItem value="sales">Sales Proposal</SelectItem>
+                  <SelectItem value="hr">Onboarding</SelectItem>
+                  <SelectItem value="operations">Operations</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                className="w-full mt-2"
+                onClick={handleGenerateTemplate}
+                disabled={generatingTemplate || !projectType}
+              >
+                {generatingTemplate ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                Generate Template
+              </Button>
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>
