@@ -153,6 +153,8 @@ export default function AIBugMonitor() {
   const [user, setUser] = useState(null);
   const [showReport, setShowReport] = useState(false);
   const [analyzingAll, setAnalyzingAll] = useState(false);
+  const [selfFixing, setSelfFixing] = useState(false);
+  const [selfFixLog, setSelfFixLog] = useState([]);
   const [codeModal, setCodeModal] = useState(null);
   const [generatingFix, setGeneratingFix] = useState(null);
   const [form, setForm] = useState({
@@ -281,6 +283,76 @@ Make the code complete and copy-paste ready.`,
     setAnalyzingAll(false);
   };
 
+  // Full pipeline: analyze all open bugs → generate fix code → log to AIAppliedChange
+  const selfScanAndFix = async () => {
+    const openUnfixed = bugs.filter(b => !['resolved', 'wont_fix'].includes(b.status));
+    if (openUnfixed.length === 0) { toast.info('No open bugs to fix!'); return; }
+    setSelfFixing(true);
+    setSelfFixLog([]);
+    toast.loading(`Starting self-fix pipeline for ${openUnfixed.length} bugs...`, { id: 'selfix' });
+
+    for (const bug of openUnfixed) {
+      // Step 1: analyze if not yet done
+      let currentBug = bug;
+      if (!currentBug.ai_analysis) {
+        setSelfFixLog(l => [...l, { id: bug.id, title: bug.title, stage: 'Analyzing...' }]);
+        await analyzeBug(currentBug);
+        // Refetch updated bug
+        const fresh = await base44.entities.BugReport.filter({ id: currentBug.id });
+        currentBug = fresh[0] || currentBug;
+      }
+
+      // Step 2: generate fix code and auto-log it
+      setSelfFixLog(l => l.map(x => x.id === bug.id ? { ...x, stage: 'Generating fix...' } : x).concat(
+        l.find(x => x.id === bug.id) ? [] : [{ id: bug.id, title: bug.title, stage: 'Generating fix...' }]
+      ));
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are an expert React/Tailwind developer. Generate a production-ready code fix for this bug in "Planify".
+
+Bug: ${currentBug.title}
+Description: ${currentBug.description}
+Page: ${currentBug.page || 'Unknown'}
+AI Analysis: ${currentBug.ai_analysis || ''}
+Fix Suggestion: ${currentBug.ai_fix_suggestion || ''}
+
+Provide: complete copy-paste-ready code, the file path to edit, and a brief explanation.`,
+        model: 'claude_sonnet_4_6',
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            code: { type: 'string' },
+            file_path: { type: 'string' },
+            explanation: { type: 'string' }
+          }
+        }
+      });
+
+      // Log to AIAppliedChange
+      await base44.entities.AIAppliedChange.create({
+        title: `Bug Fix: ${currentBug.title}`,
+        source: 'self_scan',
+        change_type: 'bug_fix',
+        file_path: result.file_path || '',
+        code_snippet: result.code || '',
+        explanation: result.explanation || '',
+        applied_by: user?.email || 'ai-bug-monitor',
+      });
+
+      // Mark bug resolved
+      await base44.entities.BugReport.update(currentBug.id, {
+        status: 'resolved',
+        resolution_notes: `Auto-fixed by AI at ${new Date().toLocaleString()}. File: ${result.file_path}. ${result.explanation}`,
+      });
+
+      setSelfFixLog(l => l.map(x => x.id === bug.id ? { ...x, stage: '✅ Fixed & logged' } : x));
+    }
+
+    queryClient.invalidateQueries({ queryKey: ['bug-reports'] });
+    toast.success(`Self-fix complete! ${openUnfixed.length} bugs processed.`, { id: 'selfix' });
+    setSelfFixing(false);
+  };
+
   const openBugs = bugs.filter(b => !['resolved', 'wont_fix'].includes(b.status));
   const resolvedBugs = bugs.filter(b => ['resolved', 'wont_fix'].includes(b.status));
   const unanalyzedCount = openBugs.filter(b => !b.ai_analysis).length;
@@ -308,11 +380,18 @@ Make the code complete and copy-paste ready.`,
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">AI-powered bug tracking, analysis, and auto-fix code generation</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {isAdmin && unanalyzedCount > 0 && (
               <Button variant="outline" size="sm" onClick={analyzeAll} disabled={analyzingAll}>
                 {analyzingAll ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Brain className="w-4 h-4 mr-1.5" />}
                 Analyze All ({unanalyzedCount})
+              </Button>
+            )}
+            {isAdmin && openBugs.length > 0 && (
+              <Button size="sm" onClick={selfScanAndFix} disabled={selfFixing}
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700">
+                {selfFixing ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Zap className="w-4 h-4 mr-1.5" />}
+                {selfFixing ? 'Self-Fixing...' : `Auto-Fix All (${openBugs.length})`}
               </Button>
             )}
             <Button size="sm" onClick={() => setShowReport(true)} className="bg-red-500 hover:bg-red-600">
@@ -335,6 +414,21 @@ Make the code complete and copy-paste ready.`,
             </div>
           ))}
         </div>
+
+        {/* Self-fix progress log */}
+        {selfFixLog.length > 0 && (
+          <div className="mb-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl space-y-1.5">
+            <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 flex items-center gap-1 mb-2">
+              <Zap className="w-3 h-3" /> Self-Fix Pipeline
+            </p>
+            {selfFixLog.map((entry) => (
+              <div key={entry.id} className="flex items-center gap-2 text-xs">
+                <span className="text-slate-500 dark:text-slate-400 truncate flex-1">{entry.title}</span>
+                <span className={`font-medium ${entry.stage.startsWith('✅') ? 'text-green-600' : 'text-indigo-600 dark:text-indigo-400'}`}>{entry.stage}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         <Tabs defaultValue="open">
           <TabsList className="mb-4">
