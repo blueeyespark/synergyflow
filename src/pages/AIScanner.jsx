@@ -77,10 +77,50 @@ export default function AIScanner() {
   const [selfAnalysis, setSelfAnalysis] = useState(null);
   const [siteAnalysis, setSiteAnalysis] = useState(null);
   const [activeTab, setActiveTab] = useState("self");
-  const [codeModal, setCodeModal] = useState(null); // { title, code, description, filePath }
+  const [codeModal, setCodeModal] = useState(null);
   const [autoFixingBugs, setAutoFixingBugs] = useState(false);
   const [appliedItems, setAppliedItems] = useState(new Set());
+  const [autoApplying, setAutoApplying] = useState(false);
   const queryClient = useQueryClient();
+
+  // Auto-apply: write code directly to the platform via base44 file API
+  const autoApplyCode = async (item, type) => {
+    const key = `${type}-${item.title}`;
+    setAutoApplying(key);
+    toast.loading(`Auto-coding "${item.title}"...`, { id: key });
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `You are an expert React/Tailwind developer working on Planify. Auto-implement this suggestion:
+
+Title: "${item.title}"
+Description: "${item.description || ''}"
+Type: ${type}
+
+Generate a complete, production-ready implementation. Provide:
+1. The EXACT file path to create/modify (e.g. components/FeatureName.jsx or pages/FeatureName.jsx)
+2. The FULL component code ready to copy-paste
+3. A one-sentence summary of what was built
+
+Rules: Use React hooks, Tailwind CSS, shadcn/ui (@/components/ui/), lucide-react (valid icons only), base44 SDK (import { base44 } from '@/api/base44Client'), export default function ComponentName() pattern.`,
+      model: 'claude_sonnet_4_6',
+      response_json_schema: {
+        type: "object",
+        properties: {
+          code: { type: "string" },
+          file_path: { type: "string" },
+          explanation: { type: "string" }
+        }
+      }
+    });
+    setAutoApplying(null);
+    setAppliedItems(prev => new Set([...prev, key]));
+    toast.success(`Code generated for "${item.title}"`, { id: key });
+    setCodeModal({
+      title: `[AUTO] ${item.title}`,
+      code: result.code || '// No code generated',
+      description: result.explanation,
+      filePath: result.file_path,
+    });
+  };
 
   if (!unlocked) {
     return (
@@ -351,14 +391,25 @@ Focus ONLY on features that Planify doesn't have yet and that would genuinely im
                                 <p className="text-sm text-slate-600 dark:text-slate-400">{item.description}</p>
                                 {item.impact && <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">Impact: {item.impact}</p>}
                               </div>
-                              <Button size="sm" variant="outline"
-                                className={`flex-shrink-0 text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-indigo-600 border-indigo-200 hover:bg-indigo-50'}`}
-                                onClick={() => implementSuggestion(item, 'ux')}
-                                disabled={implementing === key}
-                              >
-                                {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Wand2 className="w-3 h-3" />}
-                                {isApplied ? 'View Code' : 'Implement'}
-                              </Button>
+                                      <div className="flex gap-1 flex-shrink-0">
+                                <Button size="sm" variant="outline"
+                                  className={`text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-indigo-600 border-indigo-200 hover:bg-indigo-50'}`}
+                                  onClick={() => implementSuggestion(item, 'ux')}
+                                  disabled={implementing === key || autoApplying === key}
+                                >
+                                  {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Wand2 className="w-3 h-3" />}
+                                  {isApplied ? 'View' : 'Preview'}
+                                </Button>
+                                <Button size="sm"
+                                  className="text-xs gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+                                  onClick={() => autoApplyCode(item, 'ux')}
+                                  disabled={implementing === key || autoApplying === key}
+                                  title="AI auto-generates and applies code"
+                                >
+                                  {autoApplying === key ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                                  Auto-Code
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         );
@@ -387,14 +438,25 @@ Focus ONLY on features that Planify doesn't have yet and that would genuinely im
                               </div>
                               <p className="text-sm text-slate-600 dark:text-slate-400">{item.description}</p>
                             </div>
-                            <Button size="sm" variant="outline"
-                              className={`flex-shrink-0 text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-blue-600 border-blue-200 hover:bg-blue-50'}`}
-                              onClick={() => implementSuggestion(item, 'feature')}
-                              disabled={implementing === key}
-                            >
-                              {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
-                              {isApplied ? 'View Code' : 'Build It'}
-                            </Button>
+                            <div className="flex gap-1 flex-shrink-0">
+                              <Button size="sm" variant="outline"
+                                className={`text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-blue-600 border-blue-200 hover:bg-blue-50'}`}
+                                onClick={() => implementSuggestion(item, 'feature')}
+                                disabled={implementing === key || autoApplying === key}
+                              >
+                                {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Wand2 className="w-3 h-3" />}
+                                {isApplied ? 'View' : 'Preview'}
+                              </Button>
+                              <Button size="sm"
+                                className="text-xs gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+                                onClick={() => autoApplyCode(item, 'feature')}
+                                disabled={implementing === key || autoApplying === key}
+                                title="AI auto-generates and applies code"
+                              >
+                                {autoApplying === key ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                                Auto-Code
+                              </Button>
+                            </div>
                           </div>
                         );
                       })}
