@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus, List, LayoutGrid, BarChart3, Calendar, Flag, User, Loader2, Timer, Square, Play } from "lucide-react";
+import { Plus, List, LayoutGrid, BarChart3, Calendar, Flag, User, Loader2, Timer, Square, Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format, isPast, isToday, parseISO } from "date-fns";
@@ -115,6 +115,8 @@ export default function Tasks() {
   const [editingTask, setEditingTask] = useState(null);
   const queryClient = useQueryClient();
 
+  const [autoPrioritizing, setAutoPrioritizing] = useState(false);
+
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ["all-tasks"],
     queryFn: () => base44.entities.Task.list("-created_date"),
@@ -135,6 +137,56 @@ export default function Tasks() {
     mutationFn: (data) => base44.entities.Task.create(data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["all-tasks"] }); setShowForm(false); toast.success("Task created"); },
   });
+
+  const autoPrioritize = async () => {
+    if (!tasks.length) return;
+    setAutoPrioritizing(true);
+    toast.loading("Analyzing tasks...", { id: "autoprio" });
+    const taskSummaries = tasks.filter(t => t.status !== 'completed').map(t => ({
+      id: t.id,
+      title: t.title,
+      due_date: t.due_date || null,
+      status: t.status,
+      current_priority: t.priority,
+    }));
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `You are a task prioritization engine. Analyze these tasks and assign a priority (high, medium, or low) to each one based on:
+- Due date urgency (closer = higher priority)
+- Current status (todo > in_progress > review)
+- Task title keywords indicating urgency
+
+Tasks: ${JSON.stringify(taskSummaries)}
+
+Return ONLY the JSON — no markdown, no explanation.`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          priorities: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                priority: { type: "string", enum: ["high", "medium", "low"] },
+                reason: { type: "string" }
+              }
+            }
+          }
+        }
+      }
+    });
+    let updated = 0;
+    for (const p of (result?.priorities || [])) {
+      const task = tasks.find(t => t.id === p.id);
+      if (task && task.priority !== p.priority) {
+        await base44.entities.Task.update(p.id, { priority: p.priority });
+        updated++;
+      }
+    }
+    queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
+    toast.success(`Auto-prioritized ${updated} task${updated !== 1 ? 's' : ''}`, { id: "autoprio" });
+    setAutoPrioritizing(false);
+  };
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -183,6 +235,10 @@ export default function Tasks() {
                 </button>
               ))}
             </div>
+            <Button size="sm" variant="outline" onClick={autoPrioritize} disabled={autoPrioritizing} className="gap-1.5 text-indigo-600 border-indigo-200 hover:bg-indigo-50">
+              {autoPrioritizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              Auto-Prioritize
+            </Button>
             <Button size="sm" onClick={() => setShowForm(true)}>
               <Plus className="w-4 h-4 mr-1" />New Task
             </Button>

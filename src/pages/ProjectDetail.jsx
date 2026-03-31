@@ -8,7 +8,7 @@ import { format, isAfter, isBefore, parseISO, subDays } from "date-fns";
 import {
   ArrowLeft, Plus, Calendar, Users, Settings,
   CheckSquare, Circle, ArrowRight, Eye, UserPlus,
-  BarChart3, List
+  BarChart3, List, BookTemplate
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -32,6 +32,7 @@ import ProjectForm from "@/components/projects/ProjectForm";
 import InviteTeamDialog from "@/components/team/InviteTeamDialog";
 import GanttChart from "@/components/gantt/GanttChart";
 import ReminderChecker from "@/components/reminders/ReminderChecker";
+import SaveAsTemplateModal from "@/components/projects/SaveAsTemplateModal";
 
 export default function ProjectDetail() {
   const [user, setUser] = useState(null);
@@ -41,6 +42,7 @@ export default function ProjectDetail() {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [deleteTask, setDeleteTask] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
@@ -322,6 +324,14 @@ export default function ProjectDetail() {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => setShowSaveTemplate(true)}
+                  >
+                    <BookTemplate className="w-4 h-4 mr-2" />
+                    Save as Template
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => setShowInviteDialog(true)}
                   >
                     <UserPlus className="w-4 h-4 mr-2" />
@@ -503,6 +513,13 @@ export default function ProjectDetail() {
       />
 
       <ReminderChecker tasks={tasks} projectName={project?.name} user={user} />
+
+      <SaveAsTemplateModal
+        open={showSaveTemplate}
+        onOpenChange={setShowSaveTemplate}
+        project={project}
+        tasks={tasks}
+      />
 
       <AlertDialog open={!!deleteTask} onOpenChange={() => setDeleteTask(null)}>
         <AlertDialogContent>

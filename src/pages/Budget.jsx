@@ -49,6 +49,7 @@ import {
 import { toast } from "sonner";
 
 import BudgetCalculator from "@/components/budget/BudgetCalculator";
+import ProjectInvoicePanel from "@/components/billing/ProjectInvoicePanel";
 
 const categories = ["Salary", "Freelance", "Marketing", "Software", "Equipment", "Travel", "Office", "Other"];
 const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#eab308', '#22c55e', '#0ea5e9'];
@@ -72,6 +73,16 @@ export default function BudgetPage() {
   useEffect(() => {
     base44.auth.me().then(setUser);
   }, []);
+
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => base44.entities.Project.list(),
+  });
+
+  const { data: timeEntries = [] } = useQuery({
+    queryKey: ['time-entries-budget'],
+    queryFn: () => base44.entities.TimeEntry.list('-created_date', 500),
+  });
 
   const { data: budgetEntries = [] } = useQuery({
     queryKey: ['budget'],
@@ -362,6 +373,9 @@ export default function BudgetPage() {
           </div>
           {renderChart()}
         </div>
+
+        {/* Project Billing & Invoicing */}
+        <ProjectInvoicePanel projects={projects} entries={timeEntries} />
 
         {/* Net Worth Over Time Chart */}
         <div className="bg-white rounded-2xl border border-slate-100 p-6 mb-8">

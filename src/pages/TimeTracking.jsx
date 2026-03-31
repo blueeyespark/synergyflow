@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { format, formatDuration, intervalToDuration, parseISO } from "date-fns";
 import { toast } from "sonner";
+import ProjectInvoicePanel from "@/components/billing/ProjectInvoicePanel";
 
 function formatSeconds(s) {
   const h = Math.floor(s / 3600);
@@ -231,6 +232,9 @@ export default function TimeTracking() {
             <p className="text-xl font-bold text-indigo-600">{projectTotals.length}</p>
           </div>
         </div>
+
+        {/* Project Billing & Invoicing */}
+        <ProjectInvoicePanel projects={projects} entries={entries} />
 
         {/* Project Breakdown */}
         {projectTotals.length > 0 && (
