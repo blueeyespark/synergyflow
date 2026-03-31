@@ -16,35 +16,7 @@ import NavDropdown from "./NavDropdown";
 const navGroups = [
   { label: "Dashboard", icon: LayoutDashboard, page: "Dashboard", single: true },
   { label: "Work", icon: FolderKanban, single: true, page: "WorkHub" },
-  {
-    label: "Create & Produce",
-    icon: Zap,
-    children: [
-      { section: "Video Production", items: [
-        { name: "Video Editor", icon: Clock, page: "VideoEditor" },
-        { name: "Intro/Outro Maker", icon: Clock, page: "IntroOutroMaker" },
-        { name: "Thumbnail Creator", icon: Clock, page: "ThumbnailMaker" },
-      ]},
-      { section: "Content Management", items: [
-        { name: "Media Library", icon: Folder, page: "MediaLibrary" },
-        { name: "Templates", icon: LayoutTemplate, page: "Templates" },
-        { name: "Blog", icon: Globe, page: "Blog" },
-      ]},
-    ],
-  },
-  {
-    label: "Insights & Analytics",
-    icon: BarChart2,
-    children: [
-      { section: "Video Performance", items: [
-        { name: "Video Analytics", icon: TrendingUp, page: "VideoAnalytics" },
-      ]},
-      { section: "Business Metrics", items: [
-        { name: "Time Tracking", icon: Timer, page: "TimeTrackingAnalytics" },
-        { name: "Reports", icon: Receipt, page: "Reports" },
-      ]},
-    ],
-  },
+  { label: "Creator", icon: Zap, single: true, page: "CreatorStudio" },
   {
     label: "Team & Collaboration",
     icon: Users,
@@ -59,7 +31,6 @@ const navGroups = [
     ],
   },
   { label: "AI Tools", icon: Scan, single: true, page: "AITools", adminOnly: true },
-  { label: "Creator Studio", icon: Zap, single: true, page: "CreatorStudio" },
 ];
 
 export default function TopNav({
