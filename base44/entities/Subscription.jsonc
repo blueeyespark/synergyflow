@@ -1,0 +1,96 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "description": "Channel being subscribed to"
+    },
+    "subscriber_email": {
+      "type": "string",
+      "description": "Subscriber email"
+    },
+    "subscriber_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "cancelled",
+        "expired"
+      ],
+      "default": "active"
+    },
+    "tier": {
+      "type": "string",
+      "description": "Subscription tier (free, basic, premium, etc.)",
+      "default": "free"
+    },
+    "monthly_price": {
+      "type": "number",
+      "description": "Price in USD"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When subscription ends"
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "description": "Stripe subscription ID for payments"
+    },
+    "auto_renew": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "channel_id",
+    "subscriber_email",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.subscriber_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

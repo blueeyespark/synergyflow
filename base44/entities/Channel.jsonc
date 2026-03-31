@@ -1,0 +1,110 @@
+{
+  "name": "Channel",
+  "type": "object",
+  "properties": {
+    "creator_email": {
+      "type": "string",
+      "description": "Email of the channel creator"
+    },
+    "channel_name": {
+      "type": "string",
+      "description": "Channel name/username"
+    },
+    "description": {
+      "type": "string",
+      "description": "Channel description"
+    },
+    "banner_url": {
+      "type": "string",
+      "description": "Channel banner image URL"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "Channel avatar image URL"
+    },
+    "subscriber_count": {
+      "type": "number",
+      "default": 0
+    },
+    "view_count": {
+      "type": "number",
+      "default": 0
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_live": {
+      "type": "boolean",
+      "default": false
+    },
+    "rtmp_key": {
+      "type": "string",
+      "description": "RTMP streaming key"
+    },
+    "monetization_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "subscription_price": {
+      "type": "number",
+      "description": "Monthly subscription price in USD"
+    },
+    "social_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Content categories (gaming, music, education, etc.)"
+    },
+    "created_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "creator_email",
+    "channel_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "creator_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "creator_email": "{{user.email}}"
+    },
+    "delete": {
+      "creator_email": "{{user.email}}"
+    }
+  }
+}

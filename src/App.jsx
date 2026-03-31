@@ -12,6 +12,8 @@ import ContentCreator from './pages/ContentCreator';
 import CreatorStudio from './pages/CreatorStudio';
 import YouTubePublisher from './pages/YouTubePublisher';
 import TwitchStreamer from './pages/TwitchStreamer';
+import ChannelPage from './pages/ChannelPage';
+import VideoUpload from './pages/VideoUpload';
 import VideoEditor from './pages/VideoEditor';
 import IntroOutroMaker from './pages/IntroOutroMaker';
 import ThumbnailMaker from './pages/ThumbnailMaker';
@@ -90,6 +92,8 @@ const AuthenticatedApp = () => {
       <Route path="/CreatorStudio" element={<LayoutWrapper currentPageName="CreatorStudio"><CreatorStudio /></LayoutWrapper>} />
       <Route path="/YouTubePublisher" element={<LayoutWrapper currentPageName="YouTubePublisher"><YouTubePublisher /></LayoutWrapper>} />
       <Route path="/TwitchStreamer" element={<LayoutWrapper currentPageName="TwitchStreamer"><TwitchStreamer /></LayoutWrapper>} />
+      <Route path="/ChannelPage" element={<LayoutWrapper currentPageName="ChannelPage"><ChannelPage /></LayoutWrapper>} />
+      <Route path="/VideoUpload" element={<LayoutWrapper currentPageName="VideoUpload"><VideoUpload /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

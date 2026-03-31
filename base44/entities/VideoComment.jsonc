@@ -1,0 +1,105 @@
+{
+  "name": "VideoComment",
+  "type": "object",
+  "properties": {
+    "video_id": {
+      "type": "string",
+      "description": "Associated video ID"
+    },
+    "channel_id": {
+      "type": "string",
+      "description": "Video's channel ID"
+    },
+    "author_email": {
+      "type": "string"
+    },
+    "author_name": {
+      "type": "string"
+    },
+    "author_avatar_url": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string",
+      "description": "Comment text"
+    },
+    "timestamp_seconds": {
+      "type": "number",
+      "description": "If comment is tied to a specific point in video"
+    },
+    "likes": {
+      "type": "number",
+      "default": 0
+    },
+    "is_pinned": {
+      "type": "boolean",
+      "default": false
+    },
+    "parent_comment_id": {
+      "type": "string",
+      "description": "For nested replies"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "published",
+        "hidden",
+        "spam"
+      ],
+      "default": "published"
+    }
+  },
+  "required": [
+    "video_id",
+    "content",
+    "author_email"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.status": "published"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

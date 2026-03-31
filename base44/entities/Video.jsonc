@@ -1,0 +1,140 @@
+{
+  "name": "Video",
+  "type": "object",
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "description": "Associated channel ID"
+    },
+    "title": {
+      "type": "string",
+      "description": "Video title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Video description/transcript"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "Video thumbnail URL"
+    },
+    "video_url": {
+      "type": "string",
+      "description": "HLS/DASH playback URL"
+    },
+    "raw_upload_url": {
+      "type": "string",
+      "description": "Raw uploaded file S3 URL"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "description": "Video duration in seconds"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "uploading",
+        "processing",
+        "ready",
+        "archived",
+        "deleted"
+      ],
+      "default": "uploading"
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "public",
+        "unlisted",
+        "private",
+        "subscriber_only"
+      ],
+      "default": "public"
+    },
+    "scheduled_publish_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When to publish (for scheduled uploads)"
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "view_count": {
+      "type": "number",
+      "default": 0
+    },
+    "like_count": {
+      "type": "number",
+      "default": 0
+    },
+    "comment_count": {
+      "type": "number",
+      "default": 0
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "category": {
+      "type": "string"
+    },
+    "is_live_vod": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if converted from live stream"
+    },
+    "transcoding_progress": {
+      "type": "number",
+      "default": 0,
+      "description": "Transcoding progress percentage"
+    },
+    "available_resolutions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Available playback resolutions (1080p, 720p, 480p, 360p, 240p)"
+    },
+    "monetization_enabled": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "channel_id",
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.visibility": "public"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "name": "Schedule",
+  "type": "object",
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "description": "Associated channel ID"
+    },
+    "video_id": {
+      "type": "string",
+      "description": "Video to publish (if applicable)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Schedule title/stream title"
+    },
+    "description": {
+      "type": "string"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When to go live or publish"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "live_stream",
+        "video_premiere",
+        "video_upload"
+      ],
+      "default": "live_stream"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "live",
+        "completed",
+        "cancelled"
+      ],
+      "default": "scheduled"
+    },
+    "expected_duration_minutes": {
+      "type": "number",
+      "description": "Expected duration in minutes"
+    },
+    "category": {
+      "type": "string"
+    },
+    "notifications_enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "synced_to_google_calendar": {
+      "type": "boolean",
+      "default": false
+    },
+    "google_calendar_event_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "channel_id",
+    "title",
+    "scheduled_date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

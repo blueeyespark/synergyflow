@@ -1,0 +1,121 @@
+{
+  "name": "CreatorBudget",
+  "type": "object",
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "description": "Associated channel ID"
+    },
+    "title": {
+      "type": "string",
+      "description": "Budget entry title"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "income",
+        "expense"
+      ],
+      "description": "Income or expense"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount in USD"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "ad_revenue",
+        "subscriptions",
+        "donations",
+        "sponsorships",
+        "equipment",
+        "software",
+        "studio_rental",
+        "talent",
+        "marketing",
+        "other"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Transaction date"
+    },
+    "description": {
+      "type": "string"
+    },
+    "video_id": {
+      "type": "string",
+      "description": "Associated video (if applicable)"
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "Campaign or batch ID for grouping"
+    },
+    "recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Is this a recurring expense"
+    },
+    "recurring_frequency": {
+      "type": "string",
+      "enum": [
+        "weekly",
+        "biweekly",
+        "monthly",
+        "quarterly",
+        "yearly"
+      ]
+    },
+    "recurring_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "bank_transfer",
+        "credit_card",
+        "paypal",
+        "stripe",
+        "other"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed"
+      ],
+      "default": "completed"
+    }
+  },
+  "required": [
+    "channel_id",
+    "title",
+    "type",
+    "amount",
+    "category",
+    "date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

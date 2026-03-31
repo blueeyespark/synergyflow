@@ -1,0 +1,117 @@
+{
+  "name": "VideoAnalytics",
+  "type": "object",
+  "properties": {
+    "video_id": {
+      "type": "string",
+      "description": "Associated video ID"
+    },
+    "channel_id": {
+      "type": "string",
+      "description": "Video's channel ID"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Analytics date"
+    },
+    "views": {
+      "type": "number",
+      "default": 0
+    },
+    "watch_time_hours": {
+      "type": "number",
+      "default": 0,
+      "description": "Total watch time in hours"
+    },
+    "avg_view_duration_seconds": {
+      "type": "number",
+      "description": "Average view duration"
+    },
+    "retention_rate": {
+      "type": "number",
+      "description": "Percentage of video watched on average"
+    },
+    "likes": {
+      "type": "number",
+      "default": 0
+    },
+    "comments": {
+      "type": "number",
+      "default": 0
+    },
+    "shares": {
+      "type": "number",
+      "default": 0
+    },
+    "click_through_rate": {
+      "type": "number",
+      "description": "CTR percentage for cards/end screens"
+    },
+    "subscribers_gained": {
+      "type": "number",
+      "default": 0
+    },
+    "revenue": {
+      "type": "number",
+      "default": 0,
+      "description": "Ad revenue in USD"
+    },
+    "traffic_source": {
+      "type": "string",
+      "enum": [
+        "youtube_search",
+        "browse_features",
+        "subscription_feed",
+        "notifications",
+        "external",
+        "direct",
+        "other"
+      ]
+    },
+    "audience_age_group": {
+      "type": "string",
+      "description": "Primary age group viewing"
+    },
+    "audience_gender": {
+      "type": "string",
+      "description": "Primary gender viewing (male/female/other)"
+    },
+    "top_countries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "country_code": {
+            "type": "string"
+          },
+          "views": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "video_id",
+    "date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
