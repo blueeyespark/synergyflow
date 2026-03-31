@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Download, Type, Palette, Copy, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -85,7 +85,7 @@ export default function ThumbnailMaker() {
   };
 
   // Draw on mount and when settings change
-  useState(() => {
+  useEffect(() => {
     drawThumbnail();
   }, [bgColor, textColor, mainText, fontSize, uploadedImage, preset]);
 

@@ -34,13 +34,10 @@ export default function VideoEditor() {
     }
   };
 
-  const handleTimeUpdate = () => {
+  const handleVolumeChange = (newVolume) => {
+    setVolume(newVolume);
     if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
-      if (endTime && videoRef.current.currentTime >= endTime) {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
+      videoRef.current.volume = newVolume;
     }
   };
 
@@ -188,7 +185,7 @@ export default function VideoEditor() {
                     </div>
                     <div>
                       <label className="text-xs font-medium text-slate-600 block mb-2 flex items-center gap-1">
-                        <Volume2 className="w-3 h-3" /> Volume
+                        <Volume2 className="w-3 h-3" /> Volume: {(volume * 100).toFixed(0)}%
                       </label>
                       <input
                         type="range"
@@ -196,7 +193,7 @@ export default function VideoEditor() {
                         max="1"
                         step="0.1"
                         value={volume}
-                        onChange={(e) => setVolume(parseFloat(e.target.value))}
+                        onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
                         className="w-full"
                       />
                     </div>
