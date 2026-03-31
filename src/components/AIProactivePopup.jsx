@@ -38,7 +38,7 @@ function AvatarFace({ talking }) {
   );
 }
 
-export default function AIProactivePopup({ tasks = [], projects = [] }) {
+export default function AIProactivePopup({ tasks = [], projects = [], budget = [] }) {
   const [visible, setVisible] = useState(false);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
