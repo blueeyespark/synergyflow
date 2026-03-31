@@ -40,6 +40,7 @@ const navGroups = [
         { name: "AI Tools", icon: Scan, page: "AITools" },
         { name: "Users", icon: Users, page: "UserViewer" },
       ]},
+    ],
   },
 ];
 
