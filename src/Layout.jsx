@@ -1,122 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  LayoutDashboard, FolderKanban, LogOut, Menu, X,
-  Calendar, DollarSign, Moon, Sun, Settings, ChevronDown,
-  BarChart2, CheckSquare, Globe, Bot, Flame, Receipt, UserCog,
-  History, Scan, Bug, Timer, Trophy, Users, FolderOpen,
-  LayoutTemplate, Share2, Zap
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import NotificationBell from "@/components/notifications/NotificationBell";
-import MobileNav from "@/components/MobileNav";
 import PointsToast from "@/components/gamification/PointsToast";
-import WorkspaceSelector from "@/components/workspace/WorkspaceSelector";
+import MobileNav from "@/components/MobileNav";
 import OfflineBanner from "@/components/OfflineBanner";
 import AIAssistant from "@/components/AIAssistant";
 import AIProactivePopup from "@/components/AIProactivePopup";
-
-
-// Nav groups — each can be a direct link or a dropdown
-const navGroups = [
-  {
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    page: "Dashboard",
-    single: true,
-  },
-  {
-    label: "Work",
-    icon: FolderKanban,
-    single: true,
-    page: "WorkHub",
-  },
-
-  {
-    label: "Finance",
-    icon: DollarSign,
-    single: true,
-    page: "Reports",
-  },
-
-  {
-    label: "Team",
-    icon: Users,
-    children: [
-      { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
-      { name: "Reports & Analytics", icon: BarChart2, page: "Reports" },
-    ],
-  },
-  {
-    label: "Content",
-    icon: Globe,
-    children: [
-      { name: "Blog", icon: Globe, page: "Blog" },
-      { name: "Client Portal", icon: Globe, page: "ClientPortal", adminOnly: true },
-      { name: "Discord Bot", icon: Bot, page: "DiscordBot", adminOnly: true },
-    ],
-  },
-  {
-    label: "AI Tools",
-    icon: Scan,
-    single: true,
-    page: "AITools",
-    adminOnly: true,
-  },
-];
-
-function NavDropdown({ group, currentPageName, isAdmin }) {
-  const [open, setOpen] = useState(false);
-  const children = group.children?.filter(c => !c.adminOnly || isAdmin) || [];
-  const isActive = children.some(c => c.page === currentPageName);
-
-  if (children.length === 0) return null;
-
-  return (
-    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-      <button
-        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-          isActive ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-        }`}
-      >
-        <group.icon className="w-4 h-4" />
-        {group.label}
-        <ChevronDown className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.12 }}
-            className="absolute top-full left-0 mt-1 w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-1.5 z-50"
-          >
-            {children.map(item => (
-              <Link
-                key={item.page}
-                to={createPageUrl(item.page)}
-                className={`flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${
-                  currentPageName === item.page
-                    ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 font-medium"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
-                }`}
-              >
-                <item.icon className="w-4 h-4" />
-                {item.name}
-              </Link>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+import TopNav from "@/components/layout/TopNav";
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
@@ -148,8 +38,6 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     base44.auth.me().then(setUser);
   }, []);
-
-  const isAdmin = user?.role === "admin";
 
   const { data: projects = [] } = useQuery({
     queryKey: ["projects"],
@@ -210,15 +98,6 @@ export default function Layout({ children, currentPageName }) {
     return unsubscribe;
   }, [user?.email, queryClient]);
 
-  // Flat list for mobile
-  const allMobileItems = [
-    { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
-    { name: "Work", icon: FolderKanban, page: "WorkHub" },
-    ...navGroups
-      .filter(g => !g.single)
-      .flatMap(g => (g.children || []).filter(c => !c.adminOnly || isAdmin))
-  ].filter(i => !i.adminOnly || isAdmin);
-
   return (
     <div className={`min-h-screen transition-colors ${darkMode ? "dark bg-slate-900" : "bg-slate-50"}`}>
       {pointsEvent && <PointsToast event={pointsEvent} onDismiss={() => setPointsEvent(null)} />}
@@ -264,138 +143,21 @@ export default function Layout({ children, currentPageName }) {
         .dark .shadow-sm, .dark .shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important; }
       `}</style>
 
-      {/* Top Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <TopNav
+        user={user}
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+        currentPageName={currentPageName}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+        notifications={notifications}
+        onMarkAsRead={(id) => markAsReadMutation.mutate(id)}
+        onMarkAllRead={() => markAllReadMutation.mutate()}
+        onDeleteNotification={(id) => deleteNotificationMutation.mutate(id)}
+        currentWorkspace={currentWorkspace}
+        onWorkspaceChange={setCurrentWorkspace}
+      />
 
-            {/* Logo & Workspace */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">P</span>
-                </div>
-                <span className="font-semibold text-slate-900 dark:text-slate-100 hidden sm:block">Planify</span>
-              </Link>
-              <span className="text-slate-300 hidden sm:block">/</span>
-              <div className="hidden sm:block">
-                <WorkspaceSelector currentWorkspace={currentWorkspace} onWorkspaceChange={setCurrentWorkspace} user={user} />
-              </div>
-            </div>
-
-            {/* Desktop Nav Groups */}
-            <div className="hidden md:flex items-center gap-0.5">
-              {/* Dashboard direct link */}
-              <Link
-                to={createPageUrl("Dashboard")}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  currentPageName === "Dashboard" ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-                }`}
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Dashboard
-              </Link>
-              <Link
-                to={createPageUrl("WorkHub")}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  currentPageName === "WorkHub" ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-                }`}
-              >
-                <FolderKanban className="w-4 h-4" />
-                Work
-              </Link>
-
-              {navGroups.filter(g => !g.single && (!g.adminOnly || isAdmin)).map(group => (
-                <NavDropdown key={group.label} group={group} currentPageName={currentPageName} isAdmin={isAdmin} />
-              ))}
-              {navGroups.filter(g => g.single && g.page !== 'Dashboard' && g.page !== 'WorkHub' && g.page !== 'Reports' && (!g.adminOnly || isAdmin)).map(group => (
-                <Link
-                  key={group.page}
-                  to={createPageUrl(group.page)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    currentPageName === group.page ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-                  }`}
-                >
-                  <group.icon className="w-4 h-4" />
-                  {group.label}
-                </Link>
-              ))}
-            </div>
-
-            {/* Right Section */}
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white">
-                {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </Button>
-              <NotificationBell
-                notifications={notifications}
-                onMarkAsRead={(id) => markAsReadMutation.mutate(id)}
-                onMarkAllRead={() => markAllReadMutation.mutate()}
-                onDelete={(id) => deleteNotificationMutation.mutate(id)}
-              />
-
-              <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-700">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                  {user?.full_name?.charAt(0) || "U"}
-                </div>
-                <div className="hidden lg:block text-right">
-                  <p className="text-xs font-medium text-slate-900 dark:text-slate-100 leading-tight">{user?.full_name || "User"}</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 leading-tight">{user?.role || "user"}</p>
-                </div>
-                <Link to={createPageUrl("Settings")}>
-                  <Button variant="ghost" size="icon" className="text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white">
-                    <Settings className="w-4 h-4" />
-                  </Button>
-                </Link>
-                <Button variant="ghost" size="icon" onClick={() => base44.auth.logout()} className="text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white">
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="md:hidden border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
-          >
-            <div className="px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto">
-              {allMobileItems.map(item => (
-                <Link
-                  key={item.page}
-                  to={createPageUrl(item.page)}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${
-                    currentPageName === item.page ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600" : "text-slate-600 dark:text-slate-300"
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {item.name}
-                </Link>
-              ))}
-              <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-700">
-                <div className="px-3 py-2">
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{user?.full_name}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
-                </div>
-                <Button variant="ghost" onClick={() => base44.auth.logout()} className="w-full justify-start text-slate-600 dark:text-slate-300 mt-1">
-                  <LogOut className="w-4 h-4 mr-2" /> Sign out
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </nav>
-
-      {/* Main Content */}
       <main className="pt-16 pb-16 md:pb-0">
         {children}
       </main>
