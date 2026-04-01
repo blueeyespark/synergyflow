@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutDashboard, Globe, Bot, Upload, BarChart3, Calendar, Users } from "lucide-react";
+import { LayoutDashboard, Globe, Bot, Upload, BarChart3, Calendar, Users, ImageIcon } from "lucide-react";
 import ContentProductionHub from "@/components/studio/ContentProductionHub";
 import MediaLibrary from "./MediaLibrary";
 import ChannelPage from "./ChannelPage";
@@ -17,7 +17,7 @@ const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, component: Dashboard },
   { id: "channel", label: "My Channel", icon: Users, component: ChannelPage },
   { id: "production", label: "Content Production", icon: Upload, component: ContentProductionHub },
-  { id: "media", label: "Media Library", icon: Image, component: MediaLibrary },
+  { id: "media", label: "Media Library", icon: ImageIcon, component: MediaLibrary },
 
   { id: "planning", label: "Planning", icon: Calendar, component: PlanningHub },
   { id: "analytics", label: "Analytics", icon: BarChart3, component: AnalyticsHub },
