@@ -4,10 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Home, Flame, Music, Gamepad2, Tv, Radio, BookOpen, Trophy,
   ChevronDown, ThumbsUp, Clock, ListVideo, Download, History,
-  PlaySquare, ShoppingBag, MoreVertical, Search, X, TrendingUp, Users
+  PlaySquare, ShoppingBag, MoreVertical, Search, X, TrendingUp,
+  Users, Zap, Star, PlusCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AIContentAdvisor from "@/components/dashboard/AIContentAdvisor";
 import VideoPlayerModal from "@/components/dashboard/VideoPlayerModal";
 
@@ -143,20 +144,44 @@ function ShortCard({ video, onClick }) {
   );
 }
 
+// Hub quick-access cards shown to everyone
+function HubCards({ user, myChannel }) {
+  const cards = [
+    { to: "/Live", icon: Radio, label: "Live", desc: "Watch live streams", color: "from-red-500 to-orange-500", bg: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900" },
+    { to: "/Shorts", icon: Zap, label: "Shorts", desc: "Quick vertical videos", color: "from-pink-500 to-purple-600", bg: "bg-pink-50 dark:bg-pink-950/30 border-pink-200 dark:border-pink-900" },
+    { to: "/Channel", icon: Users, label: "My Channel", desc: "Your public channel", color: "from-blue-500 to-indigo-600", bg: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900" },
+    { to: "/StreamerDashboard", icon: Star, label: "Go Live", desc: "Start streaming now", color: "from-purple-500 to-violet-600", bg: "bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-900" },
+  ];
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      {cards.map((c) => (
+        <Link key={c.to} to={c.to}>
+          <motion.div whileHover={{ scale: 1.03 }} className={`rounded-2xl border p-4 cursor-pointer transition-shadow hover:shadow-md ${c.bg}`}>
+            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${c.color} flex items-center justify-center mb-3`}>
+              <c.icon className="w-5 h-5 text-white" />
+            </div>
+            <p className="font-bold text-sm text-gray-900 dark:text-white">{c.label}</p>
+            <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">{c.desc}</p>
+          </motion.div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [showMoreSubs, setShowMoreSubs] = useState(false);
-  const [showShortsFeed, setShowShortsFeed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
-  const navigate = useNavigate();
   const [watchHistory, setWatchHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem("watchHistory") || "[]"); } catch { return []; }
   });
+  const navigate = useNavigate();
 
-  useEffect(() => { base44.auth.me().then(setUser); }, []);
+  useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
 
   const { data: channels = [] } = useQuery({
     queryKey: ["channels-all"],
@@ -171,6 +196,7 @@ export default function Dashboard() {
   });
 
   const channelMap = channels.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
+  const myChannel = channels.find(c => c.creator_email === user?.email);
 
   const handleOpenVideo = (video) => {
     setSelectedVideo(video);
@@ -229,6 +255,12 @@ export default function Dashboard() {
           <Users className="w-5 h-5 flex-shrink-0" /> My Channel
         </Link>
 
+        <hr className="border-gray-200 dark:border-zinc-800 my-3" />
+
+        {/* Creator Studio CTA */}
+        <Link to="/CreatorStudio" className={`${sidebarBtnBase} bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 hover:from-cyan-500/20 hover:to-blue-500/20`}>
+          <PlusCircle className="w-5 h-5 flex-shrink-0" /> Creator Studio
+        </Link>
 
         <hr className="border-gray-200 dark:border-zinc-800 my-3" />
         <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">You</p>
@@ -305,6 +337,12 @@ export default function Dashboard() {
           </div>
 
           <div className="px-3 sm:px-4 pb-20 md:pb-8 space-y-8 mt-4">
+
+            {/* Hub quick-access cards — only on home/no search */}
+            {!searchQuery && activeCategory === "All" && (
+              <HubCards user={user} myChannel={myChannel} />
+            )}
+
             {searchQuery && (
               <div className="flex items-center gap-2">
                 <Search className="w-4 h-4 text-gray-400 dark:text-zinc-400" />
@@ -333,11 +371,14 @@ export default function Dashboard() {
             {/* Shorts */}
             {showShorts && (
               <section>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-5 h-5 bg-red-600 rounded-sm flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-black">▶</span>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 bg-red-600 rounded-sm flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-xs font-black">▶</span>
+                    </div>
+                    <h2 className="text-base font-bold text-gray-900 dark:text-white">Shorts</h2>
                   </div>
-                  <h2 className="text-base font-bold text-gray-900 dark:text-white">Shorts</h2>
+                  <Link to="/Shorts" className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium">See all →</Link>
                 </div>
                 <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-3 px-3">
                   {shorts.slice(0, 10).map(v => <ShortCard key={v.id} video={v} onClick={handleOpenVideo} />)}
@@ -348,9 +389,15 @@ export default function Dashboard() {
             {/* Video grid */}
             {displayVideos.length > 0 ? (
               <section>
-                {!searchQuery && activeCategory !== "All" && (
-                  <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3">{activeCategory}</h2>
-                )}
+                <div className="flex items-center justify-between mb-3">
+                  {!searchQuery && activeCategory !== "All" ? (
+                    <h2 className="text-base font-bold text-gray-900 dark:text-white">{activeCategory}</h2>
+                  ) : (
+                    <h2 className="text-base font-bold text-gray-900 dark:text-white">
+                      {searchQuery ? "Search Results" : "All Videos"}
+                    </h2>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                   {displayVideos.map((video, i) => (
                     <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
@@ -363,7 +410,12 @@ export default function Dashboard() {
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <PlaySquare className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
                 <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No videos found</h3>
-                <p className="text-gray-500 dark:text-zinc-500 text-sm">{searchQuery ? "Try a different search" : "Upload videos from Creator Studio"}</p>
+                <p className="text-gray-500 dark:text-zinc-500 text-sm mb-4">{searchQuery ? "Try a different search" : "Be the first to upload a video!"}</p>
+                {!searchQuery && (
+                  <Link to="/CreatorStudio" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
+                    <PlusCircle className="w-4 h-4" /> Go to Creator Studio
+                  </Link>
+                )}
               </div>
             )}
           </div>
@@ -380,8 +432,6 @@ export default function Dashboard() {
           <AIContentAdvisor videos={displayVideos} channels={channels} user={user} />
         </aside>
       </main>
-
-
 
       {/* Video Player Modal */}
       {selectedVideo && (
