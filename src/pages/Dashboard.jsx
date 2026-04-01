@@ -76,19 +76,19 @@ function formatDuration(secs) {
 function VideoCard({ video, channel, onClick, watched }) {
   return (
     <div className="group cursor-pointer" onClick={() => onClick(video)}>
-      <div className="relative aspect-video bg-zinc-800 rounded-xl overflow-hidden mb-2">
+      <div className="relative aspect-video bg-gray-200 dark:bg-zinc-800 rounded-xl overflow-hidden mb-2">
         <img
           src={video.thumbnail_url || `https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop&sig=${video.id}`}
           alt={video.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
         />
         {watched && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-600">
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-400 dark:bg-zinc-600">
             <div className="h-full bg-red-600 w-1/3" />
           </div>
         )}
         {video.duration_seconds > 0 && (
-          <span className="absolute bottom-2 right-2 bg-black/90 text-white text-xs font-medium px-1.5 py-0.5 rounded">
+          <span className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded">
             {formatDuration(video.duration_seconds)}
           </span>
         )}
@@ -106,11 +106,11 @@ function VideoCard({ video, channel, onClick, watched }) {
           {channel?.channel_name?.charAt(0) || "C"}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-xs sm:text-sm font-medium text-white line-clamp-2 leading-snug">{video.title}</h3>
-          <p className="text-xs text-zinc-400 mt-0.5 truncate">{channel?.channel_name || "Creator"}</p>
-          <p className="text-xs text-zinc-500">{formatViews(video.view_count)} views · {timeAgo(video.published_date || video.created_date)}</p>
+          <h3 className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white line-clamp-2 leading-snug">{video.title}</h3>
+          <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5 truncate">{channel?.channel_name || "Creator"}</p>
+          <p className="text-xs text-gray-400 dark:text-zinc-500">{formatViews(video.view_count)} views · {timeAgo(video.published_date || video.created_date)}</p>
         </div>
-        <button className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-white p-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+        <button className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-white p-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
           <MoreVertical className="w-4 h-4" />
         </button>
       </div>
@@ -121,7 +121,7 @@ function VideoCard({ video, channel, onClick, watched }) {
 function ShortCard({ video, onClick }) {
   return (
     <div className="group cursor-pointer flex-shrink-0 w-32 sm:w-36 md:w-40" onClick={() => onClick(video)}>
-      <div className="relative aspect-[9/16] bg-zinc-800 rounded-xl overflow-hidden mb-2">
+      <div className="relative aspect-[9/16] bg-gray-200 dark:bg-zinc-800 rounded-xl overflow-hidden mb-2">
         <img
           src={video.thumbnail_url || `https://images.unsplash.com/photo-1536240478700-b869ad10a2ab?w=200&h=356&fit=crop&sig=${video.id}`}
           alt={video.title}
@@ -135,7 +135,7 @@ function ShortCard({ video, onClick }) {
           </div>
         </div>
       </div>
-      <p className="text-xs text-zinc-400 px-1 truncate">{formatViews(video.view_count)} views</p>
+      <p className="text-xs text-gray-500 dark:text-zinc-400 px-1 truncate">{formatViews(video.view_count)} views</p>
     </div>
   );
 }
@@ -151,9 +151,7 @@ export default function Dashboard() {
     try { return JSON.parse(localStorage.getItem("watchHistory") || "[]"); } catch { return []; }
   });
 
-  useEffect(() => {
-    base44.auth.me().then(setUser);
-  }, []);
+  useEffect(() => { base44.auth.me().then(setUser); }, []);
 
   const { data: channels = [] } = useQuery({
     queryKey: ["channels-all"],
@@ -174,7 +172,6 @@ export default function Dashboard() {
     const newHistory = [video.id, ...watchHistory.filter(id => id !== video.id)].slice(0, 50);
     setWatchHistory(newHistory);
     localStorage.setItem("watchHistory", JSON.stringify(newHistory));
-    // bump view count locally
     base44.entities.Video.update(video.id, { view_count: (video.view_count || 0) + 1 }).catch(() => {});
   };
 
@@ -201,47 +198,49 @@ export default function Dashboard() {
 
   const displayVideos = searchFiltered || (categoryFiltered.length > 0 ? categoryFiltered : regularVideos);
   const showShorts = !searchQuery && (activeCategory === "All" || activeCategory === "Shorts") && shorts.length > 0;
-
-  // Trending: sort by view_count desc
   const trending = [...regularVideos].sort((a, b) => (b.view_count || 0) - (a.view_count || 0)).slice(0, 4);
 
+  const sidebarBtnBase = "flex items-center gap-3 px-3 py-2 rounded-xl text-sm w-full text-left transition-colors";
+  const sidebarBtnIdle = "text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white";
+  const sidebarBtnActive = "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white font-medium";
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-gray-900 dark:text-white flex">
       {/* Sidebar */}
-      <aside className="hidden md:flex flex-col w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto bg-zinc-950 py-3 px-2 z-40 border-r border-zinc-900">
+      <aside className="hidden md:flex flex-col w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto bg-white dark:bg-zinc-950 py-3 px-2 z-40 border-r border-gray-200 dark:border-zinc-900">
         {SIDEBAR_ITEMS.map(item => (
-          <button key={item.label} className={`flex items-center gap-4 px-3 py-2 rounded-xl text-sm font-medium w-full text-left transition-colors ${item.active ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-800 hover:text-white"}`}>
+          <button key={item.label} className={`${sidebarBtnBase} ${item.active ? sidebarBtnActive : sidebarBtnIdle}`}>
             <item.icon className="w-5 h-5 flex-shrink-0" />
             {item.label}
           </button>
         ))}
 
-        <hr className="border-zinc-800 my-3" />
-        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-3 mb-1">You</p>
+        <hr className="border-gray-200 dark:border-zinc-800 my-3" />
+        <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">You</p>
         {SIDEBAR_YOU.map(item => (
-          <button key={item.label} className="flex items-center gap-4 px-3 py-2 rounded-xl text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors w-full text-left">
+          <button key={item.label} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
             <item.icon className="w-5 h-5 flex-shrink-0" />
             {item.label}
           </button>
         ))}
 
-        <hr className="border-zinc-800 my-3" />
-        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-3 mb-1">Subscriptions</p>
+        <hr className="border-gray-200 dark:border-zinc-800 my-3" />
+        <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">Subscriptions</p>
         {(showMoreSubs ? MOCK_SUBSCRIPTIONS : MOCK_SUBSCRIPTIONS.slice(0, 4)).map(sub => (
-          <button key={sub.name} className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors w-full text-left">
+          <button key={sub.name} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
             <div className={`w-6 h-6 rounded-full ${sub.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>{sub.avatar}</div>
             <span className="truncate text-xs">{sub.name}</span>
           </button>
         ))}
-        <button onClick={() => setShowMoreSubs(!showMoreSubs)} className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-zinc-500 hover:text-zinc-300 transition-colors w-full text-left">
+        <button onClick={() => setShowMoreSubs(!showMoreSubs)} className={`${sidebarBtnBase} ${sidebarBtnIdle} text-xs`}>
           <ChevronDown className={`w-4 h-4 transition-transform ${showMoreSubs ? "rotate-180" : ""}`} />
           {showMoreSubs ? "Show less" : "Show more"}
         </button>
 
-        <hr className="border-zinc-800 my-3" />
-        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-3 mb-1">Explore</p>
+        <hr className="border-gray-200 dark:border-zinc-800 my-3" />
+        <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">Explore</p>
         {EXPLORE_ITEMS.map(item => (
-          <button key={item.label} className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors w-full text-left">
+          <button key={item.label} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
             <item.icon className="w-4 h-4 flex-shrink-0" />
             <span className="text-xs">{item.label}</span>
           </button>
@@ -251,26 +250,25 @@ export default function Dashboard() {
       {/* Main */}
       <main className="flex-1 min-w-0 md:ml-56 flex">
         <div className="flex-1 min-w-0">
-          {/* Sticky bar: search + categories */}
-          <div className="sticky top-16 z-30 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-900 px-3 sm:px-4 py-2 space-y-2">
+          {/* Sticky bar */}
+          <div className="sticky top-16 z-30 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-zinc-900 px-3 sm:px-4 py-2 space-y-2">
             {/* Search */}
-            <div className={`flex items-center gap-2 bg-zinc-900 border ${searchFocused ? "border-zinc-500" : "border-zinc-800"} rounded-full px-3 py-1.5 max-w-xl transition-colors`}>
-              <Search className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+            <div className={`flex items-center gap-2 bg-gray-100 dark:bg-zinc-900 border ${searchFocused ? "border-gray-400 dark:border-zinc-500" : "border-gray-200 dark:border-zinc-800"} rounded-full px-3 py-1.5 max-w-xl transition-colors`}>
+              <Search className="w-4 h-4 text-gray-400 dark:text-zinc-500 flex-shrink-0" />
               <input
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
                 placeholder="Search videos..."
-                className="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-zinc-500"
+                className="flex-1 bg-transparent text-gray-900 dark:text-white text-sm outline-none placeholder:text-gray-400 dark:placeholder:text-zinc-500"
               />
               {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="text-zinc-500 hover:text-white">
+                <button onClick={() => setSearchQuery("")} className="text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-white">
                   <X className="w-4 h-4" />
                 </button>
               )}
             </div>
-
             {/* Category chips */}
             {!searchQuery && (
               <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-0.5">
@@ -279,7 +277,9 @@ export default function Dashboard() {
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
                     className={`flex-shrink-0 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                      activeCategory === cat ? "bg-white text-black" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                      activeCategory === cat
+                        ? "bg-gray-900 dark:bg-white text-white dark:text-black"
+                        : "bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700"
                     }`}
                   >
                     {cat}
@@ -290,21 +290,19 @@ export default function Dashboard() {
           </div>
 
           <div className="px-3 sm:px-4 pb-20 md:pb-8 space-y-8 mt-4">
-
-            {/* Search results header */}
             {searchQuery && (
               <div className="flex items-center gap-2">
-                <Search className="w-4 h-4 text-zinc-400" />
-                <p className="text-zinc-300 text-sm">Results for <span className="text-white font-semibold">"{searchQuery}"</span> — {displayVideos.length} video{displayVideos.length !== 1 ? "s" : ""}</p>
+                <Search className="w-4 h-4 text-gray-400 dark:text-zinc-400" />
+                <p className="text-gray-600 dark:text-zinc-300 text-sm">Results for <span className="text-gray-900 dark:text-white font-semibold">"{searchQuery}"</span> — {displayVideos.length} video{displayVideos.length !== 1 ? "s" : ""}</p>
               </div>
             )}
 
-            {/* Trending row (shown on "All" with no search) */}
+            {/* Trending row */}
             {!searchQuery && activeCategory === "All" && trending.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-3">
                   <TrendingUp className="w-5 h-5 text-red-500" />
-                  <h2 className="text-base font-bold text-white">Trending Now</h2>
+                  <h2 className="text-base font-bold text-gray-900 dark:text-white">Trending Now</h2>
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                   {trending.map((video, i) => (
@@ -324,7 +322,7 @@ export default function Dashboard() {
                   <div className="w-5 h-5 bg-red-600 rounded-sm flex items-center justify-center flex-shrink-0">
                     <span className="text-white text-xs font-black">▶</span>
                   </div>
-                  <h2 className="text-base font-bold text-white">Shorts</h2>
+                  <h2 className="text-base font-bold text-gray-900 dark:text-white">Shorts</h2>
                 </div>
                 <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-3 px-3">
                   {shorts.slice(0, 10).map(v => <ShortCard key={v.id} video={v} onClick={handleOpenVideo} />)}
@@ -336,7 +334,7 @@ export default function Dashboard() {
             {displayVideos.length > 0 ? (
               <section>
                 {!searchQuery && activeCategory !== "All" && (
-                  <h2 className="text-base font-bold text-white mb-3">{activeCategory}</h2>
+                  <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3">{activeCategory}</h2>
                 )}
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                   {displayVideos.map((video, i) => (
@@ -348,21 +346,21 @@ export default function Dashboard() {
               </section>
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <PlaySquare className="w-12 h-12 text-zinc-700 mb-3" />
-                <h3 className="text-white font-semibold mb-1">No videos found</h3>
-                <p className="text-zinc-500 text-sm">{searchQuery ? "Try a different search" : "Upload videos from Creator Studio"}</p>
+                <PlaySquare className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
+                <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No videos found</h3>
+                <p className="text-gray-500 dark:text-zinc-500 text-sm">{searchQuery ? "Try a different search" : "Upload videos from Creator Studio"}</p>
               </div>
             )}
           </div>
         </div>
 
         {/* AI Advisor Panel */}
-        <aside className="hidden xl:flex flex-col w-72 flex-shrink-0 border-l border-zinc-800 px-4 pt-4 pb-8 overflow-y-auto" style={{ marginTop: "5rem" }}>
+        <aside className="hidden xl:flex flex-col w-72 flex-shrink-0 border-l border-gray-200 dark:border-zinc-800 px-4 pb-8 overflow-y-auto" style={{ marginTop: "5rem" }}>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center">
               <span className="text-black font-black text-xs">P</span>
             </div>
-            <span className="text-sm font-bold text-white">Planify AI</span>
+            <span className="text-sm font-bold text-gray-900 dark:text-white">Planify AI</span>
           </div>
           <AIContentAdvisor videos={displayVideos} channels={channels} user={user} />
         </aside>
