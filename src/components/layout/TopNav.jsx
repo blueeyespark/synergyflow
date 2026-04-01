@@ -77,14 +77,14 @@ export default function TopNav({
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
             <Link
-              to={createPageUrl("Dashboard")}
+              to={createPageUrl("CreatorStudio")}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
-                currentPageName === "Dashboard" ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-400/30" : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+                currentPageName === "Dashboard" || currentPageName === "CreatorStudio" ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-400/30" : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
               }`}
-              aria-current={currentPageName === "Dashboard" ? "page" : "false"}
+              aria-current={currentPageName === "CreatorStudio" ? "page" : "false"}
             >
               <LayoutDashboard className="w-4 h-4" />
-              Dashboard
+              Studio
             </Link>
 
             {navGroups.filter(g => !g.single && (!g.adminOnly || isAdmin)).map(group => (
