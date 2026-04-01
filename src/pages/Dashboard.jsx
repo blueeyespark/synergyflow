@@ -13,6 +13,7 @@ import AIContentAdvisor from "@/components/dashboard/AIContentAdvisor";
 import VideoPlayerModal from "@/components/dashboard/VideoPlayerModal";
 
 const CATEGORIES = ["All", "Gaming", "Music", "Live", "Mixes", "Reaction videos", "Simulation", "Minecraft", "Anime", "Shorts", "Mods", "Tutorials"];
+const MAIN_TABS = ["Home", "Subscriptions"];
 
 const SIDEBAR_ITEMS = [
   { icon: Home, label: "Home", active: true },
@@ -144,8 +145,7 @@ function ShortCard({ video, onClick }) {
   );
 }
 
-// Hub quick-access cards shown to everyone
-function HubCards({ user, myChannel }) {
+function HubCards() {
   const cards = [
     { to: "/Live", icon: Radio, label: "Live", desc: "Watch live streams", color: "from-red-500 to-orange-500", bg: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900" },
     { to: "/Shorts", icon: Zap, label: "Shorts", desc: "Quick vertical videos", color: "from-pink-500 to-purple-600", bg: "bg-pink-50 dark:bg-pink-950/30 border-pink-200 dark:border-pink-900" },
@@ -171,6 +171,7 @@ function HubCards({ user, myChannel }) {
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
+  const [activeMainTab, setActiveMainTab] = useState("Home");
   const [activeCategory, setActiveCategory] = useState("All");
   const [showMoreSubs, setShowMoreSubs] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -195,8 +196,23 @@ export default function Dashboard() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: mySubscriptions = [] } = useQuery({
+    queryKey: ["my-subscriptions", user?.email],
+    queryFn: () => base44.entities.Subscription.filter({ subscriber_email: user.email, status: "active" }),
+    enabled: !!user?.email,
+    staleTime: 2 * 60 * 1000,
+  });
+
   const channelMap = channels.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
-  const myChannel = channels.find(c => c.creator_email === user?.email);
+  const subscribedChannelIds = new Set(mySubscriptions.map(s => s.channel_id));
+
+  const mainVideos = videos.filter(v => v.status !== "deleted" && v.status !== "uploading");
+  const shorts = mainVideos.filter(v => v.duration_seconds > 0 && v.duration_seconds < 90);
+  const regularVideos = mainVideos.filter(v => !v.duration_seconds || v.duration_seconds >= 60);
+
+  const subVideos = mainVideos
+    .filter(v => subscribedChannelIds.has(v.channel_id))
+    .sort((a, b) => new Date(b.published_date || b.created_date) - new Date(a.published_date || a.created_date));
 
   const handleOpenVideo = (video) => {
     setSelectedVideo(video);
@@ -205,10 +221,6 @@ export default function Dashboard() {
     localStorage.setItem("watchHistory", JSON.stringify(newHistory));
     base44.entities.Video.update(video.id, { view_count: (video.view_count || 0) + 1 }).catch(() => {});
   };
-
-  const mainVideos = videos.filter(v => v.status !== "deleted" && v.status !== "uploading");
-  const shorts = mainVideos.filter(v => v.duration_seconds > 0 && v.duration_seconds < 90);
-  const regularVideos = mainVideos.filter(v => !v.duration_seconds || v.duration_seconds >= 60);
 
   const searchFiltered = searchQuery
     ? mainVideos.filter(v =>
@@ -256,8 +268,6 @@ export default function Dashboard() {
         </Link>
 
         <hr className="border-gray-200 dark:border-zinc-800 my-3" />
-
-        {/* Creator Studio CTA */}
         <Link to="/CreatorStudio" className={`${sidebarBtnBase} bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 hover:from-cyan-500/20 hover:to-blue-500/20`}>
           <PlusCircle className="w-5 h-5 flex-shrink-0" /> Creator Studio
         </Link>
@@ -298,125 +308,187 @@ export default function Dashboard() {
       <main className="flex-1 min-w-0 md:ml-56 flex">
         <div className="flex-1 min-w-0">
           {/* Sticky bar */}
-          <div className="sticky top-16 z-30 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-zinc-900 px-3 sm:px-4 py-2 space-y-2">
-            {/* Search */}
-            <div className={`flex items-center gap-2 bg-gray-100 dark:bg-zinc-900 border ${searchFocused ? "border-gray-400 dark:border-zinc-500" : "border-gray-200 dark:border-zinc-800"} rounded-full px-3 py-1.5 max-w-xl transition-colors`}>
-              <Search className="w-4 h-4 text-gray-400 dark:text-zinc-500 flex-shrink-0" />
-              <input
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-                placeholder="Search videos..."
-                className="flex-1 bg-transparent text-gray-900 dark:text-white text-sm outline-none placeholder:text-gray-400 dark:placeholder:text-zinc-500"
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-white">
-                  <X className="w-4 h-4" />
+          <div className="sticky top-16 z-30 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-zinc-900 px-3 sm:px-4 pt-2 pb-1 space-y-2">
+            {/* Main tabs */}
+            <div className="flex gap-5">
+              {MAIN_TABS.map(tab => (
+                <button key={tab} onClick={() => setActiveMainTab(tab)}
+                  className={`text-sm font-semibold pb-2 border-b-2 transition-colors ${
+                    activeMainTab === tab
+                      ? "border-gray-900 dark:border-white text-gray-900 dark:text-white"
+                      : "border-transparent text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300"
+                  }`}
+                >
+                  {tab}
+                  {tab === "Subscriptions" && mySubscriptions.length > 0 && (
+                    <span className="ml-1.5 text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded-full">{mySubscriptions.length}</span>
+                  )}
                 </button>
-              )}
+              ))}
             </div>
-            {/* Category chips */}
-            {!searchQuery && (
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-0.5">
-                {CATEGORIES.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    className={`flex-shrink-0 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                      activeCategory === cat
-                        ? "bg-gray-900 dark:bg-white text-white dark:text-black"
-                        : "bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
+
+            {/* Search + category chips — only on Home tab */}
+            {activeMainTab === "Home" && (
+              <>
+                <div className={`flex items-center gap-2 bg-gray-100 dark:bg-zinc-900 border ${searchFocused ? "border-gray-400 dark:border-zinc-500" : "border-gray-200 dark:border-zinc-800"} rounded-full px-3 py-1.5 max-w-xl transition-colors`}>
+                  <Search className="w-4 h-4 text-gray-400 dark:text-zinc-500 flex-shrink-0" />
+                  <input
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
+                    placeholder="Search videos..."
+                    className="flex-1 bg-transparent text-gray-900 dark:text-white text-sm outline-none placeholder:text-gray-400 dark:placeholder:text-zinc-500"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery("")} className="text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-white">
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {!searchQuery && (
+                  <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
+                    {CATEGORIES.map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setActiveCategory(cat)}
+                        className={`flex-shrink-0 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                          activeCategory === cat
+                            ? "bg-gray-900 dark:bg-white text-white dark:text-black"
+                            : "bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
 
           <div className="px-3 sm:px-4 pb-20 md:pb-8 space-y-8 mt-4">
 
-            {/* Hub quick-access cards — only on home/no search */}
-            {!searchQuery && activeCategory === "All" && (
-              <HubCards user={user} myChannel={myChannel} />
-            )}
-
-            {searchQuery && (
-              <div className="flex items-center gap-2">
-                <Search className="w-4 h-4 text-gray-400 dark:text-zinc-400" />
-                <p className="text-gray-600 dark:text-zinc-300 text-sm">Results for <span className="text-gray-900 dark:text-white font-semibold">"{searchQuery}"</span> — {displayVideos.length} video{displayVideos.length !== 1 ? "s" : ""}</p>
-              </div>
-            )}
-
-            {/* Trending row */}
-            {!searchQuery && activeCategory === "All" && trending.length > 0 && (
-              <section>
-                <div className="flex items-center gap-2 mb-3">
-                  <TrendingUp className="w-5 h-5 text-red-500" />
-                  <h2 className="text-base font-bold text-gray-900 dark:text-white">Trending Now</h2>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-                  {trending.map((video, i) => (
-                    <div key={video.id} className="relative">
-                      <span className="absolute -top-1 -left-1 z-10 w-6 h-6 bg-red-600 text-white text-xs font-black rounded-full flex items-center justify-center">{i + 1}</span>
-                      <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Shorts */}
-            {showShorts && (
-              <section>
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 bg-red-600 rounded-sm flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-black">▶</span>
-                    </div>
-                    <h2 className="text-base font-bold text-gray-900 dark:text-white">Shorts</h2>
+            {/* ── SUBSCRIPTIONS TAB ── */}
+            {activeMainTab === "Subscriptions" && (
+              <div>
+                {mySubscriptions.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <Users className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
+                    <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No subscriptions yet</h3>
+                    <p className="text-gray-500 dark:text-zinc-500 text-sm mb-4">Follow channels to see their latest videos here.</p>
+                    <Link to="/Channel" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline">Browse channels →</Link>
                   </div>
-                  <Link to="/Shorts" className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium">See all →</Link>
-                </div>
-                <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-3 px-3">
-                  {shorts.slice(0, 10).map(v => <ShortCard key={v.id} video={v} onClick={handleOpenVideo} />)}
-                </div>
-              </section>
-            )}
-
-            {/* Video grid */}
-            {displayVideos.length > 0 ? (
-              <section>
-                <div className="flex items-center justify-between mb-3">
-                  {!searchQuery && activeCategory !== "All" ? (
-                    <h2 className="text-base font-bold text-gray-900 dark:text-white">{activeCategory}</h2>
-                  ) : (
-                    <h2 className="text-base font-bold text-gray-900 dark:text-white">
-                      {searchQuery ? "Search Results" : "All Videos"}
-                    </h2>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-                  {displayVideos.map((video, i) => (
-                    <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                      <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
-                    </motion.div>
-                  ))}
-                </div>
-              </section>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <PlaySquare className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
-                <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No videos found</h3>
-                <p className="text-gray-500 dark:text-zinc-500 text-sm mb-4">{searchQuery ? "Try a different search" : "Be the first to upload a video!"}</p>
-                {!searchQuery && (
-                  <Link to="/CreatorStudio" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
-                    <PlusCircle className="w-4 h-4" /> Go to Creator Studio
-                  </Link>
+                ) : subVideos.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <PlaySquare className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
+                    <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No videos from subscriptions</h3>
+                    <p className="text-gray-500 dark:text-zinc-500 text-sm">The channels you follow haven't uploaded anything yet.</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Subscribed channels avatar row */}
+                    <div className="flex gap-4 overflow-x-auto pb-3 mb-6 scrollbar-hide">
+                      {[...subscribedChannelIds].map(cid => {
+                        const ch = channelMap[cid];
+                        if (!ch) return null;
+                        return (
+                          <Link key={cid} to={`/Channel?id=${cid}`} className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold ring-2 ring-indigo-300 dark:ring-indigo-700 overflow-hidden">
+                              {ch.avatar_url ? <img src={ch.avatar_url} className="w-full h-full object-cover" alt="" /> : ch.channel_name?.charAt(0)}
+                            </div>
+                            <p className="text-xs text-gray-600 dark:text-zinc-400 truncate max-w-[60px] text-center">{ch.channel_name}</p>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                      {subVideos.map((video, i) => (
+                        <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+                          <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
+            )}
+
+            {/* ── HOME TAB ── */}
+            {activeMainTab === "Home" && (
+              <>
+                {!searchQuery && activeCategory === "All" && <HubCards />}
+
+                {searchQuery && (
+                  <div className="flex items-center gap-2">
+                    <Search className="w-4 h-4 text-gray-400 dark:text-zinc-400" />
+                    <p className="text-gray-600 dark:text-zinc-300 text-sm">Results for <span className="text-gray-900 dark:text-white font-semibold">"{searchQuery}"</span> — {displayVideos.length} video{displayVideos.length !== 1 ? "s" : ""}</p>
+                  </div>
+                )}
+
+                {/* Trending row */}
+                {!searchQuery && activeCategory === "All" && trending.length > 0 && (
+                  <section>
+                    <div className="flex items-center gap-2 mb-3">
+                      <TrendingUp className="w-5 h-5 text-red-500" />
+                      <h2 className="text-base font-bold text-gray-900 dark:text-white">Trending Now</h2>
+                    </div>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+                      {trending.map((video, i) => (
+                        <div key={video.id} className="relative">
+                          <span className="absolute -top-1 -left-1 z-10 w-6 h-6 bg-red-600 text-white text-xs font-black rounded-full flex items-center justify-center">{i + 1}</span>
+                          <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Shorts */}
+                {showShorts && (
+                  <section>
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 bg-red-600 rounded-sm flex items-center justify-center flex-shrink-0">
+                          <span className="text-white text-xs font-black">▶</span>
+                        </div>
+                        <h2 className="text-base font-bold text-gray-900 dark:text-white">Shorts</h2>
+                      </div>
+                      <Link to="/Shorts" className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium">See all →</Link>
+                    </div>
+                    <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-3 px-3">
+                      {shorts.slice(0, 10).map(v => <ShortCard key={v.id} video={v} onClick={handleOpenVideo} />)}
+                    </div>
+                  </section>
+                )}
+
+                {/* Video grid */}
+                {displayVideos.length > 0 ? (
+                  <section>
+                    <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3">
+                      {searchQuery ? "Search Results" : activeCategory !== "All" ? activeCategory : "All Videos"}
+                    </h2>
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                      {displayVideos.map((video, i) => (
+                        <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+                          <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </section>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <PlaySquare className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
+                    <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No videos found</h3>
+                    <p className="text-gray-500 dark:text-zinc-500 text-sm mb-4">{searchQuery ? "Try a different search" : "Be the first to upload a video!"}</p>
+                    {!searchQuery && (
+                      <Link to="/CreatorStudio" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
+                        <PlusCircle className="w-4 h-4" /> Go to Creator Studio
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
