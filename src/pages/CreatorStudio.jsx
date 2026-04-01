@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Radio, Image, DollarSign, LayoutDashboard, Trophy, Globe, Bot, Upload, BarChart3, Calendar, Users } from "lucide-react";
+import { Video, Radio, Image, DollarSign, LayoutDashboard, Trophy, Globe, Bot, Upload, BarChart3, Calendar, Users, LayoutTemplate } from "lucide-react";
 import VideoEditor from "./VideoEditor";
 import ThumbnailMaker from "./ThumbnailMaker";
 import IntroOutroMaker from "./IntroOutroMaker";
@@ -24,7 +24,7 @@ const tabs = [
   { id: "thumbnail", label: "Thumbnail Maker", icon: Video, component: ThumbnailMaker },
   { id: "intro", label: "Intro/Outro", icon: Radio, component: IntroOutroMaker },
   { id: "media", label: "Media Library", icon: Image, component: MediaLibrary },
-  { id: "templates", label: "Templates", icon: Layout, component: Templates },
+  { id: "templates", label: "Templates", icon: LayoutTemplate, component: Templates },
   { id: "planning", label: "Planning", icon: Calendar, component: PlanningHub },
   { id: "analytics", label: "Analytics", icon: BarChart3, component: AnalyticsHub },
   { id: "budget", label: "Budget", icon: DollarSign, component: BudgetPage },
