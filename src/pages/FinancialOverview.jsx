@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
@@ -6,7 +6,10 @@ import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
-import { DollarSign, TrendingUp, Users, ShoppingBag, Heart, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { DollarSign, TrendingUp, Users, ShoppingBag, Heart, ArrowUpRight, ArrowDownRight, Info } from "lucide-react";
+
+const CREATOR_SHARE = 0.8;
+const PLATFORM_SHARE = 0.2;
 
 const MOCK_MONTHLY = [
   { month: "Oct", memberships: 420, tips: 180, products: 95, ads: 310 },
@@ -58,9 +61,11 @@ export default function FinancialOverview() {
     queryFn: () => base44.entities.CreatorBudget.list("-date", 100),
   });
 
-  const totalRevenue = MOCK_BREAKDOWN.reduce((s, i) => s + i.value, 0);
+  const grossRevenue = MOCK_BREAKDOWN.reduce((s, i) => s + i.value, 0);
+  const creatorEarnings = Math.round(grossRevenue * CREATOR_SHARE);
+  const platformFee = Math.round(grossRevenue * PLATFORM_SHARE);
   const prevTotal = 1880;
-  const totalChange = (((totalRevenue - prevTotal) / prevTotal) * 100).toFixed(1);
+  const totalChange = (((grossRevenue - prevTotal) / prevTotal) * 100).toFixed(1);
 
   const displayData = range === "3m" ? MOCK_MONTHLY.slice(-3) : range === "6m" ? MOCK_MONTHLY.slice(-6) : MOCK_MONTHLY;
 
@@ -71,16 +76,39 @@ export default function FinancialOverview() {
         <p className="text-gray-500 dark:text-zinc-400 mt-1">Track your creator earnings across all revenue streams</p>
       </motion.div>
 
-      {/* Total Banner */}
+      {/* Revenue Split Banner */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl p-6 mb-6 text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <p className="text-white/70 text-sm font-medium">Total Revenue This Month</p>
-          <p className="text-4xl font-black mt-1">${totalRevenue.toLocaleString()}</p>
+        className="bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl p-6 mb-4 text-white">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
+          <div>
+            <p className="text-white/70 text-sm font-medium">Total Gross Revenue This Month</p>
+            <p className="text-4xl font-black mt-1">${grossRevenue.toLocaleString()}</p>
+          </div>
+          <div className="flex items-center gap-2 bg-white/20 rounded-xl px-4 py-2 w-fit">
+            <TrendingUp className="w-4 h-4" />
+            <span className="text-sm font-bold">+{totalChange}% vs last month</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2 bg-white/20 rounded-xl px-4 py-2 w-fit">
-          <TrendingUp className="w-4 h-4" />
-          <span className="text-sm font-bold">+{totalChange}% vs last month</span>
+        {/* Split visualization */}
+        <div className="bg-white/10 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Info className="w-3.5 h-3.5 text-white/70" />
+            <span className="text-white/70 text-xs">Revenue split: 80% creator · 20% platform</span>
+          </div>
+          <div className="flex h-3 rounded-full overflow-hidden mb-3">
+            <div className="bg-white" style={{ width: "80%" }} />
+            <div className="bg-white/30" style={{ width: "20%" }} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-white/60 text-xs mb-0.5">Your Earnings (80%)</p>
+              <p className="text-2xl font-black">${creatorEarnings.toLocaleString()}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-white/60 text-xs mb-0.5">Platform Fee (20%)</p>
+              <p className="text-2xl font-black text-white/50">${platformFee.toLocaleString()}</p>
+            </div>
+          </div>
         </div>
       </motion.div>
 
