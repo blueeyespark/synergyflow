@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Radio, Image, DollarSign, LayoutDashboard, Trophy, Globe, Bot, Upload, BarChart3, Calendar } from "lucide-react";
+import { Video, Radio, Image, DollarSign, LayoutDashboard, Trophy, Globe, Bot, Upload, BarChart3, Calendar, Users } from "lucide-react";
 import VideoEditor from "./VideoEditor";
 import ThumbnailMaker from "./ThumbnailMaker";
 import IntroOutroMaker from "./IntroOutroMaker";
