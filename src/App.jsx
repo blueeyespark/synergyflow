@@ -3,6 +3,8 @@ import UserViewer from './pages/UserViewer';
 import ShortsPage from './pages/ShortsPage';
 import LivePage from './pages/LivePage';
 import StreamerDashboard from './pages/StreamerDashboard';
+import FinancialOverview from './pages/FinancialOverview';
+import AudienceAnalytics from './pages/AudienceAnalytics';
 import DeepScanResults from './pages/DeepScanResults';
 import Tasks from './pages/Tasks';
 import AITools from './pages/AITools';
@@ -75,6 +77,8 @@ const AuthenticatedApp = () => {
       <Route path="/Shorts" element={<LayoutWrapper currentPageName="Shorts"><ShortsPage /></LayoutWrapper>} />
       <Route path="/Live" element={<LayoutWrapper currentPageName="Live"><LivePage /></LayoutWrapper>} />
       <Route path="/StreamerDashboard" element={<LayoutWrapper currentPageName="StreamerDashboard"><StreamerDashboard /></LayoutWrapper>} />
+      <Route path="/FinancialOverview" element={<LayoutWrapper currentPageName="FinancialOverview"><FinancialOverview /></LayoutWrapper>} />
+      <Route path="/AudienceAnalytics" element={<LayoutWrapper currentPageName="AudienceAnalytics"><AudienceAnalytics /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
