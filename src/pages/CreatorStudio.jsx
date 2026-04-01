@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Video, Radio, Image, DollarSign, LayoutDashboard, Trophy, Globe, Bot, Upload, BarChart3, Calendar, Users } from "lucide-react";
 import VideoEditor from "./VideoEditor";
 import ThumbnailMaker from "./ThumbnailMaker";
@@ -36,8 +36,6 @@ const tabs = [
 export default function CreatorStudio() {
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  const ActiveComponent = tabs.find(t => t.id === activeTab)?.component;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -67,7 +65,11 @@ export default function CreatorStudio() {
             </div>
 
             <div className="p-6">
-              {ActiveComponent && <ActiveComponent />}
+              {tabs.map((tab) => (
+                <div key={tab.id} className={activeTab === tab.id ? "block" : "hidden"}>
+                  <tab.component />
+                </div>
+              ))}
             </div>
           </Tabs>
         </motion.div>
