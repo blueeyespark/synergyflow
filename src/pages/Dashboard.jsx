@@ -440,47 +440,30 @@ export default function Dashboard() {
             )}
 
             {/* ── SUBSCRIPTIONS TAB ── */}
-            {activeMainTab === "Subscriptions" && (
-              <div>
-                {mySubscriptions.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <Users className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
-                    <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No subscriptions yet</h3>
-                    <p className="text-gray-500 dark:text-zinc-500 text-sm mb-4">Follow channels to see their latest videos here.</p>
-                    <Link to="/Channel" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline">Browse channels →</Link>
-                  </div>
-                ) : subVideos.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <PlaySquare className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
-                    <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No videos from subscriptions</h3>
-                    <p className="text-gray-500 dark:text-zinc-500 text-sm">The channels you follow haven't uploaded anything yet.</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex gap-4 overflow-x-auto pb-3 mb-6 scrollbar-hide">
-                      {[...subscribedChannelIds].map(cid => {
-                        const ch = channelMap[cid];
-                        if (!ch) return null;
-                        return (
-                          <Link key={cid} to={`/Channel?id=${cid}`} className="flex flex-col items-center gap-1.5 flex-shrink-0">
-                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold ring-2 ring-indigo-300 dark:ring-indigo-700 overflow-hidden">
-                              {ch.avatar_url ? <img src={ch.avatar_url} className="w-full h-full object-cover" alt="" /> : ch.channel_name?.charAt(0)}
-                            </div>
-                            <p className="text-xs text-gray-600 dark:text-zinc-400 truncate max-w-[60px] text-center">{ch.channel_name}</p>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-                      {subVideos.map((video, i) => (
-                        <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                          <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+            {activeMainTab === "Subscriptions" && mySubscriptions.length > 0 && (
+              <>
+                <div className="flex gap-4 overflow-x-auto pb-3 mb-6 scrollbar-hide">
+                  {[...subscribedChannelIds].map(cid => {
+                    const ch = channelMap[cid];
+                    if (!ch) return null;
+                    return (
+                      <Link key={cid} to={`/Channel?id=${cid}`} className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold ring-2 ring-indigo-300 dark:ring-indigo-700 overflow-hidden">
+                          {ch.avatar_url ? <img src={ch.avatar_url} className="w-full h-full object-cover" alt="" /> : ch.channel_name?.charAt(0)}
+                        </div>
+                        <p className="text-xs text-gray-600 dark:text-zinc-400 truncate max-w-[60px] text-center">{ch.channel_name}</p>
+                      </Link>
+                    );
+                  })}
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                  {subVideos.map((video, i) => (
+                    <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+                      <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
+                    </motion.div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
