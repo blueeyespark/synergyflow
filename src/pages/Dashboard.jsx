@@ -5,15 +5,18 @@ import {
   Home, Flame, Music, Gamepad2, Tv, Radio, BookOpen, Trophy,
   ChevronDown, ThumbsUp, Clock, ListVideo, Download, History,
   PlaySquare, ShoppingBag, MoreVertical, Search, X, TrendingUp,
-  Users, Zap, Star, PlusCircle
+  Users, Zap, Star, PlusCircle, Compass
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import AIContentAdvisor from "@/components/dashboard/AIContentAdvisor";
 import VideoPlayerModal from "@/components/dashboard/VideoPlayerModal";
+import FeaturedLiveStream from "@/components/dashboard/FeaturedLiveStream";
+import ExploreCategories from "@/components/dashboard/ExploreCategories";
+import LiveSidebar from "@/components/dashboard/LiveSidebar";
 
 const CATEGORIES = ["All", "Gaming", "Music", "Live", "Mixes", "Reaction videos", "Simulation", "Minecraft", "Anime", "Shorts", "Mods", "Tutorials"];
-const MAIN_TABS = ["Home", "Subscriptions"];
+const MAIN_TABS = ["Home", "Subscriptions", "Discover"];
 
 const SIDEBAR_ITEMS = [
   { icon: Home, label: "Home", active: true },
@@ -177,6 +180,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [selectedStream, setSelectedStream] = useState(null);
   const [watchHistory, setWatchHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem("watchHistory") || "[]"); } catch { return []; }
   });
@@ -205,6 +209,8 @@ export default function Dashboard() {
 
   const channelMap = channels.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
   const subscribedChannelIds = new Set(mySubscriptions.map(s => s.channel_id));
+  const liveStreams = channels.filter(c => c.is_live).map(c => ({ ...c, viewers: Math.floor(Math.random() * 5000) + 100 }));
+  const featuredLive = liveStreams[0];
 
   const mainVideos = videos.filter(v => v.status !== "deleted" && v.status !== "uploading");
   const shorts = mainVideos.filter(v => v.duration_seconds > 0 && v.duration_seconds < 90);
@@ -310,10 +316,10 @@ export default function Dashboard() {
           {/* Sticky bar */}
           <div className="sticky top-16 z-30 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-zinc-900 px-3 sm:px-4 pt-2 pb-1 space-y-2">
             {/* Main tabs */}
-            <div className="flex gap-5">
+            <div className="flex gap-5 overflow-x-auto scrollbar-hide">
               {MAIN_TABS.map(tab => (
                 <button key={tab} onClick={() => setActiveMainTab(tab)}
-                  className={`text-sm font-semibold pb-2 border-b-2 transition-colors ${
+                  className={`text-sm font-semibold pb-2 border-b-2 flex-shrink-0 transition-colors ${
                     activeMainTab === tab
                       ? "border-gray-900 dark:border-white text-gray-900 dark:text-white"
                       : "border-transparent text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300"
@@ -369,55 +375,16 @@ export default function Dashboard() {
 
           <div className="px-3 sm:px-4 pb-20 md:pb-8 space-y-8 mt-4">
 
-            {/* ── SUBSCRIPTIONS TAB ── */}
-            {activeMainTab === "Subscriptions" && (
-              <div>
-                {mySubscriptions.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <Users className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
-                    <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No subscriptions yet</h3>
-                    <p className="text-gray-500 dark:text-zinc-500 text-sm mb-4">Follow channels to see their latest videos here.</p>
-                    <Link to="/Channel" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline">Browse channels →</Link>
-                  </div>
-                ) : subVideos.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <PlaySquare className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
-                    <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No videos from subscriptions</h3>
-                    <p className="text-gray-500 dark:text-zinc-500 text-sm">The channels you follow haven't uploaded anything yet.</p>
-                  </div>
-                ) : (
-                  <>
-                    {/* Subscribed channels avatar row */}
-                    <div className="flex gap-4 overflow-x-auto pb-3 mb-6 scrollbar-hide">
-                      {[...subscribedChannelIds].map(cid => {
-                        const ch = channelMap[cid];
-                        if (!ch) return null;
-                        return (
-                          <Link key={cid} to={`/Channel?id=${cid}`} className="flex flex-col items-center gap-1.5 flex-shrink-0">
-                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold ring-2 ring-indigo-300 dark:ring-indigo-700 overflow-hidden">
-                              {ch.avatar_url ? <img src={ch.avatar_url} className="w-full h-full object-cover" alt="" /> : ch.channel_name?.charAt(0)}
-                            </div>
-                            <p className="text-xs text-gray-600 dark:text-zinc-400 truncate max-w-[60px] text-center">{ch.channel_name}</p>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-                      {subVideos.map((video, i) => (
-                        <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                          <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-
             {/* ── HOME TAB ── */}
             {activeMainTab === "Home" && (
               <>
-                {!searchQuery && activeCategory === "All" && <HubCards />}
+                {!searchQuery && activeCategory === "All" && (
+                  <>
+                    {featuredLive && <FeaturedLiveStream stream={featuredLive} channel={channelMap[featuredLive.id]} onSelect={() => { setSelectedStream(featuredLive); }} />}
+                    <ExploreCategories onCategorySelect={cat => { setActiveCategory(cat); }} />
+                    <HubCards />
+                  </>
+                )}
 
                 {searchQuery && (
                   <div className="flex items-center gap-2">
@@ -490,18 +457,91 @@ export default function Dashboard() {
                 )}
               </>
             )}
+
+            {/* ── DISCOVER TAB ── */}
+            {activeMainTab === "Discover" && (
+              <div>
+                <div className="flex items-center gap-2 mb-6">
+                  <Compass className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Discover Content</h2>
+                </div>
+                <ExploreCategories onCategorySelect={cat => { setActiveCategory(cat); setActiveMainTab("Home"); }} />
+                {/* Popular videos grid */}
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Trending Videos</h3>
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                    {mainVideos.slice(0, 12).map((video, i) => (
+                      <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+                        <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── SUBSCRIPTIONS TAB ── */}
+            {activeMainTab === "Subscriptions" && (
+              <div>
+                {mySubscriptions.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <Users className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
+                    <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No subscriptions yet</h3>
+                    <p className="text-gray-500 dark:text-zinc-500 text-sm mb-4">Follow channels to see their latest videos here.</p>
+                    <Link to="/Channel" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline">Browse channels →</Link>
+                  </div>
+                ) : subVideos.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <PlaySquare className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
+                    <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No videos from subscriptions</h3>
+                    <p className="text-gray-500 dark:text-zinc-500 text-sm">The channels you follow haven't uploaded anything yet.</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Subscribed channels avatar row */}
+                    <div className="flex gap-4 overflow-x-auto pb-3 mb-6 scrollbar-hide">
+                      {[...subscribedChannelIds].map(cid => {
+                        const ch = channelMap[cid];
+                        if (!ch) return null;
+                        return (
+                          <Link key={cid} to={`/Channel?id=${cid}`} className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold ring-2 ring-indigo-300 dark:ring-indigo-700 overflow-hidden">
+                              {ch.avatar_url ? <img src={ch.avatar_url} className="w-full h-full object-cover" alt="" /> : ch.channel_name?.charAt(0)}
+                            </div>
+                            <p className="text-xs text-gray-600 dark:text-zinc-400 truncate max-w-[60px] text-center">{ch.channel_name}</p>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                      {subVideos.map((video, i) => (
+                        <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+                          <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* AI Advisor Panel */}
-        <aside className="hidden xl:flex flex-col w-72 flex-shrink-0 border-l border-gray-200 dark:border-zinc-800 px-4 pb-8 overflow-y-auto" style={{ marginTop: "5rem" }}>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center">
-              <span className="text-black font-black text-xs">P</span>
+        {/* Right Sidebar — Live + AI */}
+        <aside className="hidden xl:flex flex-col w-72 flex-shrink-0 border-l border-gray-200 dark:border-zinc-800 px-4 pb-8 overflow-y-auto space-y-4" style={{ marginTop: "5rem" }}>
+          {/* Live sidebar */}
+          {liveStreams.length > 0 && <LiveSidebar liveChannels={liveStreams} onSelectStream={setSelectedStream} />}
+          
+          {/* AI Advisor */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center">
+                <span className="text-black font-black text-xs">P</span>
+              </div>
+              <span className="text-sm font-bold text-gray-900 dark:text-white">Planify AI</span>
             </div>
-            <span className="text-sm font-bold text-gray-900 dark:text-white">Planify AI</span>
+            <AIContentAdvisor videos={displayVideos} channels={channels} user={user} />
           </div>
-          <AIContentAdvisor videos={displayVideos} channels={channels} user={user} />
         </aside>
       </main>
 
