@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Radio, Image, Calendar, Lightbulb, BarChart3, Youtube, Twitch, DollarSign, FileText, Layout, MessageSquare, Clock, Users, Settings, Upload, Trophy, Bot } from "lucide-react";
+import { Video, Radio, Image, Calendar, Lightbulb, BarChart3, Youtube, Twitch, DollarSign, FileText, Layout, MessageSquare, Clock, Users, Settings, Upload, Trophy, Bot, LayoutDashboard, Building2 } from "lucide-react";
 import VideoEditor from "./VideoEditor";
 import ThumbnailMaker from "./ThumbnailMaker";
 import IntroOutroMaker from "./IntroOutroMaker";
@@ -26,8 +26,10 @@ import SocialMedia from "./SocialMedia";
 import Leaderboard from "./Leaderboard";
 import ClientPortal from "./ClientPortal";
 import DiscordBot from "./DiscordBot";
+import Dashboard from "./Dashboard";
 
 const tabs = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, component: Dashboard },
   { id: "channel", label: "My Channel", icon: Users, component: ChannelPage },
   { id: "upload", label: "Upload Video", icon: Upload, component: VideoUpload },
   { id: "youtube", label: "YouTube Publisher", icon: Youtube, component: YouTubePublisher },
@@ -55,7 +57,7 @@ const tabs = [
 ];
 
 export default function CreatorStudio() {
-  const [activeTab, setActiveTab] = useState("channel");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const ActiveComponent = tabs.find(t => t.id === activeTab)?.component;
 
