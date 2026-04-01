@@ -5,7 +5,7 @@ import {
   Home, Flame, Music, Gamepad2, Tv, Radio, BookOpen, Trophy,
   ChevronDown, ThumbsUp, Clock, ListVideo, Download, History,
   PlaySquare, ShoppingBag, MoreVertical, Search, X, TrendingUp,
-  Users, Zap, Star, PlusCircle, Compass
+  Users, Zap, Star, PlusCircle, Compass, Menu
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -182,6 +182,7 @@ export default function Dashboard() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [selectedStream, setSelectedStream] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [watchHistory, setWatchHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem("watchHistory") || "[]"); } catch { return []; }
   });
@@ -257,7 +258,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-gray-900 dark:text-white flex">
       {/* Sidebar */}
-      <aside className="flex flex-col w-48 sm:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto bg-white dark:bg-zinc-950 py-3 px-2 z-40 border-r border-gray-200 dark:border-zinc-900">
+      <aside className={`flex flex-col w-48 sm:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto bg-white dark:bg-zinc-950 py-3 px-2 z-40 border-r border-gray-200 dark:border-zinc-900 transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"}`}>
         {SIDEBAR_ITEMS.map(item => (
           <button key={item.label} className={`${sidebarBtnBase} ${item.active ? sidebarBtnActive : sidebarBtnIdle}`}>
             <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -311,8 +312,11 @@ export default function Dashboard() {
         ))}
       </aside>
 
+      {/* Overlay for mobile */}
+      {sidebarOpen && <div className="fixed inset-0 bg-black/20 z-30 sm:hidden" onClick={() => setSidebarOpen(false)} />}
+
       {/* Main */}
-      <main className="flex-1 min-w-0 ml-48 sm:ml-56 flex">
+      <main className="flex-1 min-w-0 ml-0 sm:ml-48 md:ml-56 flex">
         <div className="flex-1 min-w-0">
           {/* Sticky bar */}
           <div className="sticky top-16 z-30 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-zinc-900 px-3 sm:px-4 pt-2 pb-1 space-y-2">
@@ -337,8 +341,12 @@ export default function Dashboard() {
             {/* Search + category chips — only on Home tab */}
             {activeMainTab === "Home" && (
               <>
-                <div className={`flex items-center gap-2 bg-gray-100 dark:bg-zinc-900 border ${searchFocused ? "border-gray-400 dark:border-zinc-500" : "border-gray-200 dark:border-zinc-800"} rounded-full px-3 py-1.5 max-w-xl transition-colors`}>
-                  <Search className="w-4 h-4 text-gray-400 dark:text-zinc-500 flex-shrink-0" />
+                <div className="flex items-center gap-2">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="sm:hidden flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+              <Menu className="w-5 h-5 text-gray-600 dark:text-zinc-400" />
+            </button>
+            <div className={`flex items-center gap-2 bg-gray-100 dark:bg-zinc-900 border ${searchFocused ? "border-gray-400 dark:border-zinc-500" : "border-gray-200 dark:border-zinc-800"} rounded-full px-3 py-1.5 flex-1 transition-colors`}>
+              <Search className="w-4 h-4 text-gray-400 dark:text-zinc-500 flex-shrink-0" />
                   <input
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
