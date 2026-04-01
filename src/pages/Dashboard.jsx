@@ -16,7 +16,7 @@ import ExploreCategories from "@/components/dashboard/ExploreCategories";
 import LiveSidebar from "@/components/dashboard/LiveSidebar";
 
 const CATEGORIES = ["All", "Gaming", "Music", "Live", "Mixes", "Reaction videos", "Simulation", "Minecraft", "Anime", "Shorts", "Mods", "Tutorials"];
-const MAIN_TABS = ["Home", "Subscriptions", "Discover"];
+const MAIN_TABS = ["Home", "Subscriptions"];
 
 const SIDEBAR_ITEMS = [
   { icon: Home, label: "Home", active: true },
@@ -79,9 +79,10 @@ function formatDuration(secs) {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-function VideoCard({ video, channel, onClick, watched }) {
+function VideoCard({ video, channel, onClick, watched, badge }) {
   return (
-    <div className="group cursor-pointer" onClick={() => onClick(video)}>
+    <div className="group cursor-pointer relative" onClick={() => onClick(video)}>
+      {badge && <span className="absolute -top-1 -left-1 z-10 w-6 h-6 bg-red-600 text-white text-xs font-black rounded-full flex items-center justify-center">{badge}</span>}
       <div className="relative aspect-video bg-gray-200 dark:bg-zinc-800 rounded-xl overflow-hidden mb-2">
         <img
           src={video.thumbnail_url || `https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop&sig=${video.id}`}
@@ -374,7 +375,6 @@ export default function Dashboard() {
           </div>
 
           <div className="px-3 sm:px-4 pb-20 md:pb-8 space-y-8 mt-4">
-
             {/* ── HOME TAB ── */}
             {activeMainTab === "Home" && (
               <>
@@ -387,41 +387,18 @@ export default function Dashboard() {
                 )}
 
                 {searchQuery && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mb-4">
                     <Search className="w-4 h-4 text-gray-400 dark:text-zinc-400" />
                     <p className="text-gray-600 dark:text-zinc-300 text-sm">Results for <span className="text-gray-900 dark:text-white font-semibold">"{searchQuery}"</span> — {displayVideos.length} video{displayVideos.length !== 1 ? "s" : ""}</p>
                   </div>
                 )}
 
-                {/* Trending row */}
-                {!searchQuery && activeCategory === "All" && trending.length > 0 && (
-                  <section>
-                    <div className="flex items-center gap-2 mb-3">
-                      <TrendingUp className="w-5 h-5 text-red-500" />
-                      <h2 className="text-base font-bold text-gray-900 dark:text-white">Trending Now</h2>
-                    </div>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-                      {trending.map((video, i) => (
-                        <div key={video.id} className="relative">
-                          <span className="absolute -top-1 -left-1 z-10 w-6 h-6 bg-red-600 text-white text-xs font-black rounded-full flex items-center justify-center">{i + 1}</span>
-                          <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
                 {/* Shorts */}
                 {showShorts && (
                   <section>
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 bg-red-600 rounded-sm flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-xs font-black">▶</span>
-                        </div>
-                        <h2 className="text-base font-bold text-gray-900 dark:text-white">Shorts</h2>
-                      </div>
-                      <Link to="/Shorts" className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium">See all →</Link>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Zap className="w-5 h-5 text-pink-500" />
+                      <h2 className="text-base font-bold text-gray-900 dark:text-white">Shorts</h2>
                     </div>
                     <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-3 px-3">
                       {shorts.slice(0, 10).map(v => <ShortCard key={v.id} video={v} onClick={handleOpenVideo} />)}
@@ -429,18 +406,22 @@ export default function Dashboard() {
                   </section>
                 )}
 
-                {/* Video grid */}
+                {/* Video grid with trending badges */}
                 {displayVideos.length > 0 ? (
                   <section>
                     <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3">
-                      {searchQuery ? "Search Results" : activeCategory !== "All" ? activeCategory : "All Videos"}
+                      {searchQuery ? "Search Results" : activeCategory !== "All" ? activeCategory : "Recommended Videos"}
                     </h2>
                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-                      {displayVideos.map((video, i) => (
-                        <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                          <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
-                        </motion.div>
-                      ))}
+                      {displayVideos.map((video, i) => {
+                        const trendingIndex = trending.findIndex(v => v.id === video.id);
+                        const badge = trendingIndex !== -1 ? `#${trendingIndex + 1}` : null;
+                        return (
+                          <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+                            <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} badge={badge} />
+                          </motion.div>
+                        );
+                      })}
                     </div>
                   </section>
                 ) : (
@@ -456,28 +437,6 @@ export default function Dashboard() {
                   </div>
                 )}
               </>
-            )}
-
-            {/* ── DISCOVER TAB ── */}
-            {activeMainTab === "Discover" && (
-              <div>
-                <div className="flex items-center gap-2 mb-6">
-                  <Compass className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Discover Content</h2>
-                </div>
-                <ExploreCategories onCategorySelect={cat => { setActiveCategory(cat); setActiveMainTab("Home"); }} />
-                {/* Popular videos grid */}
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Trending Videos</h3>
-                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-                    {mainVideos.slice(0, 12).map((video, i) => (
-                      <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                        <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </div>
             )}
 
             {/* ── SUBSCRIPTIONS TAB ── */}
@@ -498,7 +457,6 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <>
-                    {/* Subscribed channels avatar row */}
                     <div className="flex gap-4 overflow-x-auto pb-3 mb-6 scrollbar-hide">
                       {[...subscribedChannelIds].map(cid => {
                         const ch = channelMap[cid];
@@ -529,10 +487,7 @@ export default function Dashboard() {
 
         {/* Right Sidebar — Live + AI */}
         <aside className="hidden lg:flex flex-col w-60 xl:w-72 flex-shrink-0 border-l border-gray-200 dark:border-zinc-800 px-3 xl:px-4 pb-8 overflow-y-auto space-y-4" style={{ marginTop: "5rem" }}>
-          {/* Live sidebar */}
           {liveStreams.length > 0 && <LiveSidebar liveChannels={liveStreams} onSelectStream={setSelectedStream} />}
-          
-          {/* AI Advisor */}
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center">
@@ -545,7 +500,6 @@ export default function Dashboard() {
         </aside>
       </main>
 
-      {/* Video Player Modal */}
       {selectedVideo && (
         <VideoPlayerModal
           video={selectedVideo}
