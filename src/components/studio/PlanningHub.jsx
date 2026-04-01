@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Layout, MessageSquare, Calendar, Users, Settings, Clock } from "lucide-react";
+import { Layout, MessageSquare, Calendar, Users, Settings, Clock, LayoutDashboard } from "lucide-react";
+import PlanningOverview from "@/components/studio/PlanningOverview";
 import Templates from "@/pages/Templates";
 import ContentHub from "./ContentHub";
 import CalendarPage from "@/pages/Calendar";
@@ -9,6 +10,7 @@ import Planner from "@/pages/Planner";
 import TimeTrackingAnalytics from "@/pages/TimeTrackingAnalytics";
 
 const subtabs = [
+  { id: "overview", label: "Overview", icon: LayoutDashboard, component: PlanningOverview },
   { id: "templates", label: "Templates", icon: Layout, component: Templates },
   { id: "content", label: "Content", icon: MessageSquare, component: ContentHub },
   { id: "schedule", label: "Schedule", icon: Calendar, component: CalendarPage },
@@ -18,7 +20,7 @@ const subtabs = [
 ];
 
 export default function PlanningHub() {
-  const [active, setActive] = useState("templates");
+  const [active, setActive] = useState("overview");
   const ActiveComponent = subtabs.find(t => t.id === active)?.component;
 
   return (
