@@ -256,7 +256,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-gray-900 dark:text-white flex">
       {/* Sidebar */}
-      <aside className="hidden md:flex flex-col w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto bg-white dark:bg-zinc-950 py-3 px-2 z-40 border-r border-gray-200 dark:border-zinc-900">
+      <aside className="flex flex-col w-48 sm:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto bg-white dark:bg-zinc-950 py-3 px-2 z-40 border-r border-gray-200 dark:border-zinc-900">
         {SIDEBAR_ITEMS.map(item => (
           <button key={item.label} className={`${sidebarBtnBase} ${item.active ? sidebarBtnActive : sidebarBtnIdle}`}>
             <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -311,7 +311,7 @@ export default function Dashboard() {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 min-w-0 md:ml-56 flex">
+      <main className="flex-1 min-w-0 ml-48 sm:ml-56 flex">
         <div className="flex-1 min-w-0">
           {/* Sticky bar */}
           <div className="sticky top-16 z-30 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-zinc-900 px-3 sm:px-4 pt-2 pb-1 space-y-2">
@@ -528,7 +528,7 @@ export default function Dashboard() {
         </div>
 
         {/* Right Sidebar — Live + AI */}
-        <aside className="hidden xl:flex flex-col w-72 flex-shrink-0 border-l border-gray-200 dark:border-zinc-800 px-4 pb-8 overflow-y-auto space-y-4" style={{ marginTop: "5rem" }}>
+        <aside className="hidden lg:flex flex-col w-60 xl:w-72 flex-shrink-0 border-l border-gray-200 dark:border-zinc-800 px-3 xl:px-4 pb-8 overflow-y-auto space-y-4" style={{ marginTop: "5rem" }}>
           {/* Live sidebar */}
           {liveStreams.length > 0 && <LiveSidebar liveChannels={liveStreams} onSelectStream={setSelectedStream} />}
           
