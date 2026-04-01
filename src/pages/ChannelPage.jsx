@@ -2,35 +2,14 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Users, Share2, Bell, Settings, Play, Upload, Video, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Users, Share2, Bell, Settings, Play, Upload, Video, MessageSquare } from "lucide-react";
+import CommunityPosts from "@/components/CommunityPosts";
 import { Link } from "react-router-dom";
 
 export default function ChannelPage() {
   const [user, setUser] = useState(null);
   const [selectedChannel, setSelectedChannel] = useState(null);
-
-  useEffect(() => {
-    base44.auth.me().then(setUser);
-  }, []);
-
-  const { data: channels = [] } = useQuery({
-    queryKey: ["channels", user?.email],
-    queryFn: () => base44.entities.Channel.filter({ creator_email: user?.email }),
-    enabled: !!user?.email,
-  });
-
-  const { data: videos = [] } = useQuery({
-    queryKey: ["videos", selectedChannel?.id],
-    queryFn: () => base44.entities.Video.filter({ channel_id: selectedChannel?.id }),
-    enabled: !!selectedChannel?.id,
-  });
-
-  const { data: analytics = [] } = useQuery({
-    queryKey: ["channel-analytics", selectedChannel?.id],
-    queryFn: () => base44.entities.VideoAnalytics.list("-date"),
-    enabled: !!selectedChannel?.id,
-  });
+  const [activeTab, setActiveTab] = useState("videos");
 
   const currentChannel = selectedChannel || channels[0];
 
@@ -99,45 +78,64 @@ export default function ChannelPage() {
           ))}
         </motion.div>
 
-        {/* Videos Grid */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-slate-900">Recent Videos</h2>
-            <Link to="/CreatorStudio">
-              <Button size="sm" className="gap-2">
-                <Upload className="w-4 h-4" /> Upload Video
-              </Button>
-            </Link>
-          </div>
+        {/* Tab Nav */}
+        <div className="flex gap-1 border-b border-slate-200 mb-6">
+          {[{id: "videos", label: "Videos", icon: Play}, {id: "community", label: "Community", icon: MessageSquare}].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
+                activeTab === tab.id ? "border-slate-900 text-slate-900" : "border-transparent text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <tab.icon className="w-4 h-4" /> {tab.label}
+            </button>
+          ))}
+        </div>
 
-          {videos.length === 0 ? (
-            <div className="text-center py-12">
-              <Play className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-600">No videos yet. Start by uploading your first video!</p>
+        {activeTab === "videos" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-900">Recent Videos</h2>
+              <Link to="/CreatorStudio">
+                <Button size="sm" className="gap-2">
+                  <Upload className="w-4 h-4" /> Upload Video
+                </Button>
+              </Link>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {videos.map((video) => (
-                <div key={video.id} className="group cursor-pointer">
-                  <div className="relative aspect-video bg-slate-200 rounded-lg overflow-hidden mb-2">
-                    <img
-                      src={video.thumbnail_url || "https://images.unsplash.com/photo-1499750310107-5fef28d66043?w=320&h=180&fit=crop"}
-                      alt={video.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Play className="w-8 h-8 text-white" />
+            {videos.length === 0 ? (
+              <div className="text-center py-12">
+                <Play className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                <p className="text-slate-600">No videos yet. Start by uploading your first video!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {videos.map((video) => (
+                  <div key={video.id} className="group cursor-pointer">
+                    <div className="relative aspect-video bg-slate-200 rounded-lg overflow-hidden mb-2">
+                      <img
+                        src={video.thumbnail_url || "https://images.unsplash.com/photo-1499750310107-5fef28d66043?w=320&h=180&fit=crop"}
+                        alt={video.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Play className="w-8 h-8 text-white" />
+                      </div>
                     </div>
+                    <h3 className="font-medium text-sm text-slate-900 truncate">{video.title}</h3>
+                    <p className="text-xs text-slate-500 mt-1">{video.view_count || 0} views</p>
                   </div>
-                  <h3 className="font-medium text-sm text-slate-900 truncate">{video.title}</h3>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {video.view_count || 0} views • {Math.round((video.duration_seconds || 0) / 60)}m ago
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {activeTab === "community" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl">
+            <CommunityPosts />
+          </motion.div>
+        )}
       </div>
     </div>
   );
