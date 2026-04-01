@@ -14,23 +14,27 @@ export default function TimeTrackingAnalytics() {
   const [user, setUser] = useState(null);
   const [dateRange, setDateRange] = useState("week");
 
-  React.useEffect(() => {
+  useEffect(() => {
     base44.auth.me().then(setUser);
   }, []);
 
   const { data: timeEntries = [] } = useQuery({
-    queryKey: ["time_entries"],
-    queryFn: () => base44.entities.TimeEntry.list("-start_time"),
+    queryKey: ["time-entries", user?.email],
+    queryFn: () => base44.entities.TimeEntry.filter({ user_email: user?.email }, "-start_time", 200),
+    enabled: !!user?.email,
+    staleTime: 2 * 60 * 1000,
   });
 
   const { data: projects = [] } = useQuery({
     queryKey: ["projects"],
     queryFn: () => base44.entities.Project.list(),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: tasks = [] } = useQuery({
     queryKey: ["tasks"],
     queryFn: () => base44.entities.Task.list(),
+    staleTime: 5 * 60 * 1000,
   });
 
   const filteredEntries = useMemo(() => {

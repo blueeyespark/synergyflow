@@ -40,11 +40,13 @@ export default function TimeTracking() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => base44.entities.Project.list(),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: tasks = [] } = useQuery({
     queryKey: ['tasks'],
     queryFn: () => base44.entities.Task.list(),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: entries = [] } = useQuery({
