@@ -21,9 +21,6 @@ const navGroups = [
     children: [
       { section: "Studio", items: [
         { name: "Creator Studio", icon: Zap, page: "CreatorStudio" },
-        { name: "Leaderboard", icon: Trophy, page: "Leaderboard" },
-        { name: "Client Portal", icon: Globe, page: "ClientPortal", adminOnly: true },
-        { name: "Discord Bot", icon: Bot, page: "DiscordBot", adminOnly: true },
       ]},
     ],
   },

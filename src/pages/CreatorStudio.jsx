@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Radio, Image, Calendar, Lightbulb, BarChart3, Youtube, Twitch, DollarSign, FileText, Layout, MessageSquare, Clock, Users, Settings, Upload, LayoutDashboard } from "lucide-react";
+import { Video, Radio, Image, Calendar, Lightbulb, BarChart3, Youtube, Twitch, DollarSign, FileText, Layout, MessageSquare, Clock, Users, Settings, Upload, LayoutDashboard, Trophy, Globe, Bot } from "lucide-react";
 import VideoEditor from "./VideoEditor";
 import ThumbnailMaker from "./ThumbnailMaker";
 import IntroOutroMaker from "./IntroOutroMaker";
@@ -25,6 +25,9 @@ import Planner from "./Planner";
 import SocialMedia from "./SocialMedia";
 
 import Dashboard from "./Dashboard";
+import Leaderboard from "./Leaderboard";
+import ClientPortal from "./ClientPortal";
+import DiscordBot from "./DiscordBot";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, component: Dashboard },
@@ -49,7 +52,9 @@ const tabs = [
   { id: "planner", label: "Planner", icon: Settings, component: Planner },
   { id: "time-tracking", label: "Time Tracking", icon: Clock, component: TimeTrackingAnalytics },
   { id: "budget", label: "Budget", icon: DollarSign, component: BudgetPage },
-
+  { id: "leaderboard", label: "Leaderboard", icon: Trophy, component: Leaderboard },
+  { id: "client-portal", label: "Client Portal", icon: Globe, component: ClientPortal },
+  { id: "discord-bot", label: "Discord Bot", icon: Bot, component: DiscordBot },
 ];
 
 export default function CreatorStudio() {
