@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Radio, Image, LayoutDashboard, Trophy, Globe, Bot, Upload, BarChart3, Calendar, Users } from "lucide-react";
+import { Video, Radio, Image, LayoutDashboard, Globe, Bot, Upload, BarChart3, Calendar, Users } from "lucide-react";
 import VideoEditor from "./VideoEditor";
 import ThumbnailMaker from "./ThumbnailMaker";
 import IntroOutroMaker from "./IntroOutroMaker";
 import MediaLibrary from "./MediaLibrary";
 import ChannelPage from "./ChannelPage";
 import Dashboard from "./Dashboard";
-import Leaderboard from "./Leaderboard";
+
 import ClientPortal from "./ClientPortal";
 import DiscordBot from "./DiscordBot";
 import PublishingHub from "@/components/studio/PublishingHub";
@@ -26,7 +26,7 @@ const tabs = [
 
   { id: "planning", label: "Planning", icon: Calendar, component: PlanningHub },
   { id: "analytics", label: "Analytics", icon: BarChart3, component: AnalyticsHub },
-  { id: "leaderboard", label: "Leaderboard", icon: Trophy, component: Leaderboard },
+
   { id: "client-portal", label: "Client Portal", icon: Globe, component: ClientPortal },
   { id: "discord-bot", label: "Discord Bot", icon: Bot, component: DiscordBot },
 ];

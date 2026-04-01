@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Video, FileText, DollarSign } from "lucide-react";
+import { BarChart3, Video, FileText, DollarSign, Trophy } from "lucide-react";
 import ContentAnalytics from "@/pages/ContentAnalytics";
 import VideoAnalytics from "@/pages/VideoAnalytics";
 import Reports from "@/pages/Reports";
 import BudgetPage from "@/pages/Budget";
+import Leaderboard from "@/pages/Leaderboard";
 
 const subtabs = [
   { id: "content", label: "Content Analytics", icon: BarChart3, component: ContentAnalytics },
   { id: "video", label: "Video Analytics", icon: Video, component: VideoAnalytics },
   { id: "reports", label: "Reports", icon: FileText, component: Reports },
   { id: "budget", label: "Budget", icon: DollarSign, component: BudgetPage },
+  { id: "leaderboard", label: "Leaderboard", icon: Trophy, component: Leaderboard },
 ];
 
 export default function AnalyticsHub() {
