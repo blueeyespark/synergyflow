@@ -1,27 +1,22 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Radio, Image, LayoutDashboard, Globe, Bot, Upload, BarChart3, Calendar, Users } from "lucide-react";
-import VideoEditor from "./VideoEditor";
-import ThumbnailMaker from "./ThumbnailMaker";
-import IntroOutroMaker from "./IntroOutroMaker";
+import { LayoutDashboard, Globe, Bot, Upload, BarChart3, Calendar, Users } from "lucide-react";
+import ContentProductionHub from "@/components/studio/ContentProductionHub";
 import MediaLibrary from "./MediaLibrary";
 import ChannelPage from "./ChannelPage";
 import Dashboard from "./Dashboard";
 
 import ClientPortal from "./ClientPortal";
 import DiscordBot from "./DiscordBot";
-import PublishingHub from "@/components/studio/PublishingHub";
+
 import AnalyticsHub from "@/components/studio/AnalyticsHub";
 import PlanningHub from "@/components/studio/PlanningHub";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, component: Dashboard },
   { id: "channel", label: "My Channel", icon: Users, component: ChannelPage },
-  { id: "publishing", label: "Publishing", icon: Upload, component: PublishingHub },
-  { id: "editor", label: "Video Editor", icon: Video, component: VideoEditor },
-  { id: "thumbnail", label: "Thumbnail Maker", icon: Video, component: ThumbnailMaker },
-  { id: "intro", label: "Intro/Outro", icon: Radio, component: IntroOutroMaker },
+  { id: "production", label: "Content Production", icon: Upload, component: ContentProductionHub },
   { id: "media", label: "Media Library", icon: Image, component: MediaLibrary },
 
   { id: "planning", label: "Planning", icon: Calendar, component: PlanningHub },
