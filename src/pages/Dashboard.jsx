@@ -7,6 +7,7 @@ import {
   PlaySquare, ShoppingBag, MoreVertical, Search, X, TrendingUp
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 import AIContentAdvisor from "@/components/dashboard/AIContentAdvisor";
 import VideoPlayerModal from "@/components/dashboard/VideoPlayerModal";
 
@@ -148,6 +149,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const navigate = useNavigate();
   const [watchHistory, setWatchHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem("watchHistory") || "[]"); } catch { return []; }
   });
@@ -218,10 +220,7 @@ export default function Dashboard() {
         <Link to="/Live" className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
           <Radio className="w-5 h-5 flex-shrink-0 text-red-500" /> Live
         </Link>
-        <Link to="/Live" className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
-          <Radio className="w-5 h-5 flex-shrink-0 text-red-500" /> Live
-        </Link>
-        <button onClick={() => setShowShortsFeed(true)} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
+        <button onClick={() => navigate("/Shorts")} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
           <PlaySquare className="w-5 h-5 flex-shrink-0" /> Shorts
         </button>
 
@@ -377,8 +376,7 @@ export default function Dashboard() {
         </aside>
       </main>
 
-      {/* Shorts Feed */}
-      {showShortsFeed && <ShortsPage onClose={() => setShowShortsFeed(false)} />}
+
 
       {/* Video Player Modal */}
       {selectedVideo && (
