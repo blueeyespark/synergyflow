@@ -5,6 +5,8 @@ import { LayoutDashboard, Globe, Bot, Upload, BarChart3, Calendar, Users, ImageI
 import ContentProductionHub from "@/components/studio/ContentProductionHub";
 import MediaLibrary from "./MediaLibrary";
 import ChannelPage from "./ChannelPage";
+import FinancialOverview from "./FinancialOverview";
+import AudienceAnalytics from "./AudienceAnalytics";
 
 import ClientPortal from "./ClientPortal";
 import DiscordBot from "./DiscordBot";
@@ -22,6 +24,8 @@ const tabs = [
 
   { id: "client-portal", label: "Client Portal", icon: Globe, component: ClientPortal },
   { id: "discord-bot", label: "Discord Bot", icon: Bot, component: DiscordBot },
+  { id: "financials", label: "Financials", icon: LayoutDashboard, component: FinancialOverview },
+  { id: "audience", label: "Audience Analytics", icon: BarChart3, component: AudienceAnalytics },
 ];
 
 export default function CreatorStudio() {
