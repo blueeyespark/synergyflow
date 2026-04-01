@@ -1,52 +1,37 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Radio, Image, Calendar, Lightbulb, BarChart3, Youtube, Twitch, DollarSign, FileText, Layout, MessageSquare, Clock, Users, Settings, Upload, LayoutDashboard, Trophy, Globe, Bot } from "lucide-react";
+import { Video, Radio, Image, DollarSign, Layout, Clock, Users, Settings, LayoutDashboard, Trophy, Globe, Bot, Upload, BarChart3, Calendar, MessageSquare } from "lucide-react";
 import VideoEditor from "./VideoEditor";
 import ThumbnailMaker from "./ThumbnailMaker";
 import IntroOutroMaker from "./IntroOutroMaker";
-import ContentCalendar from "./ContentCalendar";
-import ContentIdeas from "./ContentIdeas";
-import ContentAnalytics from "./ContentAnalytics";
-import YouTubePublisher from "./YouTubePublisher";
-import TwitchStreamer from "./TwitchStreamer";
 import CalendarPage from "./Calendar";
 import BudgetPage from "./Budget";
 import MediaLibrary from "./MediaLibrary";
 import Templates from "./Templates";
-import Blog from "./Blog";
 import ChannelPage from "./ChannelPage";
-import VideoUpload from "./VideoUpload";
-import Reports from "./Reports";
-import VideoAnalytics from "./VideoAnalytics";
 import TimeTrackingAnalytics from "./TimeTrackingAnalytics";
 import Meetings from "./Meetings";
 import Planner from "./Planner";
-import SocialMedia from "./SocialMedia";
-
 import Dashboard from "./Dashboard";
 import Leaderboard from "./Leaderboard";
 import ClientPortal from "./ClientPortal";
 import DiscordBot from "./DiscordBot";
+import PublishingHub from "@/components/studio/PublishingHub";
+import AnalyticsHub from "@/components/studio/AnalyticsHub";
+import ContentHub from "@/components/studio/ContentHub";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, component: Dashboard },
   { id: "channel", label: "My Channel", icon: Users, component: ChannelPage },
-  { id: "upload", label: "Upload Video", icon: Upload, component: VideoUpload },
-  { id: "youtube", label: "YouTube Publisher", icon: Youtube, component: YouTubePublisher },
-  { id: "twitch", label: "Twitch Streamer", icon: Twitch, component: TwitchStreamer },
+  { id: "publishing", label: "Publishing", icon: Upload, component: PublishingHub },
   { id: "editor", label: "Video Editor", icon: Video, component: VideoEditor },
-  { id: "thumbnail", label: "Thumbnail Maker", icon: Image, component: ThumbnailMaker },
+  { id: "thumbnail", label: "Thumbnail Maker", icon: Video, component: ThumbnailMaker },
   { id: "intro", label: "Intro/Outro", icon: Radio, component: IntroOutroMaker },
   { id: "media", label: "Media Library", icon: Image, component: MediaLibrary },
   { id: "templates", label: "Templates", icon: Layout, component: Templates },
-  { id: "blog", label: "Blog", icon: FileText, component: Blog },
-  { id: "social", label: "Social Media", icon: MessageSquare, component: SocialMedia },
-  { id: "content-calendar", label: "Content Calendar", icon: Calendar, component: ContentCalendar },
-  { id: "ideas", label: "Content Ideas", icon: Lightbulb, component: ContentIdeas },
-  { id: "analytics", label: "Content Analytics", icon: BarChart3, component: ContentAnalytics },
-  { id: "video-analytics", label: "Video Analytics", icon: BarChart3, component: VideoAnalytics },
-  { id: "reports", label: "Reports", icon: BarChart3, component: Reports },
+  { id: "content", label: "Content", icon: MessageSquare, component: ContentHub },
+  { id: "analytics", label: "Analytics", icon: BarChart3, component: AnalyticsHub },
   { id: "schedule", label: "Schedule", icon: Calendar, component: CalendarPage },
   { id: "meetings", label: "Meetings", icon: Users, component: Meetings },
   { id: "planner", label: "Planner", icon: Settings, component: Planner },
