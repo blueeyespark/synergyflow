@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Video, Image, Radio, Youtube, Twitch } from "lucide-react";
+import { Upload, Video, ImageIcon, Radio, Youtube, Twitch } from "lucide-react";
 import VideoUpload from "@/pages/VideoUpload";
 import YouTubePublisher from "@/pages/YouTubePublisher";
 import TwitchStreamer from "@/pages/TwitchStreamer";
@@ -13,7 +13,7 @@ const subtabs = [
   { id: "youtube", label: "YouTube", icon: Youtube, component: YouTubePublisher },
   { id: "twitch", label: "Twitch", icon: Twitch, component: TwitchStreamer },
   { id: "editor", label: "Video Editor", icon: Video, component: VideoEditor },
-  { id: "thumbnail", label: "Thumbnail Maker", icon: Image, component: ThumbnailMaker },
+  { id: "thumbnail", label: "Thumbnail Maker", icon: ImageIcon, component: ThumbnailMaker },
   { id: "intro", label: "Intro/Outro", icon: Radio, component: IntroOutroMaker },
 ];
 
