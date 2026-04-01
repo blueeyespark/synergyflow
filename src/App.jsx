@@ -3,6 +3,7 @@ import UserViewer from './pages/UserViewer';
 import Tasks from './pages/Tasks';
 import AITools from './pages/AITools';
 import CreatorStudio from './pages/CreatorStudio';
+import Dashboard from './pages/Dashboard';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -14,7 +15,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = CreatorStudio;
+const MainPage = Dashboard;
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>

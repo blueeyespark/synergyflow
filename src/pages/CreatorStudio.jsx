@@ -5,7 +5,6 @@ import { LayoutDashboard, Globe, Bot, Upload, BarChart3, Calendar, Users, ImageI
 import ContentProductionHub from "@/components/studio/ContentProductionHub";
 import MediaLibrary from "./MediaLibrary";
 import ChannelPage from "./ChannelPage";
-import Dashboard from "./Dashboard";
 
 import ClientPortal from "./ClientPortal";
 import DiscordBot from "./DiscordBot";
@@ -14,7 +13,6 @@ import AnalyticsHub from "@/components/studio/AnalyticsHub";
 import PlanningHub from "@/components/studio/PlanningHub";
 
 const tabs = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, component: Dashboard },
   { id: "channel", label: "My Channel", icon: Users, component: ChannelPage },
   { id: "production", label: "Content Production", icon: Upload, component: ContentProductionHub },
   { id: "media", label: "Media Library", icon: ImageIcon, component: MediaLibrary },
@@ -27,7 +25,7 @@ const tabs = [
 ];
 
 export default function CreatorStudio() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("channel");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
