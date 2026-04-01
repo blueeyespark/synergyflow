@@ -144,6 +144,7 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [showMoreSubs, setShowMoreSubs] = useState(false);
+  const [showShortsFeed, setShowShortsFeed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -214,6 +215,16 @@ export default function Dashboard() {
             {item.label}
           </button>
         ))}
+        <Link to="/Live" className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
+          <Radio className="w-5 h-5 flex-shrink-0 text-red-500" /> Live
+        </Link>
+        <Link to="/Live" className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
+          <Radio className="w-5 h-5 flex-shrink-0 text-red-500" /> Live
+        </Link>
+        <button onClick={() => setShowShortsFeed(true)} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
+          <PlaySquare className="w-5 h-5 flex-shrink-0" /> Shorts
+        </button>
+
 
         <hr className="border-gray-200 dark:border-zinc-800 my-3" />
         <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">You</p>
@@ -365,6 +376,9 @@ export default function Dashboard() {
           <AIContentAdvisor videos={displayVideos} channels={channels} user={user} />
         </aside>
       </main>
+
+      {/* Shorts Feed */}
+      {showShortsFeed && <ShortsPage onClose={() => setShowShortsFeed(false)} />}
 
       {/* Video Player Modal */}
       {selectedVideo && (

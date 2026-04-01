@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { X, ThumbsUp, ThumbsDown, Share2, Bell, MoreHorizontal, ChevronUp, ChevronDown } from "lucide-react";
+import { X, ThumbsUp, ThumbsDown, Share2, Bell, MoreHorizontal, ChevronUp, ChevronDown, Settings, Clock, Scissors } from "lucide-react";
+import MerchShelf from "@/components/video/MerchShelf";
+import ClipsMaker from "@/components/video/ClipsMaker";
 import { motion, AnimatePresence } from "framer-motion";
 
 function formatViews(n) {
@@ -29,6 +31,15 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [user, setUser] = useState(null);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const [sleepTimer, setSleepTimer] = useState(null);
+  const [sleepCountdown, setSleepCountdown] = useState(null);
+  const [showSleepMenu, setShowSleepMenu] = useState(false);
+  const [activeTab, setActiveTab] = useState("comments");
+  const videoRef = useRef(null);
+  const sleepTimerRef = useRef(null);
+  const sleepIntervalRef = useRef(null);
 
   useEffect(() => {
     base44.auth.me().then(setUser);
@@ -38,6 +49,39 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
 
   const handleLike = () => { setLiked(!liked); if (disliked) setDisliked(false); };
   const handleDislike = () => { setDisliked(!disliked); if (liked) setLiked(false); };
+
+  const setSpeed = (speed) => {
+    setPlaybackSpeed(speed);
+    setShowSpeedMenu(false);
+    if (videoRef.current) videoRef.current.playbackRate = speed;
+  };
+
+  const startSleepTimer = (minutes) => {
+    if (sleepTimerRef.current) clearTimeout(sleepTimerRef.current);
+    if (sleepIntervalRef.current) clearInterval(sleepIntervalRef.current);
+    const secs = minutes * 60;
+    setSleepCountdown(secs);
+    setSleepTimer(minutes);
+    setShowSleepMenu(false);
+    sleepIntervalRef.current = setInterval(() => {
+      setSleepCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(sleepIntervalRef.current);
+          if (videoRef.current) videoRef.current.pause();
+          setSleepTimer(null);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const cancelSleepTimer = () => {
+    clearTimeout(sleepTimerRef.current);
+    clearInterval(sleepIntervalRef.current);
+    setSleepTimer(null);
+    setSleepCountdown(null);
+  };
 
   const submitComment = async () => {
     if (!commentText.trim() || !user) return;
@@ -82,7 +126,7 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
                 {/* Video Player */}
                 <div className="aspect-video bg-black rounded-xl overflow-hidden">
                   {video.video_url ? (
-                    <video src={video.video_url} controls autoPlay className="w-full h-full" poster={video.thumbnail_url} />
+                    <video ref={videoRef} src={video.video_url} controls autoPlay className="w-full h-full" poster={video.thumbnail_url} />
                   ) : (
                     <div className="relative w-full h-full">
                       <img
@@ -126,24 +170,63 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
 
                   <div className="flex items-center gap-2">
                     <div className="flex items-center bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                      <button
-                        onClick={handleLike}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors hover:bg-gray-200 dark:hover:bg-zinc-700 ${liked ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-zinc-400"}`}
-                      >
+                      <button onClick={handleLike} className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors hover:bg-gray-200 dark:hover:bg-zinc-700 ${liked ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-zinc-400"}`}>
                         <ThumbsUp className={`w-4 h-4 ${liked ? "fill-current" : ""}`} />
                         <span>{formatViews((video.like_count || 0) + (liked ? 1 : 0))}</span>
                       </button>
                       <div className="w-px h-5 bg-gray-300 dark:bg-zinc-700" />
-                      <button
-                        onClick={handleDislike}
-                        className={`px-3 py-1.5 transition-colors hover:bg-gray-200 dark:hover:bg-zinc-700 ${disliked ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-zinc-400"}`}
-                      >
+                      <button onClick={handleDislike} className={`px-3 py-1.5 transition-colors hover:bg-gray-200 dark:hover:bg-zinc-700 ${disliked ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-zinc-400"}`}>
                         <ThumbsDown className={`w-4 h-4 ${disliked ? "fill-current" : ""}`} />
                       </button>
                     </div>
                     <button className="flex items-center gap-1.5 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 rounded-full px-3 py-1.5 text-sm transition-colors">
                       <Share2 className="w-4 h-4" /> Share
                     </button>
+
+                    {/* Playback Speed */}
+                    <div className="relative">
+                      <button onClick={() => { setShowSpeedMenu(!showSpeedMenu); setShowSleepMenu(false); }}
+                        className="flex items-center gap-1 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 rounded-full px-2.5 py-1.5 text-xs font-semibold transition-colors">
+                        <Settings className="w-3.5 h-3.5" /> {playbackSpeed}x
+                      </button>
+                      {showSpeedMenu && (
+                        <div className="absolute right-0 top-full mt-1 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl shadow-lg z-10 py-1 min-w-[100px]">
+                          {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map(s => (
+                            <button key={s} onClick={() => setSpeed(s)}
+                              className={`w-full text-left px-3 py-1.5 text-xs transition-colors hover:bg-gray-50 dark:hover:bg-zinc-700 ${playbackSpeed === s ? "text-indigo-600 dark:text-indigo-400 font-bold" : "text-gray-700 dark:text-zinc-300"}`}>
+                              {s === 1 ? "Normal" : `${s}x`}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Sleep Timer */}
+                    <div className="relative">
+                      <button onClick={() => { setShowSleepMenu(!showSleepMenu); setShowSpeedMenu(false); }}
+                        className={`flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                          sleepTimer ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400" : "bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300"
+                        }`}>
+                        <Clock className="w-3.5 h-3.5" />
+                        {sleepCountdown ? `${Math.floor(sleepCountdown/60)}:${String(sleepCountdown%60).padStart(2,"0")}` : "Sleep"}
+                      </button>
+                      {showSleepMenu && (
+                        <div className="absolute right-0 top-full mt-1 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl shadow-lg z-10 py-1 min-w-[120px]">
+                          {[15, 30, 60, 90].map(mins => (
+                            <button key={mins} onClick={() => startSleepTimer(mins)}
+                              className="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors">
+                              {mins} minutes
+                            </button>
+                          ))}
+                          {sleepTimer && (
+                            <button onClick={cancelSleepTimer} className="w-full text-left px-3 py-1.5 text-xs text-red-500 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors border-t border-gray-100 dark:border-zinc-700">
+                              Cancel Timer
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     <button className="bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-500 dark:text-zinc-300 rounded-full p-1.5 transition-colors">
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
@@ -165,7 +248,19 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
                   )}
                 </div>
 
-                {/* Comments */}
+                {/* Tabs: Comments, Clips, Merch */}
+                <div className="flex gap-1 border-b border-gray-200 dark:border-zinc-800 mb-4">
+                  {["comments", "clips", "merch"].map(tab => (
+                    <button key={tab} onClick={() => setActiveTab(tab)}
+                      className={`px-4 py-2 text-sm font-semibold capitalize transition-colors border-b-2 -mb-px ${
+                        activeTab === tab ? "border-gray-900 dark:border-white text-gray-900 dark:text-white" : "border-transparent text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300"
+                      }`}>
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+
+                {activeTab === "comments" && (
                 <div>
                   <h3 className="text-gray-900 dark:text-white font-semibold mb-3">{comments.length} Comments</h3>
                   {user && (
@@ -204,6 +299,10 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
                     ))}
                   </div>
                 </div>
+                )}
+
+                {activeTab === "clips" && <ClipsMaker video={video} isViewer={true} />}
+                {activeTab === "merch" && <MerchShelf isOwner={false} />}
               </div>
 
               {/* Right: Related Videos */}

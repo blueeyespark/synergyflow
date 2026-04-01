@@ -1,5 +1,8 @@
 import { Toaster } from "@/components/ui/toaster"
 import UserViewer from './pages/UserViewer';
+import ShortsPage from './pages/ShortsPage';
+import LivePage from './pages/LivePage';
+import StreamerDashboard from './pages/StreamerDashboard';
 import DeepScanResults from './pages/DeepScanResults';
 import Tasks from './pages/Tasks';
 import AITools from './pages/AITools';
@@ -69,6 +72,9 @@ const AuthenticatedApp = () => {
       <Route path="/UserViewer" element={<LayoutWrapper currentPageName="UserViewer"><UserViewer /></LayoutWrapper>} />
       <Route path="/CreatorStudio" element={<LayoutWrapper currentPageName="CreatorStudio"><CreatorStudio /></LayoutWrapper>} />
       <Route path="/DeepScanResults" element={<LayoutWrapper currentPageName="DeepScanResults"><DeepScanResults /></LayoutWrapper>} />
+      <Route path="/Shorts" element={<LayoutWrapper currentPageName="Shorts"><ShortsPage /></LayoutWrapper>} />
+      <Route path="/Live" element={<LayoutWrapper currentPageName="Live"><LivePage /></LayoutWrapper>} />
+      <Route path="/StreamerDashboard" element={<LayoutWrapper currentPageName="StreamerDashboard"><StreamerDashboard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
