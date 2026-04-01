@@ -1,5 +1,6 @@
 import { Toaster } from "@/components/ui/toaster"
 import UserViewer from './pages/UserViewer';
+import ChannelPage from './pages/ChannelPage';
 import ShortsPage from './pages/ShortsPage';
 import LivePage from './pages/LivePage';
 import StreamerDashboard from './pages/StreamerDashboard';
@@ -79,6 +80,7 @@ const AuthenticatedApp = () => {
       <Route path="/StreamerDashboard" element={<LayoutWrapper currentPageName="StreamerDashboard"><StreamerDashboard /></LayoutWrapper>} />
       <Route path="/FinancialOverview" element={<LayoutWrapper currentPageName="FinancialOverview"><FinancialOverview /></LayoutWrapper>} />
       <Route path="/AudienceAnalytics" element={<LayoutWrapper currentPageName="AudienceAnalytics"><AudienceAnalytics /></LayoutWrapper>} />
+      <Route path="/Channel" element={<LayoutWrapper currentPageName="Channel"><ChannelPage /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

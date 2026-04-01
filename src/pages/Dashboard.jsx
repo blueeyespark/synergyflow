@@ -4,10 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Home, Flame, Music, Gamepad2, Tv, Radio, BookOpen, Trophy,
   ChevronDown, ThumbsUp, Clock, ListVideo, Download, History,
-  PlaySquare, ShoppingBag, MoreVertical, Search, X, TrendingUp
+  PlaySquare, ShoppingBag, MoreVertical, Search, X, TrendingUp, Users
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import AIContentAdvisor from "@/components/dashboard/AIContentAdvisor";
 import VideoPlayerModal from "@/components/dashboard/VideoPlayerModal";
 
@@ -103,12 +103,14 @@ function VideoCard({ video, channel, onClick, watched }) {
         </div>
       </div>
       <div className="flex gap-2">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
-          {channel?.channel_name?.charAt(0) || "C"}
-        </div>
+        <Link to={channel ? `/Channel?id=${channel.id}` : "#"} onClick={e => e.stopPropagation()} className="flex-shrink-0 mt-0.5">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold hover:ring-2 hover:ring-indigo-400 transition-all">
+            {channel?.channel_name?.charAt(0) || "C"}
+          </div>
+        </Link>
         <div className="flex-1 min-w-0">
           <h3 className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white line-clamp-2 leading-snug">{video.title}</h3>
-          <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5 truncate">{channel?.channel_name || "Creator"}</p>
+          <Link to={channel ? `/Channel?id=${channel.id}` : "#"} onClick={e => e.stopPropagation()} className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5 truncate hover:underline block">{channel?.channel_name || "Creator"}</Link>
           <p className="text-xs text-gray-400 dark:text-zinc-500">{formatViews(video.view_count)} views · {timeAgo(video.published_date || video.created_date)}</p>
         </div>
         <button className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-white p-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
@@ -223,6 +225,9 @@ export default function Dashboard() {
         <button onClick={() => navigate("/Shorts")} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
           <PlaySquare className="w-5 h-5 flex-shrink-0" /> Shorts
         </button>
+        <Link to="/Channel" className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
+          <Users className="w-5 h-5 flex-shrink-0" /> My Channel
+        </Link>
 
 
         <hr className="border-gray-200 dark:border-zinc-800 my-3" />
