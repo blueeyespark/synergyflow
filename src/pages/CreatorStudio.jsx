@@ -1,25 +1,20 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Radio, Image, DollarSign, Layout, Clock, Users, Settings, LayoutDashboard, Trophy, Globe, Bot, Upload, BarChart3, Calendar, MessageSquare } from "lucide-react";
+import { Video, Radio, Image, DollarSign, LayoutDashboard, Trophy, Globe, Bot, Upload, BarChart3, Calendar } from "lucide-react";
 import VideoEditor from "./VideoEditor";
 import ThumbnailMaker from "./ThumbnailMaker";
 import IntroOutroMaker from "./IntroOutroMaker";
-import CalendarPage from "./Calendar";
 import BudgetPage from "./Budget";
 import MediaLibrary from "./MediaLibrary";
-import Templates from "./Templates";
 import ChannelPage from "./ChannelPage";
-import TimeTrackingAnalytics from "./TimeTrackingAnalytics";
-import Meetings from "./Meetings";
-import Planner from "./Planner";
 import Dashboard from "./Dashboard";
 import Leaderboard from "./Leaderboard";
 import ClientPortal from "./ClientPortal";
 import DiscordBot from "./DiscordBot";
 import PublishingHub from "@/components/studio/PublishingHub";
 import AnalyticsHub from "@/components/studio/AnalyticsHub";
-import ContentHub from "@/components/studio/ContentHub";
+import PlanningHub from "@/components/studio/PlanningHub";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, component: Dashboard },
@@ -30,12 +25,8 @@ const tabs = [
   { id: "intro", label: "Intro/Outro", icon: Radio, component: IntroOutroMaker },
   { id: "media", label: "Media Library", icon: Image, component: MediaLibrary },
   { id: "templates", label: "Templates", icon: Layout, component: Templates },
-  { id: "content", label: "Content", icon: MessageSquare, component: ContentHub },
+  { id: "planning", label: "Planning", icon: Calendar, component: PlanningHub },
   { id: "analytics", label: "Analytics", icon: BarChart3, component: AnalyticsHub },
-  { id: "schedule", label: "Schedule", icon: Calendar, component: CalendarPage },
-  { id: "meetings", label: "Meetings", icon: Users, component: Meetings },
-  { id: "planner", label: "Planner", icon: Settings, component: Planner },
-  { id: "time-tracking", label: "Time Tracking", icon: Clock, component: TimeTrackingAnalytics },
   { id: "budget", label: "Budget", icon: DollarSign, component: BudgetPage },
   { id: "leaderboard", label: "Leaderboard", icon: Trophy, component: Leaderboard },
   { id: "client-portal", label: "Client Portal", icon: Globe, component: ClientPortal },
