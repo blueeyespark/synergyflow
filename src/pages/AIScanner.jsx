@@ -239,26 +239,30 @@ Return the full component code, the suggested file path (e.g., components/featur
     });
   };
 
-  // Generate implementation from external site feature — auto-applies and logs
+  // Generate implementation from external site feature — shows code modal
   const implementExternalFeature = async (feature) => {
     const key = `ext-${feature.feature}`;
     setImplementing(key);
-    toast.loading(`Implementing "${feature.feature}"...`, { id: key });
+    toast.loading(`Generating code for "${feature.feature}"...`, { id: key });
     const result = await base44.integrations.Core.InvokeLLM({
       prompt: `You are an expert React/Tailwind developer working on "Planify" — a project management app.
 
 Adapt this feature from ${siteAnalysis?.site_name || url} for Planify:
 Feature: "${feature.feature}"
 Description: "${feature.description}"
+How it works: "${feature.how_it_works || feature.description}"
+Implementation steps: "${feature.implementation_steps || ''}"
 
-Generate a complete, working React component adapted for Planify:
-- Use Tailwind CSS, shadcn/ui (@/components/ui/), lucide-react, base44 SDK
+Generate a COMPLETE, PRODUCTION-READY React component for this feature:
+- Use Tailwind CSS, shadcn/ui (@/components/ui/), lucide-react (only valid icons), base44 SDK
 - import { base44 } from '@/api/base44Client'
 - export default function ComponentName() pattern
 - Include dark mode support (dark: classes)
-- Make it production-ready and copy-paste ready
+- Include all state management, data fetching, and UI logic
+- The code must be fully functional and copy-paste ready
 
-Return the component code, suggested file path, and explanation.`,
+Return the FULL component code (not a snippet), the suggested file path, and a brief explanation.`,
+      model: 'claude_sonnet_4_6',
       response_json_schema: {
         type: "object",
         properties: {
@@ -268,7 +272,7 @@ Return the component code, suggested file path, and explanation.`,
         }
       }
     });
-    // Auto-log externally adapted feature
+    // Log to AIAppliedChange
     await base44.entities.AIAppliedChange.create({
       title: feature.feature,
       source: 'external_scan',
@@ -278,33 +282,80 @@ Return the component code, suggested file path, and explanation.`,
       explanation: result.explanation || '',
       applied_by: user?.email || 'ai-scanner',
       origin_site: siteAnalysis?.site_name || url,
-    });
+    }).catch(() => {});
     setImplementing(null);
     setAppliedItems(prev => new Set([...prev, key]));
-    toast.success(`✅ "${feature.feature}" applied & logged`, { id: key });
+    toast.success(`Code ready for "${feature.feature}"`, { id: key });
+    // Show the code modal
+    setCodeModal({
+      title: feature.feature,
+      code: result.code || '// No code generated',
+      description: result.explanation,
+      filePath: result.file_path,
+    });
   };
 
   const analyzeSite = async () => {
     if (!url) return;
     setLoading(true);
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `Analyze the website/app at "${url}" from a product and UX perspective for a project management app called Planify. Identify:
-1. Key features and functionality worth adapting for Planify
-2. UX patterns that work well and could improve Planify
-3. Features that are better than what Planify currently has
-4. Specific implementation ideas tailored to Planify's React/Tailwind stack
+      prompt: `You are a senior product engineer performing a deep technical audit of the website at "${url}". 
 
-Planify already has: Dashboard, Projects/Kanban, Tasks, Workload Dashboard, Analytics, Time Tracking, Calendar, Budget, AI Assistant, Planner, Leaderboard, Templates, Blog, Social Media, Reports.
+Visit the site and analyze it thoroughly:
+1. List every major FUNCTION and FEATURE you can identify (navigation, forms, actions, modals, data flows, integrations, etc.)
+2. For each function describe exactly how it works and what it does
+3. Identify the UX patterns and interaction models used
+4. Find features that Planify (a React/Tailwind project management app) does NOT have but should
+5. For each adaptable feature, describe step-by-step HOW to implement it in React/Tailwind
 
-Focus ONLY on features that Planify doesn't have yet and that would genuinely improve it. Be specific about HOW to implement each feature in Planify.`,
+Planify already has: Dashboard, Projects/Kanban, Tasks, Workload, Analytics, Time Tracking, Calendar, Budget, AI Assistant, Planner, Leaderboard, Templates, Blog, Social Media, Reports, Video/Creator Studio.
+
+Be very specific — list actual UI components, data interactions, and implementation approaches. Think like a developer who wants to replicate the best parts.`,
       add_context_from_internet: true,
+      model: 'gemini_3_pro',
       response_json_schema: {
         type: "object",
         properties: {
           site_name: { type: "string" },
-          key_features: { type: "array", items: { type: "object", properties: { feature: { type: "string" }, description: { type: "string" }, adaptable: { type: "boolean" }, planify_fit: { type: "string" } } } },
+          site_description: { type: "string" },
+          detected_functions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                category: { type: "string" },
+                description: { type: "string" },
+                how_it_works: { type: "string" }
+              }
+            }
+          },
+          key_features: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                feature: { type: "string" },
+                description: { type: "string" },
+                adaptable: { type: "boolean" },
+                planify_fit: { type: "string" },
+                implementation_steps: { type: "string" }
+              }
+            }
+          },
           ux_patterns: { type: "array", items: { type: "string" } },
-          implementation_ideas: { type: "array", items: { type: "object", properties: { title: { type: "string" }, description: { type: "string" }, effort: { type: "string" }, planify_page: { type: "string" } } } },
+          implementation_ideas: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                description: { type: "string" },
+                effort: { type: "string" },
+                planify_page: { type: "string" }
+              }
+            }
+          },
           summary: { type: "string" }
         }
       }
@@ -519,6 +570,24 @@ Focus ONLY on features that Planify doesn't have yet and that would genuinely im
                   <p className="text-indigo-100 text-sm">{siteAnalysis.summary}</p>
                 </div>
 
+                {siteAnalysis.detected_functions?.length > 0 && (
+                  <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5 shadow-sm">
+                    <h4 className="font-semibold mb-3 text-slate-900 dark:text-slate-100">🔍 Detected Functions & Features ({siteAnalysis.detected_functions.length})</h4>
+                    <div className="space-y-2">
+                      {siteAnalysis.detected_functions.map((fn, i) => (
+                        <div key={i} className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-xs">{fn.category || 'feature'}</Badge>
+                            <span className="font-medium text-sm text-slate-800 dark:text-slate-200">{fn.name}</span>
+                          </div>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">{fn.description}</p>
+                          {fn.how_it_works && <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">⚙️ {fn.how_it_works}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {siteAnalysis.key_features?.length > 0 && (
                   <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5 shadow-sm">
                     <h4 className="font-semibold mb-3 text-slate-900 dark:text-slate-100">Key Features to Adapt for Planify</h4>
@@ -536,6 +605,7 @@ Focus ONLY on features that Planify doesn't have yet and that would genuinely im
                                 </div>
                                 <p className="text-sm text-slate-600 dark:text-slate-400">{f.description}</p>
                                 {f.planify_fit && <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">In Planify: {f.planify_fit}</p>}
+                                {f.implementation_steps && <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">📋 {f.implementation_steps}</p>}
                               </div>
                               {f.adaptable && (
                                 <Button size="sm" variant="outline"
@@ -543,8 +613,8 @@ Focus ONLY on features that Planify doesn't have yet and that would genuinely im
                                   onClick={() => implementExternalFeature(f)}
                                   disabled={implementing === key}
                                 >
-                                  {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Wand2 className="w-3 h-3" />}
-                                  {isApplied ? 'View Code' : 'Implement'}
+                                  {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Code className="w-3 h-3" />}
+                                  {isApplied ? 'View Code' : 'Generate Code'}
                                 </Button>
                               )}
                             </div>
