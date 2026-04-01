@@ -8,12 +8,11 @@ export default function NavDropdown({ group, currentPageName, isAdmin }) {
   const [open, setOpen] = useState(false);
   
   // Handle both flat and sectioned structures
-  const hasSections = group.children?.[0]?.section;
+  const hasSections = group.children?.[0]?.items !== undefined;
   let isActive = false;
   let flatChildren = [];
   
   if (hasSections) {
-    // New sectioned format
     group.children.forEach(section => {
       section.items.forEach(item => {
         if (!item.adminOnly || isAdmin) {
@@ -23,7 +22,6 @@ export default function NavDropdown({ group, currentPageName, isAdmin }) {
       });
     });
   } else {
-    // Old flat format
     flatChildren = group.children?.filter(c => !c.adminOnly || isAdmin) || [];
     isActive = flatChildren.some(c => c.page === currentPageName);
   }
@@ -52,15 +50,16 @@ export default function NavDropdown({ group, currentPageName, isAdmin }) {
             className="absolute top-full left-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-1.5 z-50 min-w-max"
           >
             {hasSections ? (
-              // Sectioned layout
               group.children.map((section, idx) => {
                 const visibleItems = section.items.filter(i => !i.adminOnly || isAdmin);
                 if (visibleItems.length === 0) return null;
                 return (
                   <div key={idx}>
-                    <div className="px-3 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                      {section.section}
-                    </div>
+                    {section.section && (
+                      <div className="px-3 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                        {section.section}
+                      </div>
+                    )}
                     {visibleItems.map(item => (
                       <Link
                         key={item.page}
@@ -80,7 +79,6 @@ export default function NavDropdown({ group, currentPageName, isAdmin }) {
                 );
               })
             ) : (
-              // Flat layout (legacy)
               flatChildren.map(item => (
                 <Link
                   key={item.page}
