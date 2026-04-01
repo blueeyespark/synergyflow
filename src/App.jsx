@@ -1,21 +1,8 @@
 import { Toaster } from "@/components/ui/toaster"
-import Leaderboard from './pages/Leaderboard';
-import Templates from './pages/Templates';
 import UserViewer from './pages/UserViewer';
-import TimeTrackingAnalytics from './pages/TimeTrackingAnalytics';
 import Tasks from './pages/Tasks';
-import ClientPortal from './pages/ClientPortal';
-import DiscordBot from './pages/DiscordBot';
 import AITools from './pages/AITools';
-import ContentCreator from './pages/ContentCreator';
 import CreatorStudio from './pages/CreatorStudio';
-import YouTubePublisher from './pages/YouTubePublisher';
-import TwitchStreamer from './pages/TwitchStreamer';
-import ChannelPage from './pages/ChannelPage';
-import VideoUpload from './pages/VideoUpload';
-import VideoEditor from './pages/VideoEditor';
-import IntroOutroMaker from './pages/IntroOutroMaker';
-import ThumbnailMaker from './pages/ThumbnailMaker';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -75,23 +62,10 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="/Leaderboard" element={<LayoutWrapper currentPageName="Leaderboard"><Leaderboard /></LayoutWrapper>} />
-      <Route path="/Templates" element={<LayoutWrapper currentPageName="Templates"><Templates /></LayoutWrapper>} />
       <Route path="/Tasks" element={<LayoutWrapper currentPageName="Tasks"><Tasks /></LayoutWrapper>} />
-      <Route path="/ClientPortal" element={<LayoutWrapper currentPageName="ClientPortal"><ClientPortal /></LayoutWrapper>} />
-      <Route path="/DiscordBot" element={<LayoutWrapper currentPageName="DiscordBot"><DiscordBot /></LayoutWrapper>} />
       <Route path="/AITools" element={<LayoutWrapper currentPageName="AITools"><AITools /></LayoutWrapper>} />
-      <Route path="/ContentCreator" element={<LayoutWrapper currentPageName="ContentCreator"><ContentCreator /></LayoutWrapper>} />
       <Route path="/UserViewer" element={<LayoutWrapper currentPageName="UserViewer"><UserViewer /></LayoutWrapper>} />
-      <Route path="/TimeTrackingAnalytics" element={<LayoutWrapper currentPageName="TimeTrackingAnalytics"><TimeTrackingAnalytics /></LayoutWrapper>} />
-      <Route path="/VideoEditor" element={<LayoutWrapper currentPageName="VideoEditor"><VideoEditor /></LayoutWrapper>} />
-      <Route path="/IntroOutroMaker" element={<LayoutWrapper currentPageName="IntroOutroMaker"><IntroOutroMaker /></LayoutWrapper>} />
-      <Route path="/ThumbnailMaker" element={<LayoutWrapper currentPageName="ThumbnailMaker"><ThumbnailMaker /></LayoutWrapper>} />
       <Route path="/CreatorStudio" element={<LayoutWrapper currentPageName="CreatorStudio"><CreatorStudio /></LayoutWrapper>} />
-      <Route path="/YouTubePublisher" element={<LayoutWrapper currentPageName="YouTubePublisher"><YouTubePublisher /></LayoutWrapper>} />
-      <Route path="/TwitchStreamer" element={<LayoutWrapper currentPageName="TwitchStreamer"><TwitchStreamer /></LayoutWrapper>} />
-      <Route path="/ChannelPage" element={<LayoutWrapper currentPageName="ChannelPage"><ChannelPage /></LayoutWrapper>} />
-      <Route path="/VideoUpload" element={<LayoutWrapper currentPageName="VideoUpload"><VideoUpload /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
