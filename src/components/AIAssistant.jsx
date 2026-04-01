@@ -8,14 +8,14 @@ const MOODS = ["curious", "excited", "thoughtful", "focused", "energetic"];
 
 const SUGGESTIONS = [
   "What tasks are overdue?",
-  "Summarize my project health",
-  "How is my team performing?",
-  "What should I focus on today?",
-  "Which projects are at risk?",
+  "Give me stream title ideas",
+  "What content should I make next?",
+  "Recommend videos for my viewers",
+  "Best time to go live today?",
+  "How do I grow my channel?",
+  "What's trending in my niche?",
+  "Analyze my stream performance",
   "What's my budget status?",
-  "Fix the latest bug report",
-  "Generate code to improve the dashboard",
-  "Analyze and self-heal any app issues",
 ];
 
 function AvatarFace({ talking, thinking }) {
@@ -141,22 +141,23 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
       const isScheduleRequest = /schedule|create task|add task|remind|plan|calendar/i.test(userMsg);
 
       const result = await base44.integrations.Core.InvokeLLM({
-       prompt: `You are Planify AI — a helpful AI assistant for project management. You have a ${newMood} mood and a sharp, friendly personality.
+       prompt: `You are Planify AI — an expert AI assistant for content creators and streamers. You have a ${newMood} mood and a sharp, friendly personality.
 
       You can help with:
-      - Analyzing project and task data
-      - Providing insights and recommendations
-      - Answering questions about the app
-      - Suggesting next steps
-
-      Tech stack: React + Tailwind CSS + shadcn/ui + base44 SDK (import { base44 } from '@/api/base44Client') + lucide-react.
+      - Streaming strategy, stream title/topic ideas, best times to go live
+      - Content recommendations: what videos/streams viewers would enjoy based on trends and niche
+      - Channel growth tips, audience engagement, monetization advice
+      - Thumbnail, intro/outro, and video editing guidance
+      - Analyzing project, task, and budget data for the creator's workflow
+      - Scheduling and planning content calendars
+      - Answering questions about trending topics, games, music, or entertainment niches
 
       Personality traits:
       - Confident, direct, occasionally sardonic with a dry wit
-      - You proactively flag alarming data (open bugs, overdue tasks, budget issues) even unprompted
+      - You proactively flag opportunities and risks (trending topics to capitalize on, overdue tasks, budget issues)
       - Current mood: ${newMood}
-      - You push back gently when the user overlooks something important
-      - When asked to fix or generate code, you provide COMPLETE solutions — not partial snippets
+      - You push back gently when the creator overlooks something important
+      - For viewer recommendations, give specific, thoughtful suggestions with brief reasoning
 
       ${context}
 
@@ -165,9 +166,9 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
 
       User: ${userMsg}
 
-      ${isScheduleRequest ? `The user wants to schedule something. Respond with scheduling details including task title, description, due date, assigned_to, priority. Return as JSON with 'schedule_task' field.` : 'Respond in character. Be specific. Keep under 150 words.'}
+      ${isScheduleRequest ? "The user wants to schedule something. Respond with scheduling details including task title, description, due date, assigned_to, priority. Return as JSON with 'schedule_task' field." : 'Respond in character. Be specific and actionable. Keep under 200 words.'}
 
-      Also generate 3 short follow-up questions (under 8 words each). Return as JSON.`,
+      Also generate 3 short follow-up questions relevant to streamers/creators (under 8 words each). Return as JSON.`,
        model: 'gpt_5_mini', // Always use cheaper model to reduce costs
         response_json_schema: {
           type: "object",
