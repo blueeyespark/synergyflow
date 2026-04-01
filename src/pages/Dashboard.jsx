@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Home, Flame, Music, Gamepad2, Tv, Radio, BookOpen, Trophy, ChevronDown, ThumbsUp, Clock, ListVideo, Download, History, PlaySquare, ShoppingBag, Menu, Search, Bell, Upload, Mic, MoreVertical } from "lucide-react";
 import { motion } from "framer-motion";
+import AIContentAdvisor from "@/components/dashboard/AIContentAdvisor";
 
 const CATEGORIES = ["All", "Gaming", "Music", "Live", "Mixes", "Reaction videos", "Simulation", "Minecraft", "Anime", "Shorts", "Mods", "Tutorials"];
 
@@ -86,13 +87,13 @@ function VideoCard({ video, channel }) {
           <span className="absolute bottom-1.5 right-1.5 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">LIVE</span>
         )}
       </div>
-      <div className="flex gap-3">
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 mt-0.5">
+      <div className="flex gap-2">
+        <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs sm:text-sm font-bold flex-shrink-0 mt-0.5">
           {channel?.channel_name?.charAt(0) || "C"}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-white line-clamp-2 leading-snug mb-1">{video.title}</h3>
-          <p className="text-xs text-zinc-400">{channel?.channel_name || "Creator"}</p>
+          <h3 className="text-xs sm:text-sm font-medium text-white line-clamp-2 leading-snug mb-0.5">{video.title}</h3>
+          <p className="text-xs text-zinc-400 truncate">{channel?.channel_name || "Creator"}</p>
           <p className="text-xs text-zinc-400">
             {formatViews(video.view_count || 0)} views • {timeAgo(video.published_date || video.created_date)}
           </p>
@@ -107,7 +108,7 @@ function VideoCard({ video, channel }) {
 
 function ShortCard({ video }) {
   return (
-    <div className="group cursor-pointer flex-shrink-0 w-40 sm:w-44">
+    <div className="group cursor-pointer flex-shrink-0 w-32 sm:w-40 md:w-44">
       <div className="relative aspect-[9/16] bg-zinc-800 rounded-xl overflow-hidden mb-2">
         <img
           src={video.thumbnail_url || `https://images.unsplash.com/photo-1536240478700-b869ad10a2ab?w=200&h=356&fit=crop&sig=${video.id}`}
@@ -158,7 +159,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex">
-      {/* Sidebar */}
+      {/* Sidebar — desktop only */}
       {sidebarOpen && (
         <aside className="hidden md:flex flex-col w-60 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto bg-zinc-950 py-3 px-2 z-40">
           {SIDEBAR_ITEMS.map(item => (
@@ -207,70 +208,84 @@ export default function Dashboard() {
       )}
 
       {/* Main */}
-      <main className={`flex-1 transition-all ${sidebarOpen ? "md:ml-60" : ""}`}>
-        {/* Top Bar */}
-        <div className="sticky top-16 z-30 bg-zinc-950/95 backdrop-blur-sm px-4 py-3">
+      <main className={`flex-1 min-w-0 transition-all ${sidebarOpen ? "md:ml-60" : ""} flex`}>
+
+        {/* Content area */}
+        <div className="flex-1 min-w-0">
           {/* Category chips */}
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  activeCategory === cat
-                    ? "bg-white text-black"
-                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="sticky top-16 z-30 bg-zinc-950/95 backdrop-blur-sm px-2 sm:px-4 py-2 sm:py-3">
+            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`flex-shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
+                    activeCategory === cat
+                      ? "bg-white text-black"
+                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="px-2 sm:px-4 pb-20 md:pb-8 space-y-6 sm:space-y-8">
+            {/* Shorts Section */}
+            {shorts.length > 0 && (activeCategory === "All" || activeCategory === "Shorts") && (
+              <section>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-5 h-5 bg-red-600 rounded-sm flex items-center justify-center">
+                    <span className="text-white text-xs font-black">▶</span>
+                  </div>
+                  <h2 className="text-lg font-bold text-white">Shorts</h2>
+                  <MoreVertical className="w-5 h-5 text-zinc-400 ml-auto cursor-pointer hover:text-white" />
+                </div>
+                <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-2 px-2">
+                  {shorts.slice(0, 10).map(v => <ShortCard key={v.id} video={v} />)}
+                </div>
+              </section>
+            )}
+
+            {/* Main Video Grid */}
+            {displayVideos.length > 0 ? (
+              <section>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                  {displayVideos.map((video, i) => (
+                    <motion.div
+                      key={video.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.03 }}
+                    >
+                      <VideoCard video={video} channel={channelMap[video.channel_id]} />
+                    </motion.div>
+                  ))}
+                </div>
+              </section>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-24 text-center">
+                <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
+                  <PlaySquare className="w-8 h-8 text-zinc-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">No videos yet</h3>
+                <p className="text-zinc-400 text-sm max-w-xs">Upload videos from the Content Production tab to see them here</p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="px-4 pb-8 space-y-8">
-          {/* Shorts Section */}
-          {shorts.length > 0 && (activeCategory === "All" || activeCategory === "Shorts") && (
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-5 h-5 bg-red-600 rounded-sm flex items-center justify-center">
-                  <span className="text-white text-xs font-black">▶</span>
-                </div>
-                <h2 className="text-lg font-bold text-white">Shorts</h2>
-                <MoreVertical className="w-5 h-5 text-zinc-400 ml-auto cursor-pointer hover:text-white" />
-              </div>
-              <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-                {shorts.slice(0, 10).map(v => <ShortCard key={v.id} video={v} />)}
-              </div>
-            </section>
-          )}
-
-          {/* Main Video Grid */}
-          {displayVideos.length > 0 ? (
-            <section>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {displayVideos.map((video, i) => (
-                  <motion.div
-                    key={video.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.03 }}
-                  >
-                    <VideoCard video={video} channel={channelMap[video.channel_id]} />
-                  </motion.div>
-                ))}
-              </div>
-            </section>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
-              <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
-                <PlaySquare className="w-8 h-8 text-zinc-500" />
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">No videos yet</h3>
-              <p className="text-zinc-400 text-sm max-w-xs">Upload videos from the Content Production tab to see them here</p>
+        {/* AI Advisor Panel — desktop right sidebar */}
+        <aside className="hidden xl:flex flex-col w-72 flex-shrink-0 border-l border-zinc-800 px-4 pt-20 pb-8 overflow-y-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center">
+              <span className="text-black font-black text-xs">P</span>
             </div>
-          )}
-        </div>
+            <span className="text-sm font-bold text-white">Planify AI</span>
+          </div>
+          <AIContentAdvisor videos={displayVideos} channels={channels} user={user} />
+        </aside>
       </main>
     </div>
   );
