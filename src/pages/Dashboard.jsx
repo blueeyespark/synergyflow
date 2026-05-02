@@ -376,7 +376,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background text-foreground flex">
 
       {/* ── LEFT SIDEBAR ─────────────────────────────────────── */}
-      <aside className="hidden sm:flex flex-col w-52 md:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto py-4 px-2.5 z-40 border-r border-slate-200 dark:border-[#0d2040]/80 bg-white dark:bg-background">
+      <aside className="hidden sm:flex flex-col w-52 md:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto py-4 px-2.5 z-40 border-r border-slate-200 dark:border-[#0d2040]/80 bg-white dark:bg-card">
         <div className="space-y-0.5 mb-3">
           {SIDEBAR_NAV.map(item => (
             <Link key={item.label} to={item.to} className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-slate-600 dark:text-blue-400/60 hover:bg-slate-100 dark:hover:bg-blue-900/20 hover:text-slate-800 dark:hover:text-blue-200 transition-all w-full">
@@ -426,7 +426,7 @@ export default function Dashboard() {
         <div className="flex-1 min-w-0">
 
           {/* Sticky top bar */}
-          <div className="sticky top-16 z-30 border-b border-slate-200 dark:border-[#0d2040]/80 px-4 pt-3 pb-1 space-y-2 bg-white dark:bg-card" style={{ backdropFilter: "blur(20px)" }}>
+          <div className="sticky top-16 z-30 border-b border-slate-200 dark:border-[#0d2040]/80 px-4 pt-3 pb-1 space-y-2 bg-white dark:bg-background" style={{ backdropFilter: "blur(20px)" }}>
 
             {/* Tabs + Search */}
             <div className="flex items-center gap-1 flex-wrap">
@@ -610,7 +610,7 @@ export default function Dashboard() {
         </div>
 
         {/* ── RIGHT SIDEBAR ─────────────────────────────────────── */}
-        <aside className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-l border-slate-200 dark:border-[#0d2040]/80 px-4 pb-8 overflow-y-auto space-y-5 bg-slate-50 dark:bg-background" style={{ marginTop: "5rem" }}>
+        <aside className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-l border-slate-200 dark:border-[#0d2040]/80 px-4 pb-8 overflow-y-auto space-y-5 bg-slate-50 dark:bg-card" style={{ marginTop: "5rem" }}>
 
           {/* Live channels */}
           {liveChannels.length > 0 && (
