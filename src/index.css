@@ -138,6 +138,14 @@
     background-clip: text;
   }
 
+  /* Light mode overrides for all dark-themed elements */
+  .bg-\[\#060d18\] { background-color: #f3f4f6; }
+  .bg-\[\#03080f\] { background-color: #ffffff; }
+  .bg-\[\#0a1525\] { background-color: #f9fafb; }
+  .bg-\[\#0d1a2e\] { background-color: #eff6ff; }
+  .border-\[\#0d2040\] { border-color: #e5e7eb; }
+  .border-\[\#1a3a60\] { border-color: #d1d5db; }
+  
   /* Light mode text colors — make blue/light text dark for visibility */
   .text-blue-400 { color: #1e40af; }
   .text-blue-300 { color: #1e3a8a; }
@@ -159,4 +167,7 @@
   .text-white { color: #1f2937; }
   .text-gray-400 { color: #4b5563; }
   .text-gray-500 { color: #374151; }
+  .text-\[\#e8f4ff\] { color: #1f2937; }
+  .text-\[\#c8dff5\] { color: #374151; }
+  .text-\[\#9fc3e8\] { color: #4b5563; }
 }
