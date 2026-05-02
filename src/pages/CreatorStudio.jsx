@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   Globe, Bot, Upload, BarChart3, Calendar,
-  Users, ImageIcon, ArrowLeft, DollarSign
+  Users, ImageIcon, ArrowLeft, DollarSign, TrendingUp
 } from "lucide-react";
 import ContentProductionHub from "@/components/studio/ContentProductionHub";
 import MediaLibrary from "./MediaLibrary";
@@ -13,6 +13,7 @@ import DiscordBot from "./DiscordBot";
 import PlanningHub from "@/components/studio/PlanningHub";
 import TeamManagement from "@/components/studio/TeamManagement";
 import StreamerAnalytics from "@/components/studio/StreamerAnalytics";
+import TrendingForCreators from "@/components/studio/TrendingForCreators";
 
 const tabs = [
   { id: "channel",    label: "My Channel",   icon: Users,      component: ChannelPage },
@@ -20,6 +21,7 @@ const tabs = [
   { id: "media",      label: "Media",        icon: ImageIcon,  component: MediaLibrary },
   { id: "planning",   label: "Planning",     icon: Calendar,   component: PlanningHub },
   { id: "analytics",  label: "Analytics",   icon: BarChart3,  component: StreamerAnalytics },
+  { id: "trending",   label: "Trending",     icon: TrendingUp, component: TrendingForCreators },
   { id: "team",       label: "Team",         icon: Users,      component: TeamManagement },
   { id: "client",     label: "Client Portal",icon: Globe,      component: ClientPortal },
   { id: "discord",    label: "Discord Bot",  icon: Bot,        component: DiscordBot },

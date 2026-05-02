@@ -58,14 +58,8 @@ export default function TopNav({
     >
       <div className="flex items-center justify-between h-14 px-3 sm:px-5 gap-2">
 
-        {/* Left: hamburger + logo */}
+        {/* Left: logo */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-blue-400 hover:bg-blue-900/20 transition-colors"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
           <Link to="/" className="flex items-center gap-1.5 group">
             <div className="relative w-8 h-8 flex items-center justify-center flex-shrink-0">
               <div className="absolute inset-0 rounded-lg bg-[#1e78ff]/20 border border-[#1e78ff]/40" />
