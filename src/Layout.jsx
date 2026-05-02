@@ -32,7 +32,7 @@ export default function Layout({ children, currentPageName }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem("darkMode", darkMode);
+    localStorage.setItem("darkMode", String(darkMode));
   }, [darkMode]);
 
   useEffect(() => {

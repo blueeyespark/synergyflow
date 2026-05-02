@@ -110,7 +110,13 @@ export default function TopNav({
             <Search className="w-4 h-4" />
           </button>
 
-          <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="text-blue-400 hover:text-blue-200 hover:bg-blue-900/20">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setDarkMode(!darkMode)} 
+            className="text-blue-400 hover:text-blue-200 hover:bg-blue-900/20"
+            title={darkMode ? "Light Mode" : "Dark Mode"}
+          >
             {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
 
