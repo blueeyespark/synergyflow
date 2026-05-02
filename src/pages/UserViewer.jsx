@@ -20,7 +20,7 @@ export default function UserViewer() {
   }, []);
 
   const { data: allUsers = [] } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["users", user?.role],
     queryFn: () => base44.entities.User.list(),
     enabled: !!user?.email && user?.role === 'admin',
     retry: false,
