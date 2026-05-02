@@ -4,26 +4,27 @@
 
 @layer base {
   :root {
-    --background: 222 47% 5%;
-    --foreground: 210 100% 95%;
-    --card: 222 40% 8%;
-    --card-foreground: 210 100% 95%;
-    --popover: 222 40% 8%;
-    --popover-foreground: 210 100% 95%;
-    --primary: 210 100% 56%;
-    --primary-foreground: 222 47% 5%;
-    --secondary: 222 30% 14%;
-    --secondary-foreground: 210 100% 80%;
-    --muted: 222 30% 14%;
-    --muted-foreground: 210 30% 55%;
+    /* Light mode */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 96%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 210 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 220 13% 91%;
+    --muted-foreground: 215 16% 47%;
     --accent: 195 100% 50%;
-    --accent-foreground: 222 47% 5%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 40% 15%;
-    --input: 222 40% 10%;
-    --ring: 210 100% 56%;
-    --chart-1: 210 100% 56%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 210 100% 50%;
+    --chart-1: 210 100% 50%;
     --chart-2: 195 100% 50%;
     --chart-3: 270 80% 60%;
     --chart-4: 40 100% 55%;
@@ -32,6 +33,7 @@
   }
 
   .dark {
+    /* Dark mode - black and blue cyber theme */
     --background: 222 47% 5%;
     --foreground: 210 100% 95%;
     --card: 222 40% 8%;
@@ -61,9 +63,13 @@
 
   body {
     @apply bg-background text-foreground;
-    background: #03080f;
     position: relative;
     font-family: 'Inter', sans-serif;
+  }
+
+  /* Dark mode specific */
+  .dark body {
+    background: #03080f;
   }
 
   body::before {
@@ -73,15 +79,17 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background:
-      radial-gradient(ellipse at 10% 20%, rgba(30, 120, 255, 0.12) 0%, transparent 55%),
-      radial-gradient(ellipse at 90% 80%, rgba(0, 200, 255, 0.08) 0%, transparent 55%),
-      radial-gradient(ellipse at 50% 50%, rgba(10, 20, 40, 0.9) 0%, transparent 100%);
     pointer-events: none;
     z-index: 0;
   }
 
-  /* Cyber grid subtle overlay */
+  .dark body::before {
+    background:
+      radial-gradient(ellipse at 10% 20%, rgba(30, 120, 255, 0.12) 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 80%, rgba(0, 200, 255, 0.08) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 50%, rgba(10, 20, 40, 0.9) 0%, transparent 100%);
+  }
+
   body::after {
     content: '';
     position: fixed;
@@ -89,19 +97,26 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-image:
-      linear-gradient(rgba(30, 120, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(30, 120, 255, 0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
     pointer-events: none;
     z-index: 0;
   }
 
+  .dark body::after {
+    background-image:
+      linear-gradient(rgba(30, 120, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(30, 120, 255, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
   /* Scrollbar styling */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: #03080f; }
-  ::-webkit-scrollbar-thumb { background: #1e78ff44; border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: #1e78ff88; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #22d3ee44; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #22d3ee88; }
+
+  .dark ::-webkit-scrollbar-track { background: #03080f; }
+  .dark ::-webkit-scrollbar-thumb { background: #1e78ff44; }
+  .dark ::-webkit-scrollbar-thumb:hover { background: #1e78ff88; }
 
   /* Cyber glow utilities */
   .cyber-glow {
