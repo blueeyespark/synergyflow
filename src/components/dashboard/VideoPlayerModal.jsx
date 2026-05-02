@@ -5,6 +5,19 @@ import MerchShelf from "@/components/video/MerchShelf";
 import ClipsMaker from "@/components/video/ClipsMaker";
 import { motion, AnimatePresence } from "framer-motion";
 
+function timeAgoShort(dateStr) {
+  if (!dateStr) return "";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
+
 function formatViews(n) {
   if (!n) return "0";
   if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
@@ -83,6 +96,8 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
     setSleepCountdown(null);
   };
 
+  const [commentVotes, setCommentVotes] = useState({});
+
   const submitComment = async () => {
     if (!commentText.trim() || !user) return;
     const c = await base44.entities.VideoComment.create({
@@ -94,6 +109,13 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
     });
     setComments(prev => [c, ...prev]);
     setCommentText("");
+  };
+
+  const handleCommentVote = (commentId, type) => {
+    setCommentVotes(prev => {
+      const current = prev[commentId];
+      return { ...prev, [commentId]: current === type ? null : type };
+    });
   };
 
   return (
@@ -285,18 +307,37 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
                       </div>
                     </div>
                   )}
-                  <div className="space-y-3">
-                    {comments.map(c => (
-                      <div key={c.id} className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                          {c.author_name?.charAt(0) || "?"}
+                  <div className="space-y-4">
+                    {comments.map(c => {
+                      const vote = commentVotes[c.id];
+                      const likes = (c.likes || 0) + (vote === "up" ? 1 : 0);
+                      return (
+                        <div key={c.id} className="flex gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                            {c.author_name?.charAt(0) || "?"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-gray-900 dark:text-white text-xs font-semibold">
+                              {c.author_name}
+                              <span className="text-gray-400 dark:text-zinc-500 font-normal ml-1.5">{timeAgoShort(c.created_date)}</span>
+                            </p>
+                            <p className="text-gray-700 dark:text-zinc-300 text-sm mt-0.5 leading-relaxed">{c.content}</p>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <button onClick={() => handleCommentVote(c.id, "up")}
+                                className={`flex items-center gap-1 text-xs transition-colors ${vote === "up" ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300"}`}>
+                                <ThumbsUp className={`w-3.5 h-3.5 ${vote === "up" ? "fill-current" : ""}`} />
+                                {likes > 0 && <span>{likes}</span>}
+                              </button>
+                              <button onClick={() => handleCommentVote(c.id, "down")}
+                                className={`flex items-center gap-1 text-xs transition-colors ${vote === "down" ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300"}`}>
+                                <ThumbsDown className={`w-3.5 h-3.5 ${vote === "down" ? "fill-current" : ""}`} />
+                              </button>
+                              <button className="text-xs text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300 font-medium transition-colors">Reply</button>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-gray-900 dark:text-white text-xs font-semibold">{c.author_name} <span className="text-gray-400 dark:text-zinc-500 font-normal">{timeAgo(c.created_date)}</span></p>
-                          <p className="text-gray-700 dark:text-zinc-300 text-sm mt-0.5">{c.content}</p>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
                 )}

@@ -5,7 +5,7 @@ import {
   Home, Flame, Music, Gamepad2, Tv, Radio, BookOpen, Trophy,
   ChevronDown, ThumbsUp, Clock, ListVideo, Download, History,
   PlaySquare, ShoppingBag, MoreVertical, Search, X, TrendingUp,
-  Users, Zap, Star, PlusCircle, Compass, Menu
+  Users, Zap, Star, PlusCircle, Compass, Menu, BarChart2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ import VideoPlayerModal from "@/components/dashboard/VideoPlayerModal";
 import FeaturedLiveStream from "@/components/dashboard/FeaturedLiveStream";
 import ExploreCategories from "@/components/dashboard/ExploreCategories";
 import LiveSidebar from "@/components/dashboard/LiveSidebar";
+import SaveToPlaylistMenu from "@/components/dashboard/SaveToPlaylistMenu";
 
 const CATEGORIES = ["All", "Gaming", "Music", "Live", "Mixes", "Reaction videos", "Simulation", "Minecraft", "Anime", "Shorts", "Mods", "Tutorials"];
 const MAIN_TABS = ["Home", "Subscriptions"];
@@ -79,7 +80,10 @@ function formatDuration(secs) {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-function VideoCard({ video, channel, onClick, watched, badge }) {
+function VideoCard({ video, channel, onClick, watched, badge, user }) {
+  const [showMenu, setShowMenu] = useState(false);
+  const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
+
   return (
     <div className="group cursor-pointer relative" onClick={() => onClick(video)}>
       {badge && <span className="absolute -top-1 -left-1 z-10 w-6 h-6 bg-red-600 text-white text-xs font-black rounded-full flex items-center justify-center">{badge}</span>}
@@ -119,9 +123,31 @@ function VideoCard({ video, channel, onClick, watched, badge }) {
           <Link to={channel ? `/Channel?id=${channel.id}` : "#"} onClick={e => e.stopPropagation()} className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5 truncate hover:underline block">{channel?.channel_name || "Creator"}</Link>
           <p className="text-xs text-gray-400 dark:text-zinc-500">{formatViews(video.view_count)} views · {timeAgo(video.published_date || video.created_date)}</p>
         </div>
-        <button className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-white p-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
-          <MoreVertical className="w-4 h-4" />
-        </button>
+        <div className="relative flex-shrink-0" onClick={e => e.stopPropagation()}>
+          <button
+            className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-white p-1"
+            onClick={() => setShowMenu(!showMenu)}
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
+          {showMenu && (
+            <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl shadow-xl w-44 py-1 text-sm">
+              <button
+                className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300 transition-colors"
+                onClick={() => { setShowPlaylistMenu(true); setShowMenu(false); }}
+              >
+                <ListVideo className="w-4 h-4" /> Save to playlist
+              </button>
+            </div>
+          )}
+          {showPlaylistMenu && user?.email && (
+            <SaveToPlaylistMenu
+              videoId={video.id}
+              userEmail={user.email}
+              onClose={() => setShowPlaylistMenu(false)}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -146,6 +172,29 @@ function ShortCard({ video, onClick }) {
       </div>
       <p className="text-xs text-gray-500 dark:text-zinc-400 px-1 truncate">{formatViews(video.view_count)} views</p>
     </div>
+  );
+}
+
+function PlaylistsSidebarSection({ userEmail, sidebarBtnBase, sidebarBtnIdle }) {
+  const { data: playlists = [] } = useQuery({
+    queryKey: ["playlists", userEmail],
+    queryFn: () => base44.entities.Playlist.filter({ owner_email: userEmail }),
+    enabled: !!userEmail,
+    staleTime: 2 * 60 * 1000,
+  });
+  if (playlists.length === 0) {
+    return <p className="text-xs text-gray-400 dark:text-zinc-600 px-3 py-1">No playlists yet</p>;
+  }
+  return (
+    <>
+      {playlists.slice(0, 5).map(p => (
+        <button key={p.id} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
+          <ListVideo className="w-4 h-4 flex-shrink-0" />
+          <span className="truncate text-xs">{p.name}</span>
+          <span className="ml-auto text-xs text-gray-400 dark:text-zinc-600">{p.video_ids?.length || 0}</span>
+        </button>
+      ))}
+    </>
   );
 }
 
@@ -279,6 +328,9 @@ export default function Dashboard() {
         <Link to="/CreatorStudio" className={`${sidebarBtnBase} bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 hover:from-cyan-500/20 hover:to-blue-500/20`}>
           <PlusCircle className="w-5 h-5 flex-shrink-0" /> Creator Studio
         </Link>
+        <Link to="/VideoAnalytics" className={`${sidebarBtnBase} bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:from-amber-500/20 hover:to-orange-500/20`}>
+          <BarChart2 className="w-5 h-5 flex-shrink-0" /> Analytics
+        </Link>
 
         <hr className="border-gray-200 dark:border-zinc-800 my-3" />
         <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">You</p>
@@ -288,6 +340,10 @@ export default function Dashboard() {
             {item.label}
           </button>
         ))}
+
+        <hr className="border-gray-200 dark:border-zinc-800 my-3" />
+        <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">My Playlists</p>
+        {user?.email && <PlaylistsSidebarSection userEmail={user.email} sidebarBtnBase={sidebarBtnBase} sidebarBtnIdle={sidebarBtnIdle} />}
 
         <hr className="border-gray-200 dark:border-zinc-800 my-3" />
         <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">Subscriptions</p>
@@ -427,7 +483,7 @@ export default function Dashboard() {
                         const badge = trendingIndex !== -1 ? `#${trendingIndex + 1}` : null;
                         return (
                           <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                            <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} badge={badge} />
+                            <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} badge={badge} user={user} />
                           </motion.div>
                         );
                       })}
@@ -468,7 +524,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                   {subVideos.map((video, i) => (
                     <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                      <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} />
+                      <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} user={user} />
                     </motion.div>
                   ))}
                 </div>
