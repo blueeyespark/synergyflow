@@ -33,18 +33,12 @@ const tabs = [
   { id: "planning",   label: "Planning",       icon: Calendar,   component: PlanningHub },
   { id: "ai",         label: "AI Assistant",   icon: Zap,        component: AIAssistantHub },
   { id: "analytics",  label: "Analytics",      icon: BarChart3,  component: StreamerAnalytics },
-  { id: "insights",   label: "Insights",       icon: TrendingUp, component: AnalyticsPlus },
-  { id: "streaming",  label: "Streaming",      icon: Upload,     component: StreamingTechnical },
-  { id: "health",     label: "Stream Health",  icon: Activity,   component: StreamHealthMonitor },
+  { id: "discover",   label: "Discover",       icon: TrendingUp, component: AnalyticsPlus },
+  { id: "live",       label: "Live",           icon: Activity,   component: StreamingTechnical },
+  { id: "revenue",    label: "Revenue",        icon: ShoppingBag,component: MonetizationRevenue },
   { id: "community",  label: "Community",      icon: Users,      component: CommunityEngagement },
-  { id: "monetize",   label: "Monetization",   icon: BarChart3,  component: MonetizationRevenue },
-  { id: "sponsors",   label: "Sponsors",       icon: Zap,        component: SponsorDashboard },
-  { id: "merch",      label: "Merch Shop",     icon: ShoppingBag,component: MerchShelfStudio },
-  { id: "trending",   label: "Trending",       icon: TrendingUp, component: TrendingForCreators },
-  { id: "collab",     label: "Collaboration",  icon: Users,      component: CollaborationStudio },
   { id: "team",       label: "Team",           icon: Users,      component: TeamManagement },
   { id: "client",     label: "Client Portal",  icon: Globe,      component: ClientPortal },
-  { id: "discord",    label: "Discord Bot",    icon: Bot,        component: DiscordBot },
 ];
 
 export default function CreatorStudio() {
