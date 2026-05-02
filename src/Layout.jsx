@@ -135,7 +135,7 @@ export default function Layout({ children, currentPageName }) {
     <div className="min-h-screen flex flex-col bg-background text-foreground relative">
       {pointsEvent && <PointsToast event={pointsEvent} onDismiss={() => setPointsEvent(null)} />}
       <OfflineBanner />
-      <AIAssistant projects={projects} tasks={tasks} budget={budget} />
+      <AIAssistant projects={projects} tasks={tasks} budget={budget} userRole={user?.role || 'viewer'} />
       <AIProactivePopup projects={projects} tasks={tasks} />
 
       <style>{`
