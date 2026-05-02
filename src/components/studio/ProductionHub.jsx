@@ -1,18 +1,14 @@
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Video, ImageIcon, Radio } from "lucide-react";
+import { Upload, ImageIcon, Radio } from "lucide-react";
 import VideoUpload from "@/pages/VideoUpload";
-import VideoEditor from "@/pages/VideoEditor";
-import ThumbnailMaker from "@/pages/ThumbnailMaker";
-import IntroOutroMaker from "@/pages/IntroOutroMaker";
+import VideoEditorAdvanced from "./VideoEditorAdvanced";
 import MediaLibrary from "@/pages/MediaLibrary";
 import AIAssistantHub from "./AIAssistantHub";
 
 const subtabs = [
   { id: "upload", label: "Upload", icon: Upload, component: VideoUpload },
-  { id: "editor", label: "Editor", icon: Video, component: VideoEditor },
-  { id: "thumbnail", label: "Thumbnail", icon: ImageIcon, component: ThumbnailMaker },
-  { id: "intro", label: "Intro/Outro", icon: Radio, component: IntroOutroMaker },
+  { id: "editor", label: "Editor", icon: ImageIcon, component: VideoEditorAdvanced },
   { id: "media", label: "Media Library", icon: ImageIcon, component: MediaLibrary },
   { id: "ai", label: "AI Assistant", icon: Radio, component: AIAssistantHub },
 ];
