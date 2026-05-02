@@ -369,7 +369,9 @@ export default function Dashboard() {
   const TABS = [
     { id: "home",      label: "Home" },
     { id: "following", label: "Following", badge: mySubscriptions.length },
+    { id: "trending",  label: "Trending" },
     { id: "watchlater",label: "Watch Later", badge: watchLater.length },
+    { id: "history",   label: "Watch History", badge: watchHistory.length },
   ];
 
   return (
@@ -578,6 +580,34 @@ export default function Dashboard() {
               </motion.div>
             )}
 
+            {/* ── TRENDING TAB ───────────────────────────────────── */}
+            {activeTab === "trending" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="w-4 h-4 text-orange-400" />
+                  <h2 className="text-sm font-bold text-foreground dark:text-[#e8f4ff]">Trending Now</h2>
+                  <span className="text-xs text-slate-600 dark:text-blue-400/40">{trending.length} videos</span>
+                </div>
+                {trending.length > 0 ? (
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                    {trending.map((video, i) => (
+                      <motion.div key={video.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+                        <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} user={user} />
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-24 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-card border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
+                      <TrendingUp className="w-7 h-7 text-slate-400 dark:text-blue-400/30" />
+                    </div>
+                    <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">No trending videos</h3>
+                    <p className="text-slate-600 dark:text-blue-400/40 text-sm">Check back later for trending content</p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
             {/* ── WATCH LATER TAB ───────────────────────────────── */}
             {activeTab === "watchlater" && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -602,6 +632,30 @@ export default function Dashboard() {
                     </div>
                     <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">Nothing saved yet</h3>
                     <p className="text-slate-600 dark:text-blue-400/40 text-sm">Hover a video and click ⋯ → Watch Later</p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* ── WATCH HISTORY TAB ──────────────────────────────── */}
+            {activeTab === "history" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <History className="w-4 h-4 text-blue-400/60" />
+                  <h2 className="text-sm font-bold text-foreground dark:text-[#e8f4ff]">Watch History</h2>
+                  <span className="text-xs text-slate-600 dark:text-blue-400/40">{continueWatching.length} videos</span>
+                </div>
+                {continueWatching.length > 0 ? (
+                  <div className="space-y-3">
+                    {continueWatching.map(v => <VideoCard key={v.id} video={v} channel={channelMap[v.channel_id]} onClick={handleOpenVideo} watched compact user={user} />)}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-24 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-card border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
+                       <History className="w-7 h-7 text-slate-400 dark:text-blue-400/30" />
+                    </div>
+                    <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">No watch history yet</h3>
+                    <p className="text-slate-600 dark:text-blue-400/40 text-sm">Videos you watch will appear here</p>
                   </div>
                 )}
               </motion.div>
