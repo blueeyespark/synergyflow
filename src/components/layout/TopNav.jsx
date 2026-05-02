@@ -122,15 +122,18 @@ export default function TopNav({
             {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
 
-          <NotificationBell
-            notifications={notifications}
-            onMarkAsRead={onMarkAsRead}
-            onMarkAllRead={onMarkAllRead}
-            onDelete={onDeleteNotification}
-            newVideos={newVideos}
-          />
+          {user && (
+            <NotificationBell
+              notifications={notifications}
+              onMarkAsRead={onMarkAsRead}
+              onMarkAllRead={onMarkAllRead}
+              onDelete={onDeleteNotification}
+              newVideos={newVideos}
+            />
+          )}
 
-          {/* Avatar / account dropdown — YouTube style */}
+          {/* Avatar / account dropdown OR Sign In button */}
+          {user ? (
           <div className="relative ml-1" ref={dropdownRef}>
             <button
               onClick={() => setAccountOpen(!accountOpen)}
@@ -206,6 +209,11 @@ export default function TopNav({
               )}
             </AnimatePresence>
           </div>
+          ) : (
+            <Button onClick={() => base44.auth.redirectToLogin(window.location.href)} className="gap-2">
+              <Users className="w-4 h-4" /> Sign In
+            </Button>
+          )}
         </div>
       </div>
 
