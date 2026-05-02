@@ -147,6 +147,9 @@ export default function ChannelPage() {
   const [activeTab, setActiveTab] = useState("videos");
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [activeChannelId, setActiveChannelId] = useState(() => {
+    try { return localStorage.getItem("activeChannelId") || null; } catch { return null; }
+  });
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -154,6 +157,13 @@ export default function ChannelPage() {
   const channelId = urlParams.get("id");
 
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
+
+  // Listen for channel switches from TopNav
+  useEffect(() => {
+    const handler = (e) => setActiveChannelId(e.detail.channelId);
+    window.addEventListener("activeChannelChanged", handler);
+    return () => window.removeEventListener("activeChannelChanged", handler);
+  }, []);
 
   const { data: channels = [], refetch: refetchChannels } = useQuery({
     queryKey: ["channels-all"],
@@ -167,9 +177,15 @@ export default function ChannelPage() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const myChannels = channels.filter(c => c.creator_email === user?.email);
+
+  // Resolve which channel to show:
+  // 1) URL param ?id=... (viewing someone else's or a specific channel)
+  // 2) activeChannelId from localStorage (own channel switcher)
+  // 3) First own channel fallback
   const channel = channelId
     ? channels.find(c => c.id === channelId)
-    : channels.find(c => c.creator_email === user?.email);
+    : (myChannels.find(c => c.id === activeChannelId) || myChannels[0]);
 
   const isOwnChannel = channel && user && channel.creator_email === user.email;
   const channelVideos = videos.filter(v => v.channel_id === channel?.id && v.status !== "deleted");
@@ -183,7 +199,6 @@ export default function ChannelPage() {
   // No channel found — show create form if own channel, else 404
   if (!channel) {
     if (!channelId && user) {
-      // Own channel — show create button or form
       if (showCreateForm) {
         return (
           <CreateChannelForm
@@ -198,14 +213,14 @@ export default function ChannelPage() {
       }
       return (
         <div className="min-h-screen bg-[#03080f] flex items-center justify-center p-4">
-          <div className="text-center">
+          <div className="text-center max-w-sm">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#1e78ff]/20 to-[#a855f7]/20 border border-blue-900/40 flex items-center justify-center mx-auto mb-5">
               <Users className="w-9 h-9 text-blue-400/40" />
             </div>
-            <h2 className="text-2xl font-black text-[#e8f4ff] mb-2">You don't have a channel yet</h2>
-            <p className="text-blue-400/50 text-sm mb-6">Create your channel to start uploading, streaming, and building your community.</p>
-            <Button onClick={() => setShowCreateForm(true)} className="gap-2">
-              <Zap className="w-4 h-4" /> Create Your Channel
+            <h2 className="text-2xl font-black text-[#e8f4ff] mb-2">No channel selected</h2>
+            <p className="text-blue-400/50 text-sm mb-6">Create a channel or switch to one using the profile menu.</p>
+            <Button onClick={() => setShowCreateForm(true)} className="gap-2 w-full">
+              <Zap className="w-4 h-4" /> Create a Channel
             </Button>
           </div>
         </div>
@@ -255,15 +270,15 @@ export default function ChannelPage() {
             </div>
 
             {/* Action buttons */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
               {isOwnChannel ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Link to="/CreatorStudio">
                     <Button className="gap-2">
                       <Zap className="w-4 h-4" /> Creator Studio
                     </Button>
                   </Link>
-                  <Link to="/CreatorStudio?tab=channel">
+                  <Link to="/CreatorStudio?tab=editchannel">
                     <Button variant="outline" className="gap-2">
                       <Edit3 className="w-4 h-4" /> Edit Channel
                     </Button>

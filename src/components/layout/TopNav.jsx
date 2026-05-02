@@ -5,11 +5,12 @@ import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, Moon, Sun, Settings, LogOut, Search,
-  Tv, Youtube, Zap, Users, Scan, LayoutDashboard,
-  Radio, PlaySquare, ChevronRight, UserCircle2
+  Tv, Zap, Users, Scan, LayoutDashboard,
+  Radio, PlaySquare, ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import ChannelSwitcher from "@/components/layout/ChannelSwitcher";
 
 export default function TopNav({
   user,
@@ -27,6 +28,16 @@ export default function TopNav({
   const [accountOpen, setAccountOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeChannelId, setActiveChannelId] = useState(() => {
+    try { return localStorage.getItem("activeChannelId") || null; } catch { return null; }
+  });
+
+  const handleChannelSwitch = (channelId) => {
+    setActiveChannelId(channelId);
+    localStorage.setItem("activeChannelId", channelId);
+    // Dispatch event so other components can react
+    window.dispatchEvent(new CustomEvent("activeChannelChanged", { detail: { channelId } }));
+  };
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const isAdmin = user?.role === "admin";
@@ -140,17 +151,17 @@ export default function TopNav({
                         <p className="text-xs text-blue-400/50 truncate">{user?.email}</p>
                       </div>
                     </div>
-                    <Link
-                      to="/Channel"
-                      onClick={() => setAccountOpen(false)}
-                      className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#1e78ff] hover:text-[#00c8ff] border border-[#1e78ff]/30 rounded-lg py-1.5 transition-colors hover:bg-[#1e78ff]/10"
-                    >
-                      <Tv className="w-3.5 h-3.5" /> View your channel
-                    </Link>
+                  </div>
+
+                  {/* Channel switcher */}
+                  <div className="border-b border-blue-900/30 py-1">
+                    <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-4 py-1.5">Switch Channel</p>
+                    <ChannelSwitcher user={user} activeChannelId={activeChannelId} onSwitch={handleChannelSwitch} />
                   </div>
 
                   {/* Menu items */}
                   <div className="py-1">
+                    <MenuItem icon={Tv} label="View Channel" to="/Channel" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={Zap} label="Creator Studio" to="/CreatorStudio" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={Radio} label="Go Live" to="/StreamerDashboard" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={PlaySquare} label="Your Clips" to="/Shorts" onClick={() => setAccountOpen(false)} />
