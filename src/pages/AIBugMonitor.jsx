@@ -47,6 +47,21 @@ function BugCard({ bug, onAnalyze, onUpdateStatus, onAutoFix, isAdmin, generatin
   const [expanded, setExpanded] = useState(false);
   const StatusIcon = STATUS_ICONS[bug.status] || Bug;
 
+  const impactColors = {
+    low: "bg-blue-100 text-blue-700",
+    medium: "bg-amber-100 text-amber-700",
+    high: "bg-orange-100 text-orange-700",
+  };
+
+  const categoryEmojis = {
+    ui_issue: "🎨",
+    performance: "⚡",
+    crash: "💥",
+    data_loss: "⚠️",
+    integration: "🔗",
+    other: "📋",
+  };
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
       <button
@@ -56,9 +71,13 @@ function BugCard({ bug, onAnalyze, onUpdateStatus, onAutoFix, isAdmin, generatin
         <StatusIcon className="w-4 h-4 mt-0.5 flex-shrink-0 text-slate-400" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
+            {bug.ai_escalated && <AlertTriangle className="w-3 h-3 text-red-500" />}
             <span className="font-medium text-slate-900 dark:text-slate-100 text-sm">{bug.title}</span>
             <Badge className={`text-xs ${SEVERITY_STYLES[bug.severity]}`}>{bug.severity}</Badge>
             <Badge className={`text-xs ${STATUS_STYLES[bug.status]}`}>{bug.status?.replace('_', ' ')}</Badge>
+            {bug.ai_user_impact && <Badge className={`text-xs ${impactColors[bug.ai_user_impact]}`}>{bug.ai_user_impact} impact</Badge>}
+            {bug.ai_category && <span className="text-xs">{categoryEmojis[bug.ai_category] || "📋"} {bug.ai_category}</span>}
+            {bug.duplicate_of && <Badge variant="outline" className="text-xs">Duplicate</Badge>}
             {bug.page && <span className="text-xs text-slate-400">/{bug.page}</span>}
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{bug.description}</p>
@@ -99,6 +118,21 @@ function BugCard({ bug, onAnalyze, onUpdateStatus, onAutoFix, isAdmin, generatin
                   <div className="text-sm text-slate-700 dark:text-slate-300 prose prose-sm max-w-none">
                     <ReactMarkdown>{bug.ai_fix_suggestion}</ReactMarkdown>
                   </div>
+                </div>
+              )}
+              {bug.ai_component && (
+                <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-100 dark:border-indigo-800">
+                  <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 mb-1">AI Categorization</p>
+                  <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                    <span>Component: {bug.ai_component}</span>
+                    {bug.ai_user_impact && <span>• Impact: {bug.ai_user_impact}</span>}
+                  </div>
+                </div>
+              )}
+              {bug.duplicate_of && (
+                <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-100 dark:border-yellow-800">
+                  <p className="text-xs font-semibold text-yellow-700 dark:text-yellow-400 mb-1">Duplicate Detected</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">This bug is linked to bug #{bug.duplicate_of}</p>
                 </div>
               )}
               {bug.resolution_notes && (
@@ -171,13 +205,99 @@ export default function AIBugMonitor() {
     queryFn: () => base44.entities.BugReport.list('-created_date'),
   });
 
+  // Auto-categorize incoming bug reports
+  const categorizeBug = async (bugData) => {
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analyze this bug report and categorize it:
+
+Title: ${bugData.title}
+Description: ${bugData.description}
+Page: ${bugData.page}
+
+Provide:
+1. Bug category (ui_issue, performance, crash, data_loss, integration, other)
+2. Affected component/feature
+3. Estimated user impact (low, medium, high)
+4. Should this be escalated? (true/false)`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            category: { type: "string" },
+            component: { type: "string" },
+            user_impact: { type: "string" },
+            escalate: { type: "boolean" }
+          }
+        }
+      });
+      return result;
+    } catch (e) {
+      return { category: 'other', component: bugData.page || 'Unknown', user_impact: 'medium', escalate: false };
+    }
+  };
+
+  // Detect duplicate bugs using AI similarity matching
+  const detectDuplicates = async (newBug) => {
+    if (bugs.length === 0) return [];
+    try {
+      const bugSummaries = bugs.map(b => `- [${b.id}] ${b.title}: ${b.description}`).join('\n');
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a bug deduplication expert. Find any bugs similar to this new report:
+
+NEW BUG:
+Title: ${newBug.title}
+Description: ${newBug.description}
+Page: ${newBug.page}
+
+EXISTING BUGS:
+${bugSummaries}
+
+Return a list of bug IDs that are duplicates or very similar. Return empty array if none match.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            duplicate_ids: { type: "array", items: { type: "string" } },
+            confidence: { type: "number", description: "0-1 confidence score" }
+          }
+        }
+      });
+      return result.duplicate_ids || [];
+    } catch (e) {
+      return [];
+    }
+  };
+
   const submitMutation = useMutation({
-    mutationFn: (data) => base44.entities.BugReport.create({ ...data, reporter_email: user?.email }),
+    mutationFn: async (data) => {
+      // Auto-categorize
+      const categorization = await categorizeBug(data);
+      
+      // Detect duplicates
+      const duplicates = await detectDuplicates(data);
+      
+      // Create the bug with categorization
+      const bugData = {
+        ...data,
+        reporter_email: user?.email,
+        ai_category: categorization.category,
+        ai_component: categorization.component,
+        ai_user_impact: categorization.user_impact,
+        ai_escalated: categorization.escalate,
+        duplicate_of: duplicates.length > 0 ? duplicates[0] : null,
+      };
+      
+      // If duplicates found, show warning
+      if (duplicates.length > 0) {
+        toast.warning(`⚠️ This bug may be a duplicate of bug #${duplicates[0]}. Linking...`);
+      }
+      
+      return base44.entities.BugReport.create(bugData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bug-reports'] });
       setShowReport(false);
       setForm({ title: "", description: "", steps_to_reproduce: "", expected_behavior: "", actual_behavior: "", severity: "medium", page: "" });
-      toast.success("Bug report submitted");
+      toast.success("Bug report submitted and auto-categorized");
     },
   });
 
@@ -366,7 +486,20 @@ Provide: complete copy-paste-ready code, the file path to edit, and a brief expl
     setSelfFixing(false);
   };
 
-  const openBugs = bugs.filter(b => !['resolved', 'wont_fix'].includes(b.status));
+  // Prioritize bugs by impact + severity
+  const prioritizeBugs = (bugList) => {
+    const impactOrder = { high: 0, medium: 1, low: 2 };
+    const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+    return [...bugList].sort((a, b) => {
+      const impactDiff = (impactOrder[a.ai_user_impact] || 3) - (impactOrder[b.ai_user_impact] || 3);
+      if (impactDiff !== 0) return impactDiff;
+      const escalateDiff = (b.ai_escalated ? 0 : 1) - (a.ai_escalated ? 0 : 1);
+      if (escalateDiff !== 0) return escalateDiff;
+      return (severityOrder[a.severity] || 4) - (severityOrder[b.severity] || 4);
+    });
+  };
+
+  const openBugs = prioritizeBugs(bugs.filter(b => !['resolved', 'wont_fix'].includes(b.status)));
   const resolvedBugs = bugs.filter(b => ['resolved', 'wont_fix'].includes(b.status));
   const unanalyzedCount = openBugs.filter(b => !b.ai_analysis).length;
 
@@ -427,7 +560,7 @@ Provide: complete copy-paste-ready code, the file path to edit, and a brief expl
             { label: "Total", value: bugs.length, color: "text-slate-700 dark:text-slate-300", bg: "bg-white dark:bg-slate-800" },
             { label: "Open", value: openBugs.length, color: "text-orange-600", bg: "bg-orange-50 dark:bg-orange-900/20" },
             { label: "Resolved", value: resolvedBugs.length, color: "text-green-600", bg: "bg-green-50 dark:bg-green-900/20" },
-            { label: "AI Analyzed", value: bugs.filter(b => b.ai_analysis).length, color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-900/20" },
+            { label: "Duplicates", value: bugs.filter(b => b.duplicate_of).length, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-900/20" },
           ].map(s => (
             <div key={s.label} className={`${s.bg} rounded-xl p-3 text-center border border-slate-100 dark:border-slate-700`}>
               <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
