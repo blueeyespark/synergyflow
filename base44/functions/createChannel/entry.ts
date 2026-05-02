@@ -41,8 +41,8 @@ Deno.serve(async (req) => {
     // Generate RTMP key
     const rtmpKey = generateUUID();
 
-    // Create channel using service role to bypass RLS
-    const channel = await base44.asServiceRole.entities.Channel.create({
+    // Create channel
+    const channel = await base44.entities.Channel.create({
       creator_email: user.email,
       channel_name,
       description: description || '',
