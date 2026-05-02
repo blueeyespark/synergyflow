@@ -468,7 +468,6 @@ export default function AdvancedVideoEditor() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* RIGHT SIDEBAR - Text & Thumbnail */}
       <div className="w-72 border-l border-blue-900/50 flex flex-col bg-gradient-to-b from-[#0d1628] to-[#050a14] overflow-y-auto">
