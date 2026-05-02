@@ -215,6 +215,7 @@ export default function StreamerAnalytics() {
   });
 
   const activeVideos = useMemo(() => videos.filter(v => v.status !== "deleted" && v.status !== "uploading"), [videos]);
+  const hasRealData   = activeVideos.length > 0 || analyticsRows.length > 0;
   const totalViews    = useMemo(() => activeVideos.reduce((s, v) => s + (v.view_count    || 0), 0), [activeVideos]);
   const totalLikes    = useMemo(() => activeVideos.reduce((s, v) => s + (v.like_count    || 0), 0), [activeVideos]);
   const totalComments = useMemo(() => activeVideos.reduce((s, v) => s + (v.comment_count || 0), 0), [activeVideos]);
@@ -261,6 +262,20 @@ export default function StreamerAnalytics() {
     ? topVideos
     : MOCK_CONTENT.map((c, i) => ({ id: i, title: c.title, view_count: c.views, like_count: Math.floor(c.views * 0.03), thumbnail_url: null }));
   const maxViews = displayTopVideos[0]?.view_count || 1;
+
+  if (!hasRealData) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="w-20 h-20 rounded-2xl bg-[#1e78ff]/10 border border-[#1e78ff]/20 flex items-center justify-center mb-5">
+          <BarChart2 className="w-9 h-9 text-[#1e78ff]/40" />
+        </div>
+        <h3 className="text-lg font-bold text-[#e8f4ff] mb-2">No data yet</h3>
+        <p className="text-sm text-blue-400/50 max-w-sm">
+          Analytics will appear here once you start uploading videos and going live. Head to the <span className="text-[#1e78ff] font-semibold">Production</span> tab to get started.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pb-6">
