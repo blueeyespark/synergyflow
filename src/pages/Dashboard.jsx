@@ -161,19 +161,20 @@ function VideoCard({ video, channel, onClick, watched, user, compact = false }) 
 // ─── Clip / Short card ────────────────────────────────────────────────────────
 function ClipCard({ video, onClick }) {
   return (
-    <div className="group cursor-pointer flex-shrink-0 w-36 sm:w-40" onClick={() => onClick(video)}>
-      <div className="relative aspect-[9/16] rounded-2xl overflow-hidden mb-2 bg-slate-100 dark:bg-[#060d18]">
-        <img src={video.thumbnail_url || `https://images.unsplash.com/photo-1536240478700-b869ad10a2ab?w=200&h=356&fit=crop&sig=${video.id}`} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+    <motion.div className="group cursor-pointer flex-shrink-0 w-36 sm:w-40" onClick={() => onClick(video)} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+      <div className="relative aspect-[9/16] rounded-2xl overflow-hidden mb-2 bg-slate-100 dark:bg-[#060d18] shadow-lg group-hover:shadow-xl transition-shadow">
+        <img src={video.thumbnail_url || `https://images.unsplash.com/photo-1536240478700-b869ad10a2ab?w=200&h=356&fit=crop&sig=${video.id}`} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         <p className="absolute bottom-3 left-3 right-3 text-xs text-white font-semibold line-clamp-2 leading-tight">{video.title}</p>
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-8 h-8 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center">
-            <Play className="w-4 h-4 text-white ml-0.5" fill="white" />
+          <div className="w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center ring-2 ring-white/30">
+            <Play className="w-5 h-5 text-white ml-0.5" fill="white" />
           </div>
         </div>
+        {video.status === "live" && <span className="absolute top-3 left-3 bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded-full">LIVE</span>}
       </div>
-      <p className="text-xs text-blue-400/50 px-1 truncate">{fmt(video.view_count)} views</p>
-    </div>
+      <p className="text-xs text-blue-400/50 px-0.5 truncate">{fmt(video.view_count)} views</p>
+    </motion.div>
   );
 }
 
@@ -497,17 +498,21 @@ export default function Dashboard() {
 
                   {/* Clips row */}
                   {!searchQuery && clips.length > 0 && (
-                    <section>
-                      <div className="flex items-center justify-between mb-3">
+                    <section className="mb-8">
+                      <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           <Zap className="w-4 h-4 text-[#a855f7]" />
                           <h2 className="text-sm font-bold text-[#e8f4ff]">Shorts & Clips</h2>
                           <span className="text-xs text-slate-500 dark:text-blue-400/40">{clips.length}</span>
                         </div>
-                        <button onClick={() => navigate("/Shorts")} className="text-xs text-[#1e78ff] hover:text-[#00c8ff] font-semibold transition-colors">View all →</button>
+                        <Link to="/Shorts" className="text-xs text-[#1e78ff] hover:text-[#00c8ff] font-semibold transition-colors">View all →</Link>
                       </div>
-                      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
-                        {clips.slice(0, 12).map(v => <ClipCard key={v.id} video={v} onClick={handleOpenVideo} />)}
+                      <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+                        {clips.slice(0, 12).map((v, i) => (
+                          <motion.div key={v.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
+                            <ClipCard video={v} onClick={handleOpenVideo} />
+                          </motion.div>
+                        ))}
                       </div>
                     </section>
                   )}
