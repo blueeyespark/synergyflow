@@ -586,22 +586,22 @@ Be very specific — list actual UI components, data interactions, and implement
                             </div>
                             <div className="flex gap-1 flex-shrink-0">
                               <Button size="sm" variant="outline"
-                                 className={`text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-blue-600 border-blue-200 hover:bg-blue-50'}`}
-                                 onClick={() => implementSuggestion(item, 'feature')}
-                                 disabled={implementing === key || autoApplying.has(key)}
-                               >
-                                 {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Wand2 className="w-3 h-3" />}
-                                 {isApplied ? 'View' : 'Preview'}
-                               </Button>
-                               <Button size="sm"
-                                 className="text-xs gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
-                                 onClick={() => autoApplyCode(item, 'feature')}
-                                 disabled={implementing === key || autoApplying.has(key)}
-                                 title="AI auto-generates and applies code"
-                               >
-                                 {autoApplying.has(key) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
-                                 Auto-Code
-                               </Button>
+                                className={`text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-blue-600 border-blue-200 hover:bg-blue-50'}`}
+                                onClick={() => implementSuggestion(item, 'feature')}
+                                disabled={implementing === key || autoApplying.has(key)}
+                              >
+                                {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Wand2 className="w-3 h-3" />}
+                                {isApplied ? 'View' : 'Preview'}
+                              </Button>
+                              <Button size="sm"
+                                className="text-xs gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+                                onClick={() => autoApplyCode(item, 'feature')}
+                                disabled={implementing === key || autoApplying.has(key)}
+                                title="AI auto-generates and applies code"
+                              >
+                                {autoApplying.has(key) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                                Auto-Code
+                              </Button>
                             </div>
                           </div>
                         );
