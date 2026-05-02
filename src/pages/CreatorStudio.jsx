@@ -28,8 +28,6 @@ const tabs = [
 export default function CreatorStudio() {
   const [activeTab, setActiveTab] = useState("channel");
 
-  const ActiveComponent = tabs.find(t => t.id === activeTab)?.component;
-
   return (
     <div className="min-h-screen bg-[#03080f] text-[#e8f4ff]">
       {/* Header */}
@@ -76,16 +74,17 @@ export default function CreatorStudio() {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content — tabs stay mounted to avoid re-connection storms */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.15 }}
-        >
-          {ActiveComponent && <ActiveComponent />}
-        </motion.div>
+        {tabs.map(tab => {
+          const TabComponent = tab.component;
+          const isActive = activeTab === tab.id;
+          return (
+            <div key={tab.id} style={{ display: isActive ? "block" : "none" }}>
+              <TabComponent />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
