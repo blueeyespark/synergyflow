@@ -24,12 +24,41 @@ export default function AITaskAssistant({
   comments,
   chatMessages,
   onCreateTasks,
-  onAssignTask
+  onAssignTask,
+  userRole = 'viewer'
 }) {
   const [loading, setLoading] = useState(false);
   const [activeFeature, setActiveFeature] = useState(null);
   const [input, setInput] = useState("");
   const [result, setResult] = useState(null);
+
+  const getGreeting = () => {
+    if (userRole === 'owner' || userRole === 'editor') {
+      return "Manage your tasks and team efficiently with AI assistance";
+    } else if (userRole === 'admin' || userRole === 'staff') {
+      return "Monitor and optimize team performance across all projects";
+    }
+    return "View project updates and collaborate with your team";
+  };
+
+  const getFeatures = () => {
+    if (userRole === 'owner' || userRole === 'editor') {
+      return [
+        { id: 'breakdown', icon: ListTree, title: 'Break Down Goals', desc: 'Split large goals into tasks', action: breakdownGoal, needsInput: true, inputLabel: 'Enter your goal or objective' },
+        { id: 'assign', icon: Users, title: 'Smart Assignment', desc: 'Suggest task assignments', action: suggestAssignments, needsInput: false },
+        { id: 'summarize', icon: MessageSquare, title: 'Summarize Discussions', desc: 'Summarize comments & chat', action: summarizeDiscussions, needsInput: false },
+        { id: 'describe', icon: FileText, title: 'Generate Description', desc: 'Create task from notes', action: generateDescription, needsInput: true, inputLabel: 'Enter brief notes about the task' }
+      ];
+    } else if (userRole === 'admin' || userRole === 'staff') {
+      return [
+        { id: 'summarize', icon: MessageSquare, title: 'Team Insights', desc: 'Analyze team discussions', action: summarizeDiscussions, needsInput: false },
+        { id: 'assign', icon: Users, title: 'Workload Analysis', desc: 'Review team capacity', action: suggestAssignments, needsInput: false }
+      ];
+    }
+    return [
+      { id: 'summarize', icon: MessageSquare, title: 'Project Overview', desc: 'View project summary', action: summarizeDiscussions, needsInput: false }
+    ];
+  };
 
   const breakdownGoal = async () => {
     if (!input.trim()) return;
@@ -197,12 +226,7 @@ Include:
     }
   };
 
-  const features = [
-    { id: 'breakdown', icon: ListTree, title: 'Break Down Goals', desc: 'Split large goals into tasks', action: breakdownGoal, needsInput: true, inputLabel: 'Enter your goal or objective' },
-    { id: 'assign', icon: Users, title: 'Smart Assignment', desc: 'Suggest task assignments', action: suggestAssignments, needsInput: false },
-    { id: 'summarize', icon: MessageSquare, title: 'Summarize Discussions', desc: 'Summarize comments & chat', action: summarizeDiscussions, needsInput: false },
-    { id: 'describe', icon: FileText, title: 'Generate Description', desc: 'Create task from notes', action: generateDescription, needsInput: true, inputLabel: 'Enter brief notes about the task' }
-  ];
+  const features = getFeatures();
 
   const handleCreateTasks = () => {
     if (result?.type === 'breakdown' && result.data.tasks) {
@@ -242,7 +266,7 @@ Include:
           {!activeFeature ? (
             // Feature Selection
             <>
-              <p className="text-sm text-slate-500">Select an AI feature to help manage your tasks</p>
+                <p className="text-sm text-slate-500">{getGreeting()}</p>
               {features.map(feature => (
                 <button
                   key={feature.id}

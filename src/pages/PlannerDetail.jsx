@@ -449,6 +449,7 @@ export default function PlannerDetail() {
         chatMessages={chatMessages}
         onCreateTasks={handleCreateTasksFromAI}
         onAssignTask={handleAssignTask}
+        userRole={userRole}
       />
 
       {/* Share Dialog */}
