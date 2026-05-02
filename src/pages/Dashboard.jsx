@@ -8,7 +8,7 @@ import {
   Users, Zap, Star, PlusCircle, BarChart2, Sparkles, Eye,
   Radio, Bookmark, Gift, Coffee, ChevronRight, Bell, Smile,
   Moon, Sun, Swords, Palette, Headphones, Laugh, Brain, Heart,
-  Play, Filter, Hash, Volume2, Award, UserPlus
+  Play, Filter, Hash, Volume2, Award, UserPlus, Tv
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -667,16 +667,19 @@ export default function Dashboard() {
             </div>
             <div className="p-3 space-y-1">
               {[
-                { label: "View My Channel", to: "/Channel", icon: Star, color: "text-yellow-400" },
+                { label: "View My Channel", to: "/Channel", icon: Tv, color: "text-yellow-400" },
                 { label: "Browse Live", to: "/Live", icon: Radio, color: "text-red-400" },
-                { label: "My Clips", to: "/Shorts", icon: BarChart2, color: "text-green-400" },
-              ].map(a => (
+                { label: "My Clips", to: "/Shorts", icon: PlaySquare, color: "text-green-400" },
+              ].map(a => {
+                const Icon = a.icon;
+                return (
                 <Link key={a.label} to={a.to} className="flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-blue-900/15 transition-colors group">
-                  <a.icon className={`w-4 h-4 flex-shrink-0 ${a.color}`} />
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${a.color}`} />
                   <span className="text-xs text-blue-300/60 group-hover:text-blue-200 transition-colors">{a.label}</span>
                   <ChevronRight className="w-3 h-3 text-blue-400/20 ml-auto" />
                 </Link>
-              ))}
+              );
+              })}
             </div>
           </div>
         </aside>
