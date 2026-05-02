@@ -22,12 +22,12 @@ export default function StaffManager({ currentUser }) {
       approved_by: currentUser.email,
       is_active: true,
     }),
-    onSuccess: () => { qc.invalidateQueries(["staff-access"]); setNewEmail(""); setNewName(""); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["staff-access"] }); setNewEmail(""); setNewName(""); },
   });
 
   const removeMutation = useMutation({
     mutationFn: (id) => base44.entities.StaffAccess.delete(id),
-    onSuccess: () => qc.invalidateQueries(["staff-access"]),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["staff-access"] }),
   });
 
   if (currentUser?.role !== "admin") return null;

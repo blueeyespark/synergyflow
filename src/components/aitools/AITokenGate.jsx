@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send, Lock, Unlock, ShieldCheck, ShieldX, Loader2 } from "lucide-react";
-
-const GRANT_PHRASE = "grant admin token";
+import { Bot, Send, Lock, ShieldX, Loader2 } from "lucide-react";
 
 function generateToken(email) {
   // Simple session token stored in memory — cleared on page reload
