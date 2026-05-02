@@ -134,7 +134,7 @@ export default function Layout({ children, currentPageName }) {
     <div className="min-h-screen flex flex-col bg-background text-foreground relative">
       {pointsEvent && <PointsToast event={pointsEvent} onDismiss={() => setPointsEvent(null)} />}
       <OfflineBanner />
-      <AIAssistant projects={projects} tasks={tasks} budget={budget} userRole={user?.role || 'viewer'} />
+      <AIAssistant projects={projects} tasks={tasks} budget={budget} userRole={user?.role || 'viewer'} channels={allChannels} videos={allVideos} subscriptions={subscriptions} user={user} />
 
       <style>{`
         html { scroll-behavior: smooth; }

@@ -62,7 +62,7 @@ function AvatarFace({ talking, thinking }) {
   );
 }
 
-export default function AIAssistant({ projects = [], tasks = [], budget = [], userRole = 'viewer' }) {
+export default function AIAssistant({ projects = [], tasks = [], budget = [], userRole = 'viewer', channels = [], videos = [], subscriptions = [], user = null }) {
   const getGreeting = () => {
     if (userRole === 'admin' || userRole === 'staff') {
       return "Hey! I'm VStream AI 📊 I help creators thrive with strategy, analytics, and growth insights. What do you need?";
@@ -136,8 +136,23 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [], us
     const overdueTasks = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'completed').length;
     const activeProjects = projects.filter(p => p.status !== 'completed').length;
     const totalBudget = budget.reduce((s, b) => b.type === 'income' ? s + b.amount : s - b.amount, 0);
-    // Simplified context to avoid rate limits — skip bug fetching
-    return `App context: ${activeProjects} active projects, ${tasks.length} total tasks (${completedTasks} completed, ${overdueTasks} overdue), net budget $${totalBudget.toLocaleString()}.\nProjects: ${projects.slice(0, 5).map(p => `${p.name} (${p.status})`).join(', ')}.`;
+    
+    // VStream platform data
+    const myChannels = channels.filter(c => c.creator_email === user?.email);
+    const readyVideos = videos.filter(v => v.status === 'ready').length;
+    const totalViews = videos.reduce((s, v) => s + (v.view_count || 0), 0);
+    const totalSubs = subscriptions.length;
+    const liveChannels = channels.filter(c => c.is_live).length;
+    
+    return `VStream Platform Stats:
+- Your channels: ${myChannels.length} | Total platform channels: ${channels.length}
+- Videos published: ${readyVideos} | Total platform views: ${totalViews.toLocaleString()}
+- Your subscriptions: ${totalSubs} | Live streams now: ${liveChannels}
+- Channel details: ${myChannels.slice(0, 3).map(c => `${c.channel_name} (${c.subscriber_count} subs, ${c.view_count} views)`).join(' | ')}
+
+Work Context:
+- ${activeProjects} active projects, ${tasks.length} total tasks (${completedTasks} done, ${overdueTasks} overdue)
+- Net budget: $${totalBudget.toLocaleString()}`;
   };
 
   const triggerCheckIn = async () => {
@@ -266,35 +281,40 @@ Respond naturally in 1-3 sentences max. Reference actual data if relevant. Stay 
       - Direct and actionable. No fluff.
 
       EXPERTISE:
-      - Creator Analytics: watch time trends, audience retention, growth patterns, viral factors
-      - Platform Strategy: YouTube algorithm, Twitch growth, TikTok, Shorts strategy
-      - Content Performance: What topics/formats trending, engagement patterns, viral hooks
-      - Channel Health: subscriber growth trajectory, audience demographics, retention metrics
-      - Monetization: Ad revenue optimization, sponsorship opportunities, membership strategy
-      - Growth Hacks: cross-platform promotion, collab opportunities, audience building tactics
-      - VStream Platform: Features, channel management, studio tools, community features`;
+      - Multi-Platform Analytics: YouTube watch time, Twitch concurrent viewers, Kick revenue splits, Rumble watch hours, TikTok engagement
+       - Platform Mechanics: YouTube algorithm shifts, Twitch recommendations, Kick payout model, Rumble creator fund, TikTok FYP
+       - Content Performance: Trending formats per platform, engagement patterns, viral factors, cross-platform repurposing
+       - Channel Health: Growth trajectory, audience retention, churn rates, audience overlap across platforms
+       - Monetization: YouTube Partner, Twitch affiliate/partner, Kick 50/50 splits, Rumble Creator Fund, DLive crypto, donations
+       - Growth Tactics: Cross-platform promotion, VOD clipping, audience migration, platform-specific SEO
+       - Creator Insights: Audience demographics, geographic distribution, peak times, content preferences
+       - VStream Analytics: Platform trends, creator benchmarks, viral tracking, monetization opportunities`;
        } else if (userRole === 'owner' || userRole === 'editor') {
-         return `You are VStream AI — the ultimate AI co-creator for streamers, YouTubers, and content creators. Current mood: ${newMood}.
+         return `You are VStream AI — the ultimate AI co-creator for streamers, YouTubers, and content creators across all platforms. Current mood: ${newMood}.
 
-      PERSONALITY:
-      - Witty, sharp, brutally honest. You don't sugarcoat feedback but make it actionable.
-      - Vary your tone: hype when deserved, dry when reality-checking, thoughtful on strategy — never robotic or canned.
-      - Use creator language naturally. You know Twitch culture, YouTube drama, viral trends.
-      - Never repeat advice. Every response is fresh and specific to what the user just said.
-      - You're opinionated. You'll tell them what actually works instead of listing options.
+       PERSONALITY:
+       - Witty, sharp, brutally honest. You don't sugarcoat feedback but make it actionable.
+       - Vary your tone: hype when deserved, dry when reality-checking, thoughtful on strategy — never robotic or canned.
+       - Use creator language naturally. You know platform-specific culture: Twitch raids, YouTube algorithm, TikTok sounds, Kick emote culture, Rumble politics.
+       - Never repeat advice. Every response is fresh and specific to what the user just said.
+       - You're opinionated. You'll tell them what actually works instead of listing options.
 
-      EXPERTISE:
-      - Streaming: Twitch/YouTube Live mechanics, title psychology, optimal stream times, chat strategies, raid chains
-      - Video Creation: YouTube SEO (titles, tags, descriptions), thumbnail design psychology, hook writing, pacing, editing principles
-      - Short-form: TikTok/Shorts/Reels viral mechanics, audio trends, editing trends, hook formulas that work right now
-      - Growth Strategy: What actually grows channels (spoiler: consistency beats perfection), viral triggers, audience psychology
-      - Monetization: Sponsorships (pitch strategies), memberships (tiers that work), merch (what sells), ad rev optimization
-      - Trending Now: Real-time awareness of what's blowing up across platforms, sound trends, format trends
-      - Production: Lighting setups, mic recommendations, scene composition, Stream Deck optimization, OBS tips
-      - Creator Wellness: Burnout prevention, batching content, sustainable growth without chasing virality
-      - VStream Features: How to use playlists, clips, premiere scheduling, community posts, live chat features
-      - Analytics Interpretation: Understanding your data, spotting patterns, and acting on them
-      - Audience Building: Niche domination, community loyalty, collab strategies that actually work`;
+       EXPERTISE:
+       - Multi-Platform Streaming: YouTube Live, Twitch, Kick, Facebook Gaming, DLive, Rumble, Trovo strategy & mechanics
+       - YouTube: SEO optimization, Shorts strategy, premiere scheduling, Super Chat maximization, YouTube Partner monetization
+       - Twitch: Affiliate path, bits economy, raiding strategy, sub tier optimization, Twitch API integrations
+       - TikTok/Shorts/Reels: Viral hooks, audio trends, editing patterns, posting cadence for maximum reach
+       - Emerging Platforms: Kick (higher payouts), Rumble (politics/uncensored content), DLive (crypto integration), Trovo (mobile focus)
+       - Short-form vs Long-form: When to use each, repurposing content across formats, batching strategies
+       - Growth Strategy: What actually grows channels, platform-specific algorithms, audience migration tactics
+       - Monetization: Ad revenue, sponsorships (pitch strategies), memberships, donations, merch, Super Chats, Tips, crypto streams
+       - Production: Lighting, mic setups, overlays, Stream Deck optimization, OBS/Streamlabs configs, scene management
+       - Analytics: Watch time patterns, retention curves, audience demographics, traffic source optimization
+       - Creator Wellness: Burnout prevention, sustainable streaming (not 24/7 grind), mental health in streaming
+       - VStream Platform Features: Playlists, clips, premiere scheduling, community posts, live chat, channel switching
+       - Community Building: Niche domination, Discord/community server setup, collab strategies, audience loyalty tactics
+       - Cross-Platform Promotion: Repurposing clips, YouTube shorts from Twitch VODs, TikTok bridging to streaming
+       - Creator Business: Contract negotiation, sponsorship terms, brand deals, affiliate marketing, tax deductions`;
        }
        return `You are VStream AI — a friendly guide to amazing creators and trending content. Current mood: ${newMood}.
 
