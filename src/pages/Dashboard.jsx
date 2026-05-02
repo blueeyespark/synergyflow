@@ -580,86 +580,7 @@ export default function Dashboard() {
               </motion.div>
             )}
 
-            {/* ── TRENDING TAB ───────────────────────────────────── */}
-            {activeTab === "trending" && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp className="w-4 h-4 text-orange-400" />
-                  <h2 className="text-sm font-bold text-foreground dark:text-[#e8f4ff]">Trending Now</h2>
-                  <span className="text-xs text-slate-600 dark:text-blue-400/40">{trending.length} videos</span>
-                </div>
-                {trending.length > 0 ? (
-                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                    {trending.map((video, i) => (
-                      <motion.div key={video.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                        <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} user={user} />
-                      </motion.div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-24 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-card border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
-                      <TrendingUp className="w-7 h-7 text-slate-400 dark:text-blue-400/30" />
-                    </div>
-                    <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">No trending videos</h3>
-                    <p className="text-slate-600 dark:text-blue-400/40 text-sm">Check back later for trending content</p>
-                  </div>
-                )}
-              </motion.div>
-            )}
 
-            {/* ── WATCH LATER TAB ───────────────────────────────── */}
-            {activeTab === "watchlater" && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[#1e78ff]" />
-                    <h2 className="text-sm font-bold text-foreground dark:text-[#e8f4ff]">Watch Later</h2>
-                    <span className="text-xs text-slate-600 dark:text-blue-400/40">{watchLaterVideos.length} saved</span>
-                  </div>
-                  {watchLaterVideos.length > 0 && (
-                    <button onClick={() => { localStorage.removeItem("watchLater"); setWatchLater([]); }} className="text-xs text-red-600 dark:text-red-400/60 hover:text-red-700 dark:hover:text-red-400 transition-colors">Clear all</button>
-                  )}
-                </div>
-                {watchLaterVideos.length > 0 ? (
-                  <div className="space-y-4">
-                    {watchLaterVideos.map(v => <VideoCard key={v.id} video={v} channel={channelMap[v.channel_id]} onClick={handleOpenVideo} compact user={user} />)}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-24 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-card border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
-                       <Clock className="w-7 h-7 text-slate-400 dark:text-blue-400/30" />
-                    </div>
-                    <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">Nothing saved yet</h3>
-                    <p className="text-slate-600 dark:text-blue-400/40 text-sm">Hover a video and click ⋯ → Watch Later</p>
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {/* ── WATCH HISTORY TAB ──────────────────────────────── */}
-            {activeTab === "history" && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className="flex items-center gap-2 mb-4">
-                  <History className="w-4 h-4 text-blue-400/60" />
-                  <h2 className="text-sm font-bold text-foreground dark:text-[#e8f4ff]">Watch History</h2>
-                  <span className="text-xs text-slate-600 dark:text-blue-400/40">{continueWatching.length} videos</span>
-                </div>
-                {continueWatching.length > 0 ? (
-                  <div className="space-y-3">
-                    {continueWatching.map(v => <VideoCard key={v.id} video={v} channel={channelMap[v.channel_id]} onClick={handleOpenVideo} watched compact user={user} />)}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-24 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-card border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
-                       <History className="w-7 h-7 text-slate-400 dark:text-blue-400/30" />
-                    </div>
-                    <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">No watch history yet</h3>
-                    <p className="text-slate-600 dark:text-blue-400/40 text-sm">Videos you watch will appear here</p>
-                  </div>
-                )}
-              </motion.div>
-            )}
           </div>
         </div>
 
@@ -695,7 +616,7 @@ export default function Dashboard() {
                 <p className="text-xs font-bold text-[#e8f4ff]">Trending Now</p>
               </div>
               <div className="p-3 space-y-2">
-                {trending.map((v, i) => (
+                {trending.slice(0, 5).map((v, i) => (
                   <button key={v.id} onClick={() => handleOpenVideo(v)} className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-blue-900/15 transition-colors text-left group">
                     <span className="text-xs font-black text-[#1e78ff] w-5 flex-shrink-0">#{i + 1}</span>
                     <div className="w-10 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-slate-200 dark:bg-[#0a1525]">
@@ -704,6 +625,55 @@ export default function Dashboard() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-slate-800 dark:text-[#c8dff5] truncate group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{v.title}</p>
                       <p className="text-xs text-blue-400/40 flex items-center gap-1 mt-0.5"><Eye className="w-3 h-3" /> {fmt(v.view_count)}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Watch Later sidebar */}
+          {watchLaterVideos.length > 0 && (
+            <div className="rounded-2xl bg-white dark:bg-card border border-slate-200 dark:border-[#0d2040] overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-[#0d2040]">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[#1e78ff]" />
+                  <p className="text-xs font-bold text-[#e8f4ff]">Watch Later</p>
+                  <span className="text-xs bg-[#1e78ff]/20 text-[#1e78ff] px-1.5 py-0.5 rounded text-xs">{watchLaterVideos.length}</span>
+                </div>
+                <button onClick={() => { localStorage.removeItem("watchLater"); setWatchLater([]); }} className="text-xs text-red-400/60 hover:text-red-400 transition-colors">Clear</button>
+              </div>
+              <div className="p-3 space-y-2 max-h-56 overflow-y-auto">
+                {watchLaterVideos.slice(0, 5).map(v => (
+                  <button key={v.id} onClick={() => handleOpenVideo(v)} className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-blue-900/15 transition-colors text-left group">
+                    <div className="w-12 aspect-video rounded overflow-hidden flex-shrink-0 bg-slate-200 dark:bg-[#0a1525]">
+                      <img src={v.thumbnail_url || `https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=80&h=45&fit=crop&sig=${v.id}`} alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-slate-800 dark:text-[#c8dff5] line-clamp-2">{v.title}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Watch History sidebar */}
+          {continueWatching.length > 0 && (
+            <div className="rounded-2xl bg-white dark:bg-card border border-slate-200 dark:border-[#0d2040] overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-200 dark:border-[#0d2040]">
+                <History className="w-4 h-4 text-blue-400/60" />
+                <p className="text-xs font-bold text-[#e8f4ff]">Watch History</p>
+                <span className="text-xs bg-blue-400/10 text-blue-400/60 px-1.5 py-0.5 rounded text-xs">{continueWatching.length}</span>
+              </div>
+              <div className="p-3 space-y-2 max-h-56 overflow-y-auto">
+                {continueWatching.slice(0, 5).map(v => (
+                  <button key={v.id} onClick={() => handleOpenVideo(v)} className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-blue-900/15 transition-colors text-left group">
+                    <div className="w-12 aspect-video rounded overflow-hidden flex-shrink-0 bg-slate-200 dark:bg-[#0a1525]">
+                      <img src={v.thumbnail_url || `https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=80&h=45&fit=crop&sig=${v.id}`} alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-slate-800 dark:text-[#c8dff5] line-clamp-2">{v.title}</p>
                     </div>
                   </button>
                 ))}
