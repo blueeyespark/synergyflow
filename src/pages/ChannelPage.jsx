@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -176,7 +176,7 @@ export default function ChannelPage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: videos = [] } = useQuery({
+  const { data: allVideos = [] } = useQuery({
     queryKey: ["videos-all"],
     queryFn: () => base44.entities.Video.list("-created_date", 60),
     staleTime: 5 * 60 * 1000,
@@ -193,8 +193,14 @@ export default function ChannelPage() {
     : (myChannels.find(c => c.id === activeChannelId) || myChannels[0]);
 
   const isOwnChannel = channel && user && channel.creator_email === user.email;
-  const channelVideos = videos.filter(v => v.channel_id === channel?.id && v.status !== "deleted");
-  const channelMap = channels.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
+  const channelVideos = useMemo(() => 
+    allVideos.filter(v => v.channel_id === channel?.id && v.status !== "deleted"),
+    [allVideos, channel?.id]
+  );
+  const channelMap = useMemo(() => 
+    channels.reduce((acc, c) => { acc[c.id] = c; return acc; }, {}),
+    [channels]
+  );
 
   // Loading state
   if (!user && !channelId) {
