@@ -261,7 +261,7 @@ function MoodRow({ activeMood, setActiveMood }) {
         return (
           <button key={m.id} onClick={() => setActiveMood(m.id)}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold flex-shrink-0 transition-all border ${
-              active ? "bg-[#1e78ff] text-white border-[#1e78ff] shadow-lg shadow-blue-900/40" : "bg-slate-200 dark:bg-[#0d1a2e] text-slate-700 dark:text-blue-300 border-slate-300 dark:border-[#1a3a60] hover:bg-slate-300 dark:hover:bg-[#122d48] hover:text-slate-900 dark:hover:text-blue-200"
+              active ? "bg-[#1e78ff] text-white border-[#1e78ff] shadow-lg shadow-blue-900/40" : "bg-slate-200 dark:bg-[#050a14] text-slate-700 dark:text-blue-400/60 border-slate-300 dark:border-[#0d1820] hover:bg-slate-300 dark:hover:bg-[#081018] hover:text-slate-900 dark:hover:text-blue-300"
             }`}>
             <Icon className="w-3.5 h-3.5" />
             {m.label}
@@ -444,8 +444,8 @@ export default function Dashboard() {
                 </button>
               ))}
 
-              <div className={`ml-auto flex items-center gap-2 bg-white dark:bg-[#0a1020] border ${searchFocused ? "border-[#1e78ff]/50 ring-2 ring-[#1e78ff]/20" : "border-slate-300 dark:border-[#1a3a60]"} rounded-xl px-3 py-1.5 w-48 sm:w-64 transition-all`}>
-                <Search className="w-4 h-4 text-slate-500 dark:text-blue-300/60 flex-shrink-0" />
+              <div className={`ml-auto flex items-center gap-2 bg-white dark:bg-[#030810] border ${searchFocused ? "border-[#1e78ff]/50 ring-2 ring-[#1e78ff]/20" : "border-slate-300 dark:border-[#0d1820]"} rounded-xl px-3 py-1.5 w-48 sm:w-64 transition-all`}>
+                <Search className="w-4 h-4 text-slate-500 dark:text-blue-400/40 flex-shrink-0" />
                 <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onFocus={() => setSearchFocused(true)} onBlur={() => setSearchFocused(false)} placeholder="Search..." className="flex-1 text-sm text-slate-800 dark:text-blue-100 placeholder-slate-400 dark:placeholder-blue-400/40 focus:outline-none bg-transparent min-w-0" />
                 {searchQuery && <button onClick={() => setSearchQuery("")} className="text-blue-400/40 hover:text-blue-300"><X className="w-3.5 h-3.5" /></button>}
               </div>
@@ -538,7 +538,7 @@ export default function Dashboard() {
                     </section>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-24 text-center">
-                      <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-[#0d1a2e] border border-slate-300 dark:border-[#1a3a60] flex items-center justify-center mb-4">
+                      <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-[#050a14] border border-slate-300 dark:border-[#0d1820] flex items-center justify-center mb-4">
                         <PlaySquare className="w-7 h-7 text-slate-400 dark:text-blue-400/40" />
                       </div>
                       <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">{searchQuery ? "No results found" : "No videos in this mood"}</h3>
