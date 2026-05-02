@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 function generateUUID() {
   const array = new Uint8Array(16);
@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     }
 
     // Check if channel name already exists
-    const existing = await base44.entities.Channel.filter({ channel_name });
+    const existing = await base44.asServiceRole.entities.Channel.filter({ channel_name });
     if (existing.length > 0) {
       return Response.json({ error: 'Channel name already taken' }, { status: 409 });
     }
