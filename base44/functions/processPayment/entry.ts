@@ -1,5 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+function generateUUID() {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return [...array].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return Response.json({ error: 'Method not allowed' }, { status: 405 });
@@ -30,7 +36,7 @@ Deno.serve(async (req) => {
     // In production: process with Stripe or PayPal API
     // For now: simulate payment processing
 
-    const transaction_id = crypto.randomUUID();
+    const transaction_id = generateUUID();
 
     // Create budget entry
     const budgetEntry = await base44.entities.CreatorBudget.create({

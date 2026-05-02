@@ -1,5 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+function generateUUID() {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return [...array].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return Response.json({ error: 'Method not allowed' }, { status: 405 });
@@ -21,7 +27,7 @@ Deno.serve(async (req) => {
 
     // Generate S3 presigned URL for direct upload
     // In production: use AWS SDK to generate presigned URL
-    const uploadId = crypto.randomUUID();
+    const uploadId = generateUUID();
     const uploadKey = `videos/${user.email}/${uploadId}/${filename}`;
 
     // Simulate presigned URL (in production, call AWS SDK)

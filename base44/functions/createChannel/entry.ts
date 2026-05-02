@@ -1,5 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+function generateUUID() {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return [...array].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return Response.json({ error: 'Method not allowed' }, { status: 405 });
@@ -26,7 +32,7 @@ Deno.serve(async (req) => {
     }
 
     // Generate RTMP key
-    const rtmpKey = crypto.randomUUID().replace(/-/g, '');
+    const rtmpKey = generateUUID();
 
     // Create channel
     const channel = await base44.entities.Channel.create({
