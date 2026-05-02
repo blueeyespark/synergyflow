@@ -147,6 +147,9 @@ export default function ShortsPage({ onClose }) {
   if (shorts.length === 0) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+        <button onClick={() => navigate("/")} className="absolute top-4 left-4 z-50 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition-colors flex items-center justify-center">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
         <div className="text-center text-white">
           <p className="text-lg font-semibold mb-2">No Shorts yet</p>
           <p className="text-sm text-white/60">Upload short videos (under 90s) to see them here</p>
