@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   Globe, Bot, Upload, BarChart3, Calendar,
-  Users, ImageIcon, ArrowLeft, DollarSign, TrendingUp
+  Users, ImageIcon, ArrowLeft, DollarSign, TrendingUp, Edit3
 } from "lucide-react";
 import ContentProductionHub from "@/components/studio/ContentProductionHub";
 import MediaLibrary from "./MediaLibrary";
@@ -14,9 +14,11 @@ import PlanningHub from "@/components/studio/PlanningHub";
 import TeamManagement from "@/components/studio/TeamManagement";
 import StreamerAnalytics from "@/components/studio/StreamerAnalytics";
 import TrendingForCreators from "@/components/studio/TrendingForCreators";
+import ChannelEditor from "@/components/studio/ChannelEditor";
 
 const tabs = [
   { id: "channel",    label: "My Channel",   icon: Users,      component: ChannelPage },
+  { id: "editchannel",label: "Edit Channel",  icon: Edit3,      component: ChannelEditor },
   { id: "production", label: "Production",   icon: Upload,     component: ContentProductionHub },
   { id: "media",      label: "Media",        icon: ImageIcon,  component: MediaLibrary },
   { id: "planning",   label: "Planning",     icon: Calendar,   component: PlanningHub },
@@ -28,7 +30,9 @@ const tabs = [
 ];
 
 export default function CreatorStudio() {
-  const [activeTab, setActiveTab] = useState("channel");
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get("tab");
+  const [activeTab, setActiveTab] = useState(tabParam || "channel");
 
   return (
     <div className="min-h-screen bg-[#03080f] text-[#e8f4ff]">

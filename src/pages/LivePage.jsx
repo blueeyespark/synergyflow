@@ -139,6 +139,9 @@ export default function LivePage() {
     <div className="min-h-screen bg-zinc-950">
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
+          <Link to="/" className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm mr-1">
+            <ChevronLeft className="w-4 h-4" /> Dashboard
+          </Link>
           <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
             <Radio className="w-4 h-4 text-white" />
           </div>
