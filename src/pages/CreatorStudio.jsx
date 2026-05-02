@@ -6,36 +6,23 @@ import {
   Globe, Bot, Upload, BarChart3, Calendar,
   Users, ImageIcon, ArrowLeft, TrendingUp, Edit3, Zap, Activity, ShoppingBag
 } from "lucide-react";
-import ContentProductionHub from "@/components/studio/ContentProductionHub";
-import MediaLibrary from "./MediaLibrary";
+import ProductionHub from "@/components/studio/ProductionHub";
 import ClientPortal from "./ClientPortal";
 import DiscordBot from "./DiscordBot";
 import PlanningHub from "@/components/studio/PlanningHub";
 import TeamManagement from "@/components/studio/TeamManagement";
-import StreamerAnalytics from "@/components/studio/StreamerAnalytics";
+import AnalyticsHub from "@/components/studio/AnalyticsHub";
 import AnalyticsPlus from "@/components/studio/AnalyticsPlus";
-import TrendingForCreators from "@/components/studio/TrendingForCreators";
 import ChannelEditor from "@/components/studio/ChannelEditor";
-import AIAssistantHub from "@/components/studio/AIAssistantHub";
-import StreamingTechnical from "@/components/studio/StreamingTechnical";
 import CommunityEngagement from "@/components/studio/CommunityEngagement";
-import MonetizationRevenue from "@/components/studio/MonetizationRevenue";
-import SponsorDashboard from "@/components/studio/SponsorDashboard";
-import MerchShelfStudio from "@/components/studio/MerchShelfStudio";
-import StreamHealthMonitor from "@/components/studio/StreamHealthMonitor";
-import CollaborationStudio from "@/components/studio/CollaborationStudio";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
   { id: "editchannel",label: "Edit Channel",   icon: Edit3,      component: ChannelEditor },
-  { id: "production", label: "Production",     icon: Upload,     component: ContentProductionHub },
-  { id: "media",      label: "Media",          icon: ImageIcon,  component: MediaLibrary },
+  { id: "production", label: "Production",     icon: Upload,     component: ProductionHub },
   { id: "planning",   label: "Planning",       icon: Calendar,   component: PlanningHub },
-  { id: "ai",         label: "AI Assistant",   icon: Zap,        component: AIAssistantHub },
-  { id: "analytics",  label: "Analytics",      icon: BarChart3,  component: StreamerAnalytics },
+  { id: "analytics",  label: "Analytics",      icon: BarChart3,  component: AnalyticsHub },
   { id: "discover",   label: "Discover",       icon: TrendingUp, component: AnalyticsPlus },
-  { id: "live",       label: "Live",           icon: Activity,   component: StreamingTechnical },
-  { id: "revenue",    label: "Revenue",        icon: ShoppingBag,component: MonetizationRevenue },
   { id: "community",  label: "Community",      icon: Users,      component: CommunityEngagement },
   { id: "team",       label: "Team",           icon: Users,      component: TeamManagement },
   { id: "client",     label: "Client Portal",  icon: Globe,      component: ClientPortal },

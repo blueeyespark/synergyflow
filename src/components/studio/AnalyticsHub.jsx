@@ -1,38 +1,33 @@
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Video, FileText, DollarSign, Trophy, LayoutDashboard } from "lucide-react";
-import AnalyticsOverview from "@/components/studio/AnalyticsOverview";
-import ContentAnalytics from "@/pages/ContentAnalytics";
-import VideoAnalytics from "@/pages/VideoAnalytics";
-import Reports from "@/pages/Reports";
-import BudgetPage from "@/pages/Budget";
-import Leaderboard from "@/pages/Leaderboard";
+import { BarChart3, DollarSign } from "lucide-react";
+import StreamerAnalytics from "./StreamerAnalytics";
+import MonetizationRevenue from "./MonetizationRevenue";
 
 const subtabs = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard, component: AnalyticsOverview },
-  { id: "content", label: "Content Analytics", icon: BarChart3, component: ContentAnalytics },
-  { id: "video", label: "Video Analytics", icon: Video, component: VideoAnalytics },
-  { id: "reports", label: "Reports", icon: FileText, component: Reports },
-  { id: "budget", label: "Budget", icon: DollarSign, component: BudgetPage },
-  { id: "leaderboard", label: "Leaderboard", icon: Trophy, component: Leaderboard },
+  { id: "performance", label: "Performance", icon: BarChart3, component: StreamerAnalytics },
+  { id: "revenue", label: "Revenue", icon: DollarSign, component: MonetizationRevenue },
 ];
 
 export default function AnalyticsHub() {
-  const [active, setActive] = useState("overview");
-  const ActiveComponent = subtabs.find(t => t.id === active)?.component;
+  const [activeTab, setActiveTab] = useState("performance");
+  const ActiveComponent = subtabs.find(t => t.id === activeTab)?.component;
 
   return (
-    <div>
-      <Tabs value={active} onValueChange={setActive}>
-        <TabsList className="mb-6">
-          {subtabs.map(t => (
-            <TabsTrigger key={t.id} value={t.id} className="gap-2">
-              <t.icon className="w-4 h-4" /> {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        <div>{ActiveComponent && <ActiveComponent />}</div>
-      </Tabs>
+    <div className="space-y-4">
+      <div className="flex gap-1 border-b border-blue-900/30">
+        {subtabs.map(tab => {
+          const Icon = tab.icon;
+          return (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 -mb-px transition-all ${
+                activeTab === tab.id ? "border-[#1e78ff] text-[#1e78ff]" : "border-transparent text-blue-400/60 hover:text-blue-300"
+              }`}>
+              <Icon className="w-3.5 h-3.5" /> {tab.label}
+            </button>
+          );
+        })}
+      </div>
+      {ActiveComponent && <ActiveComponent />}
     </div>
   );
 }
