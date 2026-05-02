@@ -501,10 +501,10 @@ export default function AdvancedVideoEditor() {
           </div>
 
           {/* AI Tools */}
-          <div className="pt-2.5 border-t border-blue-900/40 space-y-2">
+          <div className="pt-3 border-t border-blue-900/40 space-y-2.5">
             <h4 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">🤖 AI Tools</h4>
             <Button onClick={() => { setAiType("image"); setAiModalOpen(true); }} className="w-full h-7 text-xs gap-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg font-semibold shadow-lg shadow-purple-500/20"><Sparkles className="w-3 h-3" /> Generate Image</Button>
-            <div className="bg-purple-950/20 rounded-lg p-1.5 border border-purple-900/30">
+            <div className="bg-purple-950/20 rounded-lg p-2 border border-purple-900/30 space-y-2">
               <AIContentTools />
             </div>
           </div>
