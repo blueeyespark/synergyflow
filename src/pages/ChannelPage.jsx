@@ -49,22 +49,27 @@ function CreateChannelForm({ userEmail, onCreated, onCancel }) {
     if (!channelName.trim()) { setError("Channel name is required."); return; }
     setCreating(true);
     setError("");
-    const response = await base44.functions.invoke("createChannel", {
-      channel_name: channelName.trim(),
-      description,
-    });
-    // Update avatar/banner if provided
-    const created = response.data?.channel;
-    if (created) {
-      const updates = {};
-      if (avatarUrl) updates.avatar_url = avatarUrl;
-      if (bannerUrl) updates.banner_url = bannerUrl;
-      if (Object.keys(updates).length > 0) {
-        await base44.entities.Channel.update(created.id, updates);
+    try {
+      const response = await base44.functions.invoke("createChannel", {
+        channel_name: channelName.trim(),
+        description,
+      });
+      // Update avatar/banner if provided
+      const created = response.data?.channel;
+      if (created) {
+        const updates = {};
+        if (avatarUrl) updates.avatar_url = avatarUrl;
+        if (bannerUrl) updates.banner_url = bannerUrl;
+        if (Object.keys(updates).length > 0) {
+          await base44.entities.Channel.update(created.id, updates);
+        }
       }
+      setCreating(false);
+      onCreated();
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message || "Failed to create channel. Please try again.");
+      setCreating(false);
     }
-    setCreating(false);
-    onCreated();
   };
 
   return (
