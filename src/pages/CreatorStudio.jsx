@@ -13,18 +13,18 @@ import AnalyticsHub from "@/components/studio/AnalyticsHub";
 import AnalyticsPlus from "@/components/studio/AnalyticsPlus";
 import ChannelEditor from "@/components/studio/ChannelEditor";
 import CommunityEngagement from "@/components/studio/CommunityEngagement";
-import Templates from "@/pages/Templates";
-import Meetings from "@/pages/Meetings";
-import TimeTrackingAnalytics from "@/pages/TimeTrackingAnalytics";
+import TemplatesTab from "@/components/studio/TemplatesTab";
+import MeetingsTab from "@/components/studio/MeetingsTab";
+import TimeTrackingTab from "@/components/studio/TimeTrackingTab";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
   { id: "editchannel",  label: "Channel",       icon: Edit3,          component: ChannelEditor },
   { id: "production",   label: "Production",    icon: Upload,         component: ProductionHub },
   { id: "planning",     label: "Planning",      icon: Calendar,       component: PlanningOverview },
-  { id: "meetings",     label: "Meetings",      icon: Users,          component: Meetings },
-  { id: "templates",    label: "Templates",     icon: LayoutTemplate, component: Templates },
-  { id: "timetracking", label: "Time Tracking", icon: Clock,          component: TimeTrackingAnalytics },
+  { id: "meetings",     label: "Meetings",      icon: Users,          component: MeetingsTab },
+  { id: "templates",    label: "Templates",     icon: LayoutTemplate, component: TemplatesTab },
+  { id: "timetracking", label: "Time Tracking", icon: Clock,          component: TimeTrackingTab },
   { id: "analytics",    label: "Analytics",     icon: BarChart3,      component: AnalyticsHub },
   { id: "discover",     label: "Discover",      icon: TrendingUp,     component: AnalyticsPlus },
   { id: "community",    label: "Community",     icon: Users,          component: CommunityEngagement },
