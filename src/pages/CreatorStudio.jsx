@@ -3,32 +3,19 @@ import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Upload, BarChart3, Calendar, Users, ArrowLeft, TrendingUp, Edit3
+  Upload, BarChart3, Calendar, Users, ArrowLeft, TrendingUp, Edit3, Zap
 } from "lucide-react";
 import ProductionHub from "@/components/studio/ProductionHub";
 import PlanningHub from "@/components/studio/PlanningHub";
 import AnalyticsHub from "@/components/studio/AnalyticsHub";
 import ChannelEditor from "@/components/studio/ChannelEditor";
-import ContentCreationHub from "@/components/studio/ContentCreationHub";
-import IntegrationsHub from "@/components/studio/IntegrationsHub";
-import AdvancedAnalyticsHub from "@/components/studio/AdvancedAnalyticsHub";
-import MonetizationHub from "@/components/studio/MonetizationHub";
-import CollaborationHub from "@/components/studio/CollaborationHub";
-import CreatorResourcesHub from "@/components/studio/CreatorResourcesHub";
-import CommunityManagementHub from "@/components/studio/CommunityManagementHub";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
-  { id: "channel",      label: "Channel",         icon: Edit3,      component: ChannelEditor },
-  { id: "content",      label: "Create",          icon: Upload,     component: ContentCreationHub },
-  { id: "production",   label: "Production",      icon: Upload,     component: ProductionHub },
-  { id: "planning",     label: "Planning",        icon: Calendar,   component: PlanningHub },
-  { id: "analytics",    label: "Analytics",       icon: BarChart3,  component: AdvancedAnalyticsHub },
-  { id: "monetization", label: "Monetization",    icon: TrendingUp, component: MonetizationHub },
-  { id: "integrations", label: "Integrations",    icon: Upload,     component: IntegrationsHub },
-  { id: "collaboration",label: "Collaboration",   icon: Users,      component: CollaborationHub },
-  { id: "resources",    label: "Resources",       icon: BarChart3,  component: CreatorResourcesHub },
-  { id: "community",    label: "Community Mgmt",  icon: Users,      component: CommunityManagementHub },
+  { id: "channel",      label: "Channel",       icon: Edit3,      component: ChannelEditor },
+  { id: "production",   label: "Production",    icon: Upload,     component: ProductionHub },
+  { id: "planning",     label: "Planning",      icon: Calendar,   component: PlanningHub },
+  { id: "analytics",    label: "Analytics",     icon: BarChart3,  component: AnalyticsHub },
 ];
 
 export default function CreatorStudio() {
