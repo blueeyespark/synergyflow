@@ -163,7 +163,6 @@ export default function TopNav({
                   <div className="py-1">
                     <MenuItem icon={Tv} label="View Channel" to="/Channel" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={PlaySquare} label="Your Clips" to="/Shorts" onClick={() => setAccountOpen(false)} />
-                    {isAdmin && <MenuItem icon={Users} label="Staff Tools" to="/AITools" onClick={() => setAccountOpen(false)} />}
                   </div>
 
                   {/* Creator-only actions */}
@@ -171,6 +170,14 @@ export default function TopNav({
                     <div className="border-t border-blue-900/30 py-1">
                       <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-4 py-1.5">Creator</p>
                       <MenuItem icon={Radio} label="Go Live Now" to="/StreamerDashboard" onClick={() => setAccountOpen(false)} />
+                    </div>
+                  )}
+
+                  {/* Staff-only actions */}
+                  {isAdmin && (
+                    <div className="border-t border-blue-900/30 py-1">
+                      <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-4 py-1.5">Staff</p>
+                      <MenuItem icon={Scan} label="Staff Tools" to="/AITools" onClick={() => setAccountOpen(false)} />
                     </div>
                   )}
 
