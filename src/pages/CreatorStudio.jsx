@@ -38,7 +38,7 @@ export default function CreatorStudio() {
 
   const urlParams = new URLSearchParams(window.location.search);
   const tabParam = urlParams.get("tab");
-  const [activeTab, setActiveTab] = useState(tabParam || "channel");
+  const [activeTab, setActiveTab] = useState(tabParam || "planning");
 
   useEffect(() => {
     base44.auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
