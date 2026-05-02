@@ -173,13 +173,17 @@ export default function ChannelPage() {
   const { data: channels = [], refetch: refetchChannels } = useQuery({
     queryKey: ["channels-all"],
     queryFn: () => base44.entities.Channel.list(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    retry: 1,
   });
 
   const { data: allVideos = [] } = useQuery({
     queryKey: ["videos-all"],
-    queryFn: () => base44.entities.Video.list("-created_date", 60),
-    staleTime: 5 * 60 * 1000,
+    queryFn: () => base44.entities.Video.list("-created_date", 30),
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    retry: 1,
   });
 
   const myChannels = channels.filter(c => c.creator_email === user?.email);
@@ -377,9 +381,8 @@ export default function ChannelPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {channelVideos.map((video, i) => (
-                  <motion.div key={video.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-                     className="group cursor-pointer" onClick={() => setSelectedVideo(video)}>
+                {channelVideos.map((video) => (
+                  <div key={video.id} className="group cursor-pointer" onClick={() => setSelectedVideo(video)}>
                      <div className="relative aspect-video rounded-xl overflow-hidden mb-2 bg-gray-200 dark:bg-[#060d18]">
                       <img
                         src={video.thumbnail_url || `https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop&sig=${video.id}`}
@@ -396,7 +399,7 @@ export default function ChannelPage() {
                      <p className="text-xs mt-0.5 text-gray-500 dark:text-blue-400/40">
                       {formatCount(video.view_count)} views · {timeAgo(video.published_date || video.created_date)}
                     </p>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             )}
