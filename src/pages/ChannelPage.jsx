@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Share2, Play, ThumbsUp, Users, Eye, MessageSquare, Edit3, Upload, X, Zap, ImageIcon, ArrowLeft } from "lucide-react";
+import { Bell, Share2, Play, ThumbsUp, Users, Eye, MessageSquare, Edit3, Upload, X, Zap, ImageIcon, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import CommunityPosts from "@/components/CommunityPosts";
 import VideoPlayerModal from "@/components/dashboard/VideoPlayerModal";
+import AuthPrompt from "@/components/AuthPrompt";
 
 function formatCount(n) {
   if (!n) return "0";
@@ -150,6 +151,7 @@ export default function ChannelPage() {
   const [activeTab, setActiveTab] = useState("videos");
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [authPrompt, setAuthPrompt] = useState(null);
   const [activeChannelId, setActiveChannelId] = useState(() => {
     try { return localStorage.getItem("activeChannelId") || null; } catch { return null; }
   });
@@ -290,7 +292,14 @@ export default function ChannelPage() {
                 </div>
               ) : (
                 <>
-                  <Button onClick={() => setSubscribed(!subscribed)} variant={subscribed ? "outline" : "default"} className="gap-2">
+                  <Button 
+                    onClick={() => {
+                      if (!user) { setAuthPrompt("subscribe to channels"); return; }
+                      setSubscribed(!subscribed);
+                    }}
+                    variant={subscribed ? "outline" : "default"} 
+                    className="gap-2"
+                  >
                     {subscribed ? "Subscribed" : "Subscribe"}
                   </Button>
                   {subscribed && (
@@ -298,7 +307,19 @@ export default function ChannelPage() {
                       <Bell className="w-4 h-4" />
                     </Button>
                   )}
-                  <Button variant="outline" size="icon"><Share2 className="w-4 h-4" /></Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={() => {
+                      const url = window.location.href;
+                      navigator.clipboard.writeText(url);
+                      alert("Channel link copied!");
+                    }}
+                    className="relative"
+                    title="Copy channel link"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </Button>
                 </>
               )}
             </div>
@@ -394,6 +415,8 @@ export default function ChannelPage() {
           onSelectVideo={setSelectedVideo}
         />
       )}
+
+      {authPrompt && <AuthPrompt action={authPrompt} onClose={() => setAuthPrompt(null)} />}
     </div>
   );
 }
