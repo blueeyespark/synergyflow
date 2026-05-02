@@ -9,13 +9,57 @@ import ProductionHub from "@/components/studio/ProductionHub";
 import PlanningHub from "@/components/studio/PlanningHub";
 import AnalyticsHub from "@/components/studio/AnalyticsHub";
 import ChannelEditor from "@/components/studio/ChannelEditor";
+import IntegrationsHub from "@/components/studio/IntegrationsHub";
+import ContentCreationHub from "@/components/studio/ContentCreationHub";
+import MonetizationHub from "@/components/studio/MonetizationHub";
+import CommunityManagementHub from "@/components/studio/CommunityManagementHub";
+import CreatorResourcesHub from "@/components/studio/CreatorResourcesHub";
+import CollaborationHub from "@/components/studio/CollaborationHub";
+import AdvancedAnalyticsHub from "@/components/studio/AdvancedAnalyticsHub";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const tabs = [
-  { id: "channel",      label: "Channel",       icon: Edit3,      component: ChannelEditor },
-  { id: "production",   label: "Production",    icon: Upload,     component: ProductionHub },
-  { id: "planning",     label: "Planning",      icon: Calendar,   component: PlanningHub },
-  { id: "analytics",    label: "Analytics",     icon: BarChart3,  component: AnalyticsHub },
+  { 
+    id: "channel", 
+    label: "Channel", 
+    icon: Edit3, 
+    component: null,
+    subtabs: [
+      { id: "edit", label: "Edit Channel", component: ChannelEditor },
+      { id: "integrations", label: "Integrations", component: IntegrationsHub },
+    ]
+  },
+  { 
+    id: "production", 
+    label: "Production", 
+    icon: Upload, 
+    component: null,
+    subtabs: [
+      { id: "create", label: "Create", component: ContentCreationHub },
+      { id: "production", label: "Production", component: ProductionHub },
+    ]
+  },
+  { 
+    id: "planning", 
+    label: "Planning", 
+    icon: Calendar, 
+    component: PlanningHub,
+  },
+  { 
+    id: "analytics", 
+    label: "Analytics", 
+    icon: BarChart3, 
+    component: null,
+    subtabs: [
+      { id: "analytics", label: "Analytics", component: AnalyticsHub },
+      { id: "deep", label: "Deep Dive", component: AdvancedAnalyticsHub },
+      { id: "monetization", label: "Monetization", component: MonetizationHub },
+      { id: "community", label: "Community", component: CommunityManagementHub },
+      { id: "resources", label: "Resources", component: CreatorResourcesHub },
+      { id: "collaboration", label: "Collaboration", component: CollaborationHub },
+    ]
+  },
 ];
 
 export default function CreatorStudio() {
@@ -26,6 +70,7 @@ export default function CreatorStudio() {
   const urlParams = new URLSearchParams(window.location.search);
   const tabParam = urlParams.get("tab") || "production";
   const [activeTab, setActiveTab] = useState(tabParam);
+  const [activeSubtab, setActiveSubtab] = useState("edit");
 
   useEffect(() => {
     base44.auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
@@ -114,8 +159,40 @@ export default function CreatorStudio() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {(() => {
-          const ActiveTab = tabs.find(t => t.id === activeTab);
-          return ActiveTab ? <ActiveTab.component /> : null;
+          const activeTabData = tabs.find(t => t.id === activeTab);
+          if (!activeTabData) return null;
+
+          // Tabs without subtabs - render directly
+          if (!activeTabData.subtabs && activeTabData.component) {
+            const Component = activeTabData.component;
+            return <Component />;
+          }
+
+          // Tabs with subtabs - render tabbed interface
+          if (activeTabData.subtabs) {
+            const defaultSubtab = activeSubtab && activeTabData.subtabs.find(s => s.id === activeSubtab) ? activeSubtab : activeTabData.subtabs[0].id;
+            return (
+              <Tabs value={activeSubtab || defaultSubtab} onValueChange={setActiveSubtab}>
+                <TabsList className="mb-6 flex flex-wrap gap-1 h-auto">
+                  {activeTabData.subtabs.map(subtab => (
+                    <TabsTrigger key={subtab.id} value={subtab.id}>
+                      {subtab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {activeTabData.subtabs.map(subtab => {
+                  const SubComponent = subtab.component;
+                  return (
+                    <TabsContent key={subtab.id} value={subtab.id}>
+                      <SubComponent />
+                    </TabsContent>
+                  );
+                })}
+              </Tabs>
+            );
+          }
+
+          return null;
         })()}
       </div>
     </div>
