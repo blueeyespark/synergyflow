@@ -662,12 +662,11 @@ export default function Dashboard() {
           {/* Quick links */}
           <div className="rounded-2xl bg-[#060d18] border border-[#0d2040] overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-[#0d2040]">
-              <Zap className="w-4 h-4 text-[#1e78ff]" />
-              <p className="text-xs font-bold text-[#e8f4ff]">Quick Actions</p>
+              <PlaySquare className="w-4 h-4 text-[#1e78ff]" />
+              <p className="text-xs font-bold text-[#e8f4ff]">Clips</p>
             </div>
             <div className="p-3 space-y-1">
               {[
-                { label: "Go Live Now", to: "/StreamerDashboard", icon: Radio, color: "text-red-400" },
                 { label: "View My Channel", to: "/Channel", icon: Star, color: "text-yellow-400" },
                 { label: "Browse Live", to: "/Live", icon: Radio, color: "text-red-400" },
                 { label: "My Clips", to: "/Shorts", icon: BarChart2, color: "text-green-400" },

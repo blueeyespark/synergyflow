@@ -162,11 +162,18 @@ export default function TopNav({
                   {/* Menu items */}
                   <div className="py-1">
                     <MenuItem icon={Tv} label="View Channel" to="/Channel" onClick={() => setAccountOpen(false)} />
-                    <MenuItem icon={Radio} label="Go Live" to="/StreamerDashboard" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={PlaySquare} label="Your Clips" to="/Shorts" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={Scan} label="AI Tools" to="/AITools" onClick={() => setAccountOpen(false)} />
                     {isAdmin && <MenuItem icon={Users} label="Users" to="/UserViewer" onClick={() => setAccountOpen(false)} />}
                   </div>
+
+                  {/* Creator-only actions */}
+                  {user?.email && (
+                    <div className="border-t border-blue-900/30 py-1">
+                      <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-4 py-1.5">Creator</p>
+                      <MenuItem icon={Radio} label="Go Live Now" to="/StreamerDashboard" onClick={() => setAccountOpen(false)} />
+                    </div>
+                  )}
 
                   <div className="border-t border-blue-900/30 py-1">
                     <MenuItem icon={Settings} label="Settings" to="/Settings" onClick={() => setAccountOpen(false)} />
