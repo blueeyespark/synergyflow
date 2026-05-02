@@ -85,7 +85,7 @@ Consider:
         currentTasks: tasks.filter(t => t.assigned_to === email && t.status !== 'completed').length
       }));
 
-      const unassignedTasks = tasks.filter(t => !t.assigned_to && t.status !== 'completed');
+      const unassignedTasks = tasks.filter(t => !t.assigned_to && t.status !== 'completed' && t.status !== 'todo');
 
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: `Suggest task assignments based on workload balance.
