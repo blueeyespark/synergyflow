@@ -232,10 +232,10 @@ export default function VideoEditorAdvanced() {
             <Music className="w-4 h-4" /> Music
           </TabsTrigger>
           <TabsTrigger value="media" className="gap-2">
-            <Image className="w-4 h-4" /> Library
+            <Image className="w-4 h-4" /> Media Library
           </TabsTrigger>
           <TabsTrigger value="ai" className="gap-2">
-            <Sparkles className="w-4 h-4" /> AI Tools
+            <Sparkles className="w-4 h-4" /> AI Assistant
           </TabsTrigger>
         </TabsList>
 
@@ -592,7 +592,7 @@ export default function VideoEditorAdvanced() {
           </motion.div>
         </TabsContent>
 
-        {/* AI Tools Tab */}
+        {/* AI Assistant Tab */}
         <TabsContent value="ai" className="space-y-4">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid md:grid-cols-3 gap-4">
             {[
