@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Edit3, X } from "lucide-react";
 import VideoUpload from "@/pages/VideoUpload";
-import VideoEditorAdvanced from "./VideoEditorAdvanced";
+import AdvancedVideoEditor from "./AdvancedVideoEditor";
 import { Button } from "@/components/ui/button";
 
 export default function ProductionHub() {
@@ -25,27 +25,24 @@ export default function ProductionHub() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
           onClick={() => setEditorOpen(false)}
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-background dark:bg-[#03080f] rounded-2xl border border-slate-200 dark:border-blue-900/40 w-full max-h-[95vh] overflow-y-auto relative"
+            className="w-full max-w-7xl h-[90vh] relative flex items-center justify-center"
           >
-            <div className="sticky top-0 flex items-center justify-between p-4 border-b border-slate-200 dark:border-blue-900/40 bg-background dark:bg-[#03080f] z-10">
-              <h2 className="text-lg font-black text-foreground dark:text-[#e8f4ff]">Advanced Editor</h2>
+            <div className="absolute top-2 right-2 z-20">
               <button
                 onClick={() => setEditorOpen(false)}
-                className="p-1.5 hover:bg-slate-100 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                className="p-2 hover:bg-blue-900/40 rounded-lg transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6 text-blue-400" />
               </button>
             </div>
-            <div className="p-6">
-              <VideoEditorAdvanced />
-            </div>
+            <AdvancedVideoEditor />
           </motion.div>
         </motion.div>
       )}
