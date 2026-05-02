@@ -87,14 +87,14 @@ export default function TopNav({
 
         {/* Center: search bar (desktop) */}
         <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-4 items-center">
-          <div className="flex w-full items-center bg-[#060d18] border border-[#1a3060] rounded-xl overflow-hidden focus-within:border-[#1e78ff]/60 transition-all">
+          <div className="flex w-full items-center bg-[#030810] border border-[#0d1820] rounded-xl overflow-hidden focus-within:border-[#1e78ff]/60 transition-all">
             <input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search videos, creators..."
               className="flex-1 px-4 py-2 text-sm text-[#c8dff5] placeholder-blue-400/30 outline-none bg-transparent"
             />
-            <button type="submit" className="px-4 py-2 bg-[#0d1a2e] hover:bg-[#1e78ff]/20 border-l border-[#1a3060] text-blue-400 transition-colors">
+            <button type="submit" className="px-4 py-2 bg-[#050a14] hover:bg-[#1e78ff]/20 border-l border-[#0d1820] text-blue-400 transition-colors">
               <Search className="w-4 h-4" />
             </button>
           </div>
@@ -144,10 +144,10 @@ export default function TopNav({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.95 }}
                   transition={{ duration: 0.12 }}
-                  className="absolute right-0 top-full mt-2 w-64 bg-[#060d18] border border-blue-900/40 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-2 w-64 bg-[#030810] border border-[#0d1820] rounded-2xl shadow-2xl shadow-black/60 overflow-hidden z-50"
                 >
                   {/* User header */}
-                  <div className="px-4 py-4 border-b border-blue-900/30">
+                  <div className="px-4 py-4 border-b border-[#0d1820]">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] flex items-center justify-center text-white font-black text-base flex-shrink-0">
                         {user?.full_name?.charAt(0) || "U"}
@@ -160,7 +160,7 @@ export default function TopNav({
                   </div>
 
                   {/* Channel switcher */}
-                  <div className="border-b border-blue-900/30 py-1">
+                  <div className="border-b border-[#0d1820] py-1">
                     <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-4 py-1.5">Switch Channel</p>
                     <ChannelSwitcher user={user} activeChannelId={activeChannelId} onSwitch={handleChannelSwitch} />
                   </div>
@@ -173,7 +173,7 @@ export default function TopNav({
 
                   {/* Creator-only actions */}
                   {user?.email && (
-                    <div className="border-t border-blue-900/30 py-1">
+                    <div className="border-t border-[#0d1820] py-1">
                       <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-4 py-1.5">Creator</p>
                       <MenuItem icon={Radio} label="Go Live Now" to="/StreamerDashboard" onClick={() => setAccountOpen(false)} />
                     </div>
@@ -181,13 +181,13 @@ export default function TopNav({
 
                   {/* Staff-only actions */}
                   {isAdmin && (
-                    <div className="border-t border-blue-900/30 py-1">
+                    <div className="border-t border-[#0d1820] py-1">
                       <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-4 py-1.5">Staff</p>
                       <MenuItem icon={Scan} label="Staff Tools" to="/AITools" onClick={() => setAccountOpen(false)} />
                     </div>
                   )}
 
-                  <div className="border-t border-blue-900/30 py-1">
+                  <div className="border-t border-[#0d1820] py-1">
                     <MenuItem icon={Settings} label="Settings" to="/Settings" onClick={() => setAccountOpen(false)} />
                     <button
                       onClick={() => base44.auth.logout()}
@@ -211,10 +211,10 @@ export default function TopNav({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="md:hidden border-t border-blue-900/30 overflow-hidden"
+            className="md:hidden border-t border-[#0d1820] overflow-hidden"
           >
             <form onSubmit={handleSearch} className="flex items-center px-3 py-2 gap-2">
-              <div className="flex flex-1 items-center bg-[#060d18] border border-[#1a3060] rounded-xl overflow-hidden">
+              <div className="flex flex-1 items-center bg-[#030810] border border-[#0d1820] rounded-xl overflow-hidden">
                 <input
                   autoFocus
                   value={searchQuery}
@@ -241,7 +241,7 @@ export default function TopNav({
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="md:hidden border-t border-blue-900/30 bg-[#03080f]"
+            className="md:hidden border-t border-[#0d1820] bg-[#030810]"
           >
             <div className="px-4 py-3 space-y-0.5 max-h-[75vh] overflow-y-auto">
               {[
@@ -266,7 +266,7 @@ export default function TopNav({
                   {item.label}
                 </Link>
               ))}
-              <div className="pt-2 mt-2 border-t border-blue-900/30">
+              <div className="pt-2 mt-2 border-t border-[#0d1820]">
                 <button
                   onClick={() => base44.auth.logout()}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-400/70 hover:bg-red-900/20 hover:text-red-300 transition-colors"
