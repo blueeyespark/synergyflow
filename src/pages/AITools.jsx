@@ -39,8 +39,8 @@ export default function AITools() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50/30 dark:from-slate-900 dark:to-purple-950/20">
       <div className="max-w-5xl mx-auto px-4 py-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">AI Tools</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Scanner · Bug Monitor · Changes Log</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Staff Tools</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Scanner · Bug Monitor · Changes Log · Users</p>
         </motion.div>
 
         {/* Admin-only: manage approved staff */}

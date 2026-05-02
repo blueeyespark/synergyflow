@@ -163,8 +163,7 @@ export default function TopNav({
                   <div className="py-1">
                     <MenuItem icon={Tv} label="View Channel" to="/Channel" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={PlaySquare} label="Your Clips" to="/Shorts" onClick={() => setAccountOpen(false)} />
-                    <MenuItem icon={Scan} label="AI Tools" to="/AITools" onClick={() => setAccountOpen(false)} />
-                    {isAdmin && <MenuItem icon={Users} label="Users" to="/UserViewer" onClick={() => setAccountOpen(false)} />}
+                    {isAdmin && <MenuItem icon={Users} label="Staff Tools" to="/AITools" onClick={() => setAccountOpen(false)} />}
                   </div>
 
                   {/* Creator-only actions */}
