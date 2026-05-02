@@ -34,11 +34,7 @@ const tabs = [
     id: "production", 
     label: "Production", 
     icon: Upload, 
-    component: null,
-    subtabs: [
-      { id: "create", label: "Create", component: ContentCreationHub },
-      { id: "production", label: "Production", component: ProductionHub },
-    ]
+    component: ProductionHub,
   },
   { 
     id: "planning", 
