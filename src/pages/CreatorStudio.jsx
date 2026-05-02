@@ -4,31 +4,25 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import {
   Globe, Bot, Upload, BarChart3, Calendar,
-  Users, ImageIcon, ArrowLeft, TrendingUp, Edit3, Zap, Activity, ShoppingBag, Clock, LayoutTemplate
+  Users, ImageIcon, ArrowLeft, TrendingUp, Edit3, Zap, Activity, ShoppingBag
 } from "lucide-react";
 import ProductionHub from "@/components/studio/ProductionHub";
-import PlanningOverview from "@/components/studio/PlanningOverview";
+import PlanningHub from "@/components/studio/PlanningHub";
 import TeamManagement from "@/components/studio/TeamManagement";
 import AnalyticsHub from "@/components/studio/AnalyticsHub";
 import AnalyticsPlus from "@/components/studio/AnalyticsPlus";
 import ChannelEditor from "@/components/studio/ChannelEditor";
 import CommunityEngagement from "@/components/studio/CommunityEngagement";
-import TemplatesTab from "@/components/studio/TemplatesTab";
-import MeetingsTab from "@/components/studio/MeetingsTab";
-import TimeTrackingTab from "@/components/studio/TimeTrackingTab";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
-  { id: "editchannel",  label: "Channel",       icon: Edit3,          component: ChannelEditor },
-  { id: "production",   label: "Production",    icon: Upload,         component: ProductionHub },
-  { id: "planning",     label: "Planning",      icon: Calendar,       component: PlanningOverview },
-  { id: "meetings",     label: "Meetings",      icon: Users,          component: MeetingsTab },
-  { id: "templates",    label: "Templates",     icon: LayoutTemplate, component: TemplatesTab },
-  { id: "timetracking", label: "Time Tracking", icon: Clock,          component: TimeTrackingTab },
-  { id: "analytics",    label: "Analytics",     icon: BarChart3,      component: AnalyticsHub },
-  { id: "discover",     label: "Discover",      icon: TrendingUp,     component: AnalyticsPlus },
-  { id: "community",    label: "Community",     icon: Users,          component: CommunityEngagement },
-  { id: "team",         label: "Team",          icon: Users,          component: TeamManagement },
+  { id: "editchannel",label: "Channel",       icon: Edit3,      component: ChannelEditor },
+  { id: "production", label: "Production",    icon: Upload,     component: ProductionHub },
+  { id: "planning",   label: "Planning",      icon: Calendar,   component: PlanningHub },
+  { id: "analytics",  label: "Analytics",     icon: BarChart3,  component: AnalyticsHub },
+  { id: "discover",   label: "Discover",      icon: TrendingUp, component: AnalyticsPlus },
+  { id: "community",  label: "Community",     icon: Users,      component: CommunityEngagement },
+  { id: "team",       label: "Team",          icon: Users,      component: TeamManagement },
 ];
 
 export default function CreatorStudio() {
@@ -38,7 +32,7 @@ export default function CreatorStudio() {
 
   const urlParams = new URLSearchParams(window.location.search);
   const tabParam = urlParams.get("tab");
-  const [activeTab, setActiveTab] = useState(tabParam || "planning");
+  const [activeTab, setActiveTab] = useState(tabParam || "channel");
 
   useEffect(() => {
     base44.auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
