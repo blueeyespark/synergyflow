@@ -68,16 +68,16 @@ function CreateChannelForm({ userEmail, onCreated, onCancel }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#03080f] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background dark:bg-[#03080f] flex items-center justify-center p-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-[#060d18] border border-blue-900/40 rounded-2xl w-full max-w-lg overflow-hidden">
+        className="bg-white dark:bg-[#060d18] border border-slate-200 dark:border-blue-900/40 rounded-2xl w-full max-w-lg overflow-hidden">
 
         {/* Banner preview */}
-        <div className="relative h-32 bg-gradient-to-r from-[#1e78ff]/40 to-[#a855f7]/40 overflow-hidden">
+         <div className="relative h-32 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-[#1e78ff]/40 dark:to-[#a855f7]/40 overflow-hidden">
           {bannerUrl && <img src={bannerUrl} className="w-full h-full object-cover" alt="Banner" />}
           <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-black/30 transition-colors group">
             <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files[0] && handleImageUpload(e.target.files[0], "banner")} />
-            <div className="flex flex-col items-center gap-1 text-white/60 group-hover:text-white transition-colors">
+            <div className="flex flex-col items-center gap-1 text-slate-600 dark:text-white/60 group-hover:text-slate-700 dark:group-hover:text-white transition-colors">
               {uploadingBanner ? <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <ImageIcon className="w-5 h-5" />}
               <span className="text-xs font-medium">{bannerUrl ? "Change Banner" : "Add Banner (optional)"}</span>
             </div>
@@ -85,48 +85,48 @@ function CreateChannelForm({ userEmail, onCreated, onCancel }) {
         </div>
 
         <div className="px-6 pb-6 -mt-8">
-          {/* Avatar */}
-          <div className="flex items-end gap-4 mb-5">
-            <label className="relative cursor-pointer group flex-shrink-0">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] border-4 border-[#060d18] flex items-center justify-center overflow-hidden">
+           {/* Avatar */}
+           <div className="flex items-end gap-4 mb-5">
+             <label className="relative cursor-pointer group flex-shrink-0">
+               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] border-4 border-white dark:border-[#060d18] flex items-center justify-center overflow-hidden">
                 {avatarUrl
                   ? <img src={avatarUrl} className="w-full h-full object-cover" alt="Avatar" />
                   : <span className="text-white text-2xl font-black">{channelName.charAt(0) || "?"}</span>
                 }
                 <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  {uploadingAvatar ? <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Upload className="w-4 h-4 text-white" />}
+                  {uploadingAvatar ? <div className="w-4 h-4 border-2 border-slate-400/40 dark:border-white/40 border-t-slate-600 dark:border-t-white rounded-full animate-spin" /> : <Upload className="w-4 h-4 text-slate-700 dark:text-white" />}
                 </div>
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files[0] && handleImageUpload(e.target.files[0], "avatar")} />
             </label>
             <div className="flex-1 min-w-0 pt-8">
-              <p className="text-xs text-blue-400/40 mb-1">Profile picture (optional)</p>
-              {avatarUrl && <button onClick={() => setAvatarUrl("")} className="text-xs text-red-400/60 hover:text-red-400 transition-colors flex items-center gap-1"><X className="w-3 h-3" /> Remove</button>}
+              <p className="text-xs text-slate-600 dark:text-blue-400/40 mb-1">Profile picture (optional)</p>
+              {avatarUrl && <button onClick={() => setAvatarUrl("")} className="text-xs text-red-600 dark:text-red-400/60 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-1"><X className="w-3 h-3" /> Remove</button>}
             </div>
           </div>
 
-          <h2 className="text-xl font-black text-[#e8f4ff] mb-5">Create Your Channel</h2>
+          <h2 className="text-xl font-black text-foreground dark:text-[#e8f4ff] mb-5">Create Your Channel</h2>
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-semibold text-blue-400/60 uppercase tracking-wider mb-1.5 block">Channel Name *</label>
+              <label className="text-xs font-semibold text-slate-600 dark:text-blue-400/60 uppercase tracking-wider mb-1.5 block">Channel Name *</label>
               <input
                 value={channelName}
                 onChange={e => { setChannelName(e.target.value); setError(""); }}
                 placeholder="e.g. NightStreamCo"
-                className="w-full bg-[#0a1525] border border-blue-900/40 focus:border-[#1e78ff]/60 rounded-xl px-4 py-2.5 text-sm text-[#c8dff5] placeholder-blue-400/30 outline-none transition-colors"
+                className="w-full bg-white dark:bg-[#0a1525] border border-slate-300 dark:border-blue-900/40 focus:border-slate-400 dark:focus:border-[#1e78ff]/60 rounded-xl px-4 py-2.5 text-sm text-foreground dark:text-[#c8dff5] placeholder-slate-400 dark:placeholder-blue-400/30 outline-none transition-colors"
               />
-              {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+              {error && <p className="text-red-600 dark:text-red-400 text-xs mt-1">{error}</p>}
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-blue-400/60 uppercase tracking-wider mb-1.5 block">Description (optional)</label>
+              <label className="text-xs font-semibold text-slate-600 dark:text-blue-400/60 uppercase tracking-wider mb-1.5 block">Description (optional)</label>
               <textarea
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Tell viewers what your channel is about..."
                 rows={3}
-                className="w-full bg-[#0a1525] border border-blue-900/40 focus:border-[#1e78ff]/60 rounded-xl px-4 py-2.5 text-sm text-[#c8dff5] placeholder-blue-400/30 outline-none transition-colors resize-none"
+                className="w-full bg-white dark:bg-[#0a1525] border border-slate-300 dark:border-blue-900/40 focus:border-slate-400 dark:focus:border-[#1e78ff]/60 rounded-xl px-4 py-2.5 text-sm text-foreground dark:text-[#c8dff5] placeholder-slate-400 dark:placeholder-blue-400/30 outline-none transition-colors resize-none"
               />
             </div>
 
@@ -198,7 +198,7 @@ export default function ChannelPage() {
 
   // Loading state
   if (!user && !channelId) {
-    return <div className="min-h-screen bg-[#03080f] flex items-center justify-center"><div className="text-blue-400/40 text-sm">Loading...</div></div>;
+   return <div className="min-h-screen bg-background dark:bg-[#03080f] flex items-center justify-center"><div className="text-slate-600 dark:text-blue-400/40 text-sm">Loading...</div></div>;
   }
 
   // No channel found — show create form if own channel, else 404
@@ -218,13 +218,13 @@ export default function ChannelPage() {
         );
       }
       return (
-        <div className="min-h-screen bg-[#03080f] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-background dark:bg-[#03080f] flex items-center justify-center p-4">
           <div className="text-center max-w-sm">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#1e78ff]/20 to-[#a855f7]/20 border border-blue-900/40 flex items-center justify-center mx-auto mb-5">
-              <Users className="w-9 h-9 text-blue-400/40" />
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-200 to-slate-100 dark:from-[#1e78ff]/20 dark:to-[#a855f7]/20 border border-slate-300 dark:border-blue-900/40 flex items-center justify-center mx-auto mb-5">
+              <Users className="w-9 h-9 text-slate-400 dark:text-blue-400/40" />
             </div>
-            <h2 className="text-2xl font-black text-[#e8f4ff] mb-2">No channel selected</h2>
-            <p className="text-blue-400/50 text-sm mb-6">Create a channel or switch to one using the profile menu.</p>
+            <h2 className="text-2xl font-black text-foreground dark:text-[#e8f4ff] mb-2">No channel selected</h2>
+            <p className="text-slate-600 dark:text-blue-400/50 text-sm mb-6">Create a channel or switch to one using the profile menu.</p>
             <Button onClick={() => setShowCreateForm(true)} className="gap-2 w-full">
               <Zap className="w-4 h-4" /> Create a Channel
             </Button>
@@ -233,10 +233,10 @@ export default function ChannelPage() {
       );
     }
     return (
-      <div className="min-h-screen bg-[#03080f] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background dark:bg-[#03080f] flex items-center justify-center p-4">
         <div className="text-center">
-          <Users className="w-14 h-14 text-blue-400/20 mx-auto mb-4" />
-          <h2 className="text-2xl font-black text-[#e8f4ff] mb-2">Channel not found</h2>
+          <Users className="w-14 h-14 text-slate-300 dark:text-blue-400/20 mx-auto mb-4" />
+          <h2 className="text-2xl font-black text-foreground dark:text-[#e8f4ff] mb-2">Channel not found</h2>
           <Link to="/"><Button variant="outline">Back to Dashboard</Button></Link>
         </div>
       </div>
@@ -244,9 +244,9 @@ export default function ChannelPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#03080f] text-[#e8f4ff]">
+    <div className="min-h-screen bg-background dark:bg-[#03080f] text-foreground dark:text-[#e8f4ff]">
       {/* Banner */}
-      <div className="relative h-44 md:h-56 bg-gradient-to-r from-[#1e78ff]/40 to-[#a855f7]/40 overflow-hidden">
+      <div className="relative h-44 md:h-56 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-[#1e78ff]/40 dark:to-[#a855f7]/40 overflow-hidden">
         {channel.banner_url && <img src={channel.banner_url} alt="Banner" className="w-full h-full object-cover" />}
       </div>
 
@@ -262,16 +262,16 @@ export default function ChannelPage() {
 
           {/* Info + Actions */}
           <div className="flex-1 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl md:text-3xl font-black text-[#e8f4ff]">{channel.channel_name}</h1>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl md:text-3xl font-black text-foreground dark:text-[#e8f4ff]">{channel.channel_name}</h1>
                 {channel.is_verified && <span className="text-[#1e78ff] text-lg">✓</span>}
               </div>
-              <p className="text-blue-400/50 text-sm mt-1">
+              <p className="text-slate-600 dark:text-blue-400/50 text-sm mt-1">
                 {formatCount(channel.subscriber_count)} subscribers · {channelVideos.length} videos
               </p>
               {channel.description && (
-                <p className="text-blue-400/50 text-sm mt-1 max-w-xl line-clamp-2">{channel.description}</p>
+                <p className="text-slate-600 dark:text-blue-400/50 text-sm mt-1 max-w-xl line-clamp-2">{channel.description}</p>
               )}
             </div>
 
@@ -333,16 +333,16 @@ export default function ChannelPage() {
             { icon: Users, label: "Subscribers", value: formatCount(channel.subscriber_count) },
             { icon: Play, label: "Videos", value: channelVideos.length },
           ].map((s, i) => (
-            <div key={i} className="bg-[#060d18] border border-blue-900/40 rounded-xl p-3 text-center">
-              <s.icon className="w-4 h-4 text-blue-400/40 mx-auto mb-1" />
-              <p className="text-xl font-black text-[#e8f4ff]">{s.value}</p>
-              <p className="text-xs text-blue-400/40">{s.label}</p>
+            <div key={i} className="bg-white dark:bg-[#060d18] border border-slate-200 dark:border-blue-900/40 rounded-xl p-3 text-center">
+              <s.icon className="w-4 h-4 text-slate-400 dark:text-blue-400/40 mx-auto mb-1" />
+              <p className="text-xl font-black text-foreground dark:text-[#e8f4ff]">{s.value}</p>
+              <p className="text-xs text-slate-500 dark:text-blue-400/40">{s.label}</p>
             </div>
           ))}
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-blue-900/30 mb-6">
+        <div className="flex border-b border-slate-200 dark:border-blue-900/30 mb-6">
           {[
             { id: "videos", label: "Videos", icon: Play },
             { id: "community", label: "Community", icon: MessageSquare },
@@ -351,7 +351,7 @@ export default function ChannelPage() {
               className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                 activeTab === tab.id
                   ? "border-[#1e78ff] text-[#1e78ff]"
-                  : "border-transparent text-blue-400/50 hover:text-blue-300"
+                  : "border-transparent text-slate-600 dark:text-blue-400/50 hover:text-slate-800 dark:hover:text-blue-300"
               }`}>
               <tab.icon className="w-4 h-4" /> {tab.label}
             </button>
@@ -363,8 +363,8 @@ export default function ChannelPage() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-12">
             {channelVideos.length === 0 ? (
               <div className="text-center py-16">
-                <Play className="w-12 h-12 text-blue-400/20 mx-auto mb-3" />
-                <p className="text-blue-400/40">No videos yet</p>
+                <Play className="w-12 h-12 text-slate-300 dark:text-blue-400/20 mx-auto mb-3" />
+                <p className="text-slate-500 dark:text-blue-400/40">No videos yet</p>
                 {isOwnChannel && (
                   <Link to="/CreatorStudio"><Button className="mt-4">Upload your first video</Button></Link>
                 )}
@@ -374,7 +374,7 @@ export default function ChannelPage() {
                 {channelVideos.map((video, i) => (
                   <motion.div key={video.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
                     className="group cursor-pointer" onClick={() => setSelectedVideo(video)}>
-                    <div className="relative aspect-video bg-[#060d18] rounded-xl overflow-hidden mb-2">
+                    <div className="relative aspect-video bg-slate-200 dark:bg-[#060d18] rounded-xl overflow-hidden mb-2">
                       <img
                         src={video.thumbnail_url || `https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop&sig=${video.id}`}
                         alt={video.title}
@@ -386,8 +386,8 @@ export default function ChannelPage() {
                         </div>
                       </div>
                     </div>
-                    <h3 className="text-sm font-semibold text-[#c8dff5] line-clamp-2 leading-snug">{video.title}</h3>
-                    <p className="text-xs text-blue-400/40 mt-0.5">
+                    <h3 className="text-sm font-semibold text-slate-800 dark:text-[#c8dff5] line-clamp-2 leading-snug">{video.title}</h3>
+                    <p className="text-xs text-slate-500 dark:text-blue-400/40 mt-0.5">
                       {formatCount(video.view_count)} views · {timeAgo(video.published_date || video.created_date)}
                     </p>
                   </motion.div>

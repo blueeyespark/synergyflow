@@ -47,9 +47,9 @@ export default function LivePage() {
 
   if (selectedStream) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
+      <div className="min-h-screen bg-background dark:bg-zinc-950 text-foreground dark:text-white flex flex-col">
         {/* Back nav */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800 bg-zinc-900">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
           <button onClick={() => setSelectedStream(null)} className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm">
             <ChevronLeft className="w-4 h-4" /> Back to Browse
           </button>
@@ -136,16 +136,16 @@ export default function LivePage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-background dark:bg-zinc-950">
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
-          <Link to="/" className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm mr-1">
+           <Link to="/" className="flex items-center gap-1.5 text-slate-400 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-white transition-colors text-sm mr-1">
             <ChevronLeft className="w-4 h-4" /> Dashboard
           </Link>
           <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
             <Radio className="w-4 h-4 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Browse Live</h1>
+          <h1 className="text-2xl font-bold text-foreground dark:text-white">Browse Live</h1>
           <div className="flex items-center gap-1 bg-red-600/20 border border-red-500/30 rounded-full px-2.5 py-1 ml-2">
             <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
             <span className="text-red-400 text-xs font-semibold">{streams.length} Live</span>
@@ -156,7 +156,7 @@ export default function LivePage() {
         <div className="flex gap-2 overflow-x-auto pb-2 mb-6">
           {CATEGORIES.map(cat => (
             <button key={cat} onClick={() => setActiveCategory(cat)}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeCategory === cat ? "bg-purple-600 text-white" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"}`}>
+              className={`flex-shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeCategory === cat ? "bg-purple-600 text-white" : "bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-300 dark:hover:bg-zinc-700"}`}>
               {cat}
             </button>
           ))}
@@ -166,7 +166,7 @@ export default function LivePage() {
           {filtered.map((stream, i) => (
             <motion.div key={stream.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
               onClick={() => setSelectedStream(stream)}
-              className="group cursor-pointer bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition-all hover:-translate-y-1">
+              className="group cursor-pointer bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden hover:border-slate-300 dark:hover:border-zinc-600 transition-all hover:-translate-y-1">
               <div className="relative aspect-video">
                 <img src={stream.thumbnail || `https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=225&fit=crop&sig=${stream.id}`} alt={stream.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div className="absolute top-2 left-2 flex items-center gap-1 bg-red-600 rounded-full px-2 py-0.5">
@@ -178,13 +178,13 @@ export default function LivePage() {
                 </div>
               </div>
               <div className="p-3 flex gap-3">
-                <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${stream.avatar_color} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
-                  {stream.channel?.charAt(0)}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-white text-sm font-semibold line-clamp-1">{stream.title}</p>
-                  <p className="text-zinc-400 text-xs">{stream.channel}</p>
-                  <span className="text-xs bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded mt-1 inline-block">{stream.category}</span>
+               <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${stream.avatar_color} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
+                 {stream.channel?.charAt(0)}
+               </div>
+               <div className="min-w-0">
+                 <p className="text-foreground dark:text-white text-sm font-semibold line-clamp-1">{stream.title}</p>
+                 <p className="text-slate-500 dark:text-zinc-400 text-xs">{stream.channel}</p>
+                 <span className="text-xs bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 px-1.5 py-0.5 rounded mt-1 inline-block">{stream.category}</span>
                 </div>
               </div>
             </motion.div>
@@ -193,9 +193,9 @@ export default function LivePage() {
 
         {filtered.length === 0 && (
           <div className="text-center py-20">
-            <Radio className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
-            <p className="text-zinc-400 font-semibold">No live streams in this category</p>
-            <p className="text-zinc-600 text-sm mt-1">Start a stream from Creator Studio</p>
+            <Radio className="w-12 h-12 text-slate-300 dark:text-zinc-700 mx-auto mb-3" />
+            <p className="text-slate-600 dark:text-zinc-400 font-semibold">No live streams in this category</p>
+            <p className="text-slate-500 dark:text-zinc-600 text-sm mt-1">Start a stream from Creator Studio</p>
           </div>
         )}
       </div>
