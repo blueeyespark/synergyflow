@@ -18,6 +18,11 @@ import TrendingForCreators from "@/components/studio/TrendingForCreators";
 import ChannelEditor from "@/components/studio/ChannelEditor";
 import AIAssistantHub from "@/components/studio/AIAssistantHub";
 import CollaborationTools from "@/components/studio/CollaborationTools";
+import AnalyticsDeepDive from "@/components/studio/AnalyticsDeepDive";
+import DiscoveryRecommendations from "@/components/studio/DiscoveryRecommendations";
+import StreamingTechnical from "@/components/studio/StreamingTechnical";
+import CommunityEngagement from "@/components/studio/CommunityEngagement";
+import MonetizationRevenue from "@/components/studio/MonetizationRevenue";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
@@ -28,6 +33,11 @@ const tabs = [
   { id: "planning",   label: "Planning",       icon: Calendar,   component: PlanningHub },
   { id: "ai",         label: "AI Assistant",   icon: Zap,        component: AIAssistantHub },
   { id: "analytics",  label: "Analytics",      icon: BarChart3,  component: StreamerAnalytics },
+  { id: "deep-dive",  label: "Deep Dive",      icon: TrendingUp, component: AnalyticsDeepDive },
+  { id: "discovery",  label: "Discovery",      icon: TrendingUp, component: DiscoveryRecommendations },
+  { id: "streaming",  label: "Streaming",      icon: Upload,     component: StreamingTechnical },
+  { id: "community",  label: "Community",      icon: Users,      component: CommunityEngagement },
+  { id: "monetize",   label: "Monetization",   icon: BarChart3,  component: MonetizationRevenue },
   { id: "trending",   label: "Trending",       icon: TrendingUp, component: TrendingForCreators },
   { id: "collab",     label: "Collaboration",  icon: Users,      component: CollaborationTools },
   { id: "team",       label: "Team",           icon: Users,      component: TeamManagement },
