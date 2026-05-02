@@ -87,14 +87,14 @@ export default function TopNav({
 
         {/* Center: search bar (desktop) */}
         <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-4 items-center">
-          <div className="flex w-full items-center bg-[#030810] border border-[#0d1820] rounded-xl overflow-hidden focus-within:border-[#1e78ff]/60 transition-all">
+          <div className={`flex w-full items-center rounded-xl overflow-hidden focus-within:border-[#1e78ff]/60 transition-all border ${darkMode ? "bg-[#030810] border-[#0d1820]" : "bg-gray-100 border-gray-300"}`}>
             <input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search videos, creators..."
-              className="flex-1 px-4 py-2 text-sm text-[#c8dff5] placeholder-blue-400/30 outline-none bg-transparent"
+              className={`flex-1 px-4 py-2 text-sm outline-none bg-transparent ${darkMode ? "text-[#c8dff5] placeholder-blue-400/30" : "text-gray-900 placeholder-gray-400"}`}
             />
-            <button type="submit" className="px-4 py-2 bg-[#050a14] hover:bg-[#1e78ff]/20 border-l border-[#0d1820] text-blue-400 transition-colors">
+            <button type="submit" className={`px-4 py-2 border-l transition-colors ${darkMode ? "bg-[#050a14] hover:bg-[#1e78ff]/20 border-[#0d1820] text-blue-400" : "bg-gray-50 hover:bg-blue-50 border-gray-300 text-blue-600"}`}>
               <Search className="w-4 h-4" />
             </button>
           </div>
@@ -211,10 +211,10 @@ export default function TopNav({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="md:hidden border-t border-[#0d1820] overflow-hidden"
+            className={`md:hidden border-t overflow-hidden ${darkMode ? "border-[#0d1820]" : "border-gray-200"}`}
           >
             <form onSubmit={handleSearch} className="flex items-center px-3 py-2 gap-2">
-              <div className="flex flex-1 items-center bg-[#030810] border border-[#0d1820] rounded-xl overflow-hidden">
+              <div className={`flex flex-1 items-center rounded-xl overflow-hidden border ${darkMode ? "bg-[#030810] border-[#0d1820]" : "bg-gray-100 border-gray-300"}`}>
                 <input
                   autoFocus
                   value={searchQuery}
