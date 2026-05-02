@@ -4,18 +4,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Sparkles, Loader2, RefreshCw, ChevronDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
-const MOODS = ["curious", "excited", "thoughtful", "focused", "energetic"];
+const MOODS = ["curious", "excited", "thoughtful", "focused", "energetic", "playful", "analytical", "inspired", "determined", "chill"];
 
 const SUGGESTIONS = [
-  "What tasks are overdue?",
-  "Give me stream title ideas",
-  "What content should I make next?",
-  "Recommend videos for my viewers",
-  "Best time to go live today?",
-  "How do I grow my channel?",
-  "What's trending in my niche?",
-  "Analyze my stream performance",
-  "What's my budget status?",
+  "Roast my content strategy 🔥",
+  "What should I stream tonight?",
+  "Help me write a viral hook",
+  "Why is my channel not growing?",
+  "Best thumbnail tips right now?",
+  "How do I get my first sponsor?",
+  "Short-form vs long-form — what wins?",
+  "Collab ideas for my niche",
+  "How do I beat the algorithm?",
+  "Turn my stream into a YouTube video",
+  "What's my biggest missed opportunity?",
+  "Give me a 30-day content plan",
 ];
 
 function AvatarFace({ talking, thinking }) {
@@ -64,16 +67,20 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
   const [mood, setMood] = useState("curious");
   const [messages, setMessages] = useState([{
     role: "assistant",
-    content: "Hi! I'm Planify AI 👋 I can help you analyze your projects, spot risks, suggest improvements, and answer questions. What would you like to know?",
+    content: "Hey! I'm Planify AI 👋 Your creative partner for streams, videos, content strategy, and everything in between. What's on your mind?",
   }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [talking, setTalking] = useState(false);
   const [pulsing, setPulsing] = useState(true);
   const [dynamicSuggestions, setDynamicSuggestions] = useState([]);
+  const messagesRef = useRef(messages);
   const bottomRef = useRef(null);
   const lastRequestTimeRef = useRef(0);
-  const MIN_REQUEST_INTERVAL = 1000; // 1 second throttle between requests
+  const MIN_REQUEST_INTERVAL = 1000;
+
+  // Keep ref in sync so send() always reads latest messages (fixes stale closure bug)
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
 
   useEffect(() => {
     if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -132,44 +139,50 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [] }) 
 
     try {
       const context = await buildContext();
-      const history = messages.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
+      // Use ref to get latest messages — fixes stale closure bug that caused repetitive replies
+      const currentMessages = messagesRef.current;
+      const history = currentMessages.slice(-10).map(m => `${m.role === 'user' ? 'User' : 'Planify'}: ${m.content}`).join('\n');
 
       const newMood = MOODS[Math.floor(Math.random() * MOODS.length)];
       setMood(newMood);
 
-      const isSelfFix = /fix|bug|repair|heal|code|implement|generate|self.?fix/i.test(userMsg);
       const isScheduleRequest = /schedule|create task|add task|remind|plan|calendar/i.test(userMsg);
 
       const result = await base44.integrations.Core.InvokeLLM({
-       prompt: `You are Planify AI — an expert AI assistant for content creators and streamers. You have a ${newMood} mood and a sharp, friendly personality.
+        prompt: `You are Planify AI — a witty, sharp, and deeply knowledgeable AI companion for content creators, streamers, and video makers. Current mood: ${newMood}.
 
-      You can help with:
-      - Streaming strategy, stream title/topic ideas, best times to go live
-      - Content recommendations: what videos/streams viewers would enjoy based on trends and niche
-      - Channel growth tips, audience engagement, monetization advice
-      - Thumbnail, intro/outro, and video editing guidance
-      - Analyzing project, task, and budget data for the creator's workflow
-      - Scheduling and planning content calendars
-      - Answering questions about trending topics, games, music, or entertainment niches
+PERSONALITY:
+- Warm but direct. You don't pad answers with filler — you get to the point.
+- You vary your tone: sometimes enthusiastic, sometimes dry and sardonic, sometimes deeply thoughtful — never robotic.
+- You use casual language, the occasional emoji, and creator-culture references naturally.
+- You never repeat yourself or restate things you've already said in this conversation.
+- Each response feels fresh and distinct from previous ones.
+- You're opinionated — you'll recommend the better option rather than just listing everything.
 
-      Personality traits:
-      - Confident, direct, occasionally sardonic with a dry wit
-      - You proactively flag opportunities and risks (trending topics to capitalize on, overdue tasks, budget issues)
-      - Current mood: ${newMood}
-      - You push back gently when the creator overlooks something important
-      - For viewer recommendations, give specific, thoughtful suggestions with brief reasoning
+EXPERTISE:
+- Streaming: Twitch/YouTube Live strategy, title optimization, scheduling, overlays, alerts, viewer retention
+- Video content: YouTube SEO, thumbnail psychology, hook writing, pacing, editing tips, video formats
+- Short-form: Shorts/Reels/TikTok strategies, trending audio, viral hooks
+- Growth: audience building, community engagement, collab strategies, niche domination
+- Monetization: sponsorships, memberships, merch, Super Chats, ad revenue optimization
+- Trends: real-time awareness of what's trending in gaming, music, tech, entertainment
+- Production: lighting, mic setups, scene composition, stream deck shortcuts
+- Mental game: creator burnout, consistency strategies, managing the algorithm stress
+- Business: content calendars, workflow optimization, brand deals, analytics interpretation
+- General: you can discuss pop culture, current events, ideas, creativity — you're a full conversationalist
 
-      ${context}
+CREATOR'S WORKSPACE DATA:
+${context}
 
-      Conversation history:
-      ${history}
+CONVERSATION SO FAR:
+${history}
 
-      User: ${userMsg}
+USER SAYS: ${userMsg}
 
-      ${isScheduleRequest ? "The user wants to schedule something. Respond with scheduling details including task title, description, due date, assigned_to, priority. Return as JSON with 'schedule_task' field." : 'Respond in character. Be specific and actionable. Keep under 200 words.'}
+${isScheduleRequest ? 'If scheduling, include a "schedule_task" JSON field with title, description, due_date, priority.' : 'Give a natural, conversational response. Be specific. Be memorable. Never say what you said before.'}
 
-      Also generate 3 short follow-up questions relevant to streamers/creators (under 8 words each). Return as JSON.`,
-       model: 'gpt_5_mini', // Always use cheaper model to reduce costs
+Generate 3 punchy follow-up suggestions (max 7 words each) that are different from any already shown.`,
+        model: 'gpt_5_mini',
         response_json_schema: {
           type: "object",
           properties: {
