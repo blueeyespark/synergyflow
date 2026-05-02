@@ -6,9 +6,9 @@ import { motion } from "framer-motion";
 import AIScanner from "./AIScanner";
 import AIBugMonitor from "./AIBugMonitor";
 import AIChangesLog from "./AIChangesLog";
-import UserViewer from "./UserViewer";
 import AITokenGate from "@/components/aitools/AITokenGate";
 import StaffManager from "@/components/aitools/StaffManager";
+import UserManagement from "@/components/aitools/UserManagement";
 
 export default function AITools() {
   const [user, setUser] = useState(null);
@@ -87,7 +87,7 @@ export default function AITools() {
             <TabsContent value="scanner"><AIScanner /></TabsContent>
             <TabsContent value="bugs"><AIBugMonitor /></TabsContent>
             <TabsContent value="changes"><AIChangesLog /></TabsContent>
-            {isAdmin && <TabsContent value="users"><UserViewer /></TabsContent>}
+            {isAdmin && <TabsContent value="users"><UserManagement user={user} /></TabsContent>}
           </motion.div>
         </Tabs>
       </div>
