@@ -110,16 +110,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = (shouldRedirect = true) => {
+  const logout = async (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
     
-    if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      base44.auth.logout(window.location.href);
-    } else {
-      // Just remove the token without redirect
-      base44.auth.logout();
+    try {
+      if (shouldRedirect) {
+        // Use the SDK's logout method which handles token cleanup and redirect
+        await base44.auth.logout(window.location.origin + "/");
+      } else {
+        // Just remove the token without redirect
+        await base44.auth.logout();
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still redirect even if logout fails
+      if (shouldRedirect) window.location.href = "/";
     }
   };
 

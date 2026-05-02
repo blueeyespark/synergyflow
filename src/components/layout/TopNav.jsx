@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 // TopNav — YouTube-style nav with avatar dropdown
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, Moon, Sun, Settings, LogOut, Search,
@@ -40,6 +41,7 @@ export default function TopNav({
   };
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const isAdmin = user?.role === "admin";
 
   // Close dropdown on outside click
@@ -190,7 +192,10 @@ export default function TopNav({
                   <div className="border-t border-[#0d1820] py-1">
                     <MenuItem icon={Settings} label="Settings" to="/Settings" onClick={() => setAccountOpen(false)} />
                     <button
-                      onClick={() => base44.auth.logout()}
+                      onClick={() => {
+                        setAccountOpen(false);
+                        logout(true);
+                      }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-blue-300/70 hover:bg-blue-900/20 hover:text-blue-200 transition-colors"
                     >
                       <LogOut className="w-4 h-4 flex-shrink-0" />
@@ -268,7 +273,10 @@ export default function TopNav({
               ))}
               <div className="pt-2 mt-2 border-t border-[#0d1820]">
                 <button
-                  onClick={() => base44.auth.logout()}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    logout(true);
+                  }}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-400/70 hover:bg-red-900/20 hover:text-red-300 transition-colors"
                 >
                   <LogOut className="w-4 h-4" /> Sign out
