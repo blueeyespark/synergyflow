@@ -1,9 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Upload, Play, Pause, Download, Trash2, Volume2, Zap, Type, Palette, Copy, Music, Image, Sparkles, MessageSquare, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -25,7 +24,6 @@ const introTemplates = [
 ];
 
 export default function VideoEditorAdvanced() {
-  const [tab, setTab] = useState("editor");
   const [user, setUser] = useState(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiType, setAiType] = useState(null);
@@ -217,124 +215,195 @@ export default function VideoEditorAdvanced() {
   };
 
   return (
-    <div className="space-y-6">
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="mb-6 flex flex-wrap gap-1 h-auto">
-          <TabsTrigger value="editor" className="gap-2">
-            <Type className="w-4 h-4" /> Intros Editor
-          </TabsTrigger>
-        </TabsList>
+    <div className="space-y-6 max-w-6xl">
+      {/* Video Editing Section */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
+        <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Video Editing</h3>
+        {video ? (
+          <div className="space-y-4">
+            <div className="bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%)` }}>
+              <video
+                ref={videoRef}
+                src={video.url}
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+                className="w-full h-full object-contain"
+                style={{ volume: volume }}
+              />
+            </div>
 
-        {/* Intros Editor Tab */}
-        <TabsContent value="editor" className="space-y-4">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
-            {video ? (
-              <div className="space-y-4">
-                <div className="bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%)` }}>
-                  <video
-                    ref={videoRef}
-                    src={video.url}
-                    onTimeUpdate={handleTimeUpdate}
-                    onLoadedMetadata={handleLoadedMetadata}
-                    className="w-full h-full object-contain"
-                    style={{ volume: volume }}
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm text-slate-600 dark:text-blue-400/60">
-                    <span>{currentTime.toFixed(2)}s</span>
-                    <span>{duration.toFixed(2)}s</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max={duration}
-                    value={currentTime}
-                    onChange={(e) => {
-                      if (videoRef.current) videoRef.current.currentTime = parseFloat(e.target.value);
-                      setCurrentTime(parseFloat(e.target.value));
-                    }}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button onClick={handlePlay} className="flex-1 gap-2">
-                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    {isPlaying ? "Pause" : "Play"}
-                  </Button>
-                  <Button variant="outline" onClick={() => setVideo(null)} className="gap-2">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm text-slate-600 dark:text-blue-400/60">
+                <span>{currentTime.toFixed(2)}s</span>
+                <span>{duration.toFixed(2)}s</span>
               </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-slate-300 dark:border-blue-900/40 rounded-lg cursor-pointer hover:border-slate-400 transition-colors">
-                <Upload className="w-12 h-12 text-slate-400 dark:text-blue-400/40 mb-2" />
-                <p className="font-medium text-slate-900 dark:text-[#e8f4ff]">Upload Video</p>
-                <p className="text-sm text-slate-500 dark:text-blue-400/50">MP4, WebM, or OGG</p>
-                <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
+              <input
+                type="range"
+                min="0"
+                max={duration}
+                value={currentTime}
+                onChange={(e) => {
+                  if (videoRef.current) videoRef.current.currentTime = parseFloat(e.target.value);
+                  setCurrentTime(parseFloat(e.target.value));
+                }}
+                className="w-full"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button onClick={handlePlay} className="flex-1 gap-2">
+                {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                {isPlaying ? "Pause" : "Play"}
+              </Button>
+              <Button variant="outline" onClick={() => setVideo(null)} className="gap-2">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-slate-300 dark:border-blue-900/40 rounded-lg cursor-pointer hover:border-slate-400 transition-colors">
+            <Upload className="w-12 h-12 text-slate-400 dark:text-blue-400/40 mb-2" />
+            <p className="font-medium text-slate-900 dark:text-[#e8f4ff]">Upload Video</p>
+            <p className="text-sm text-slate-500 dark:text-blue-400/50">MP4, WebM, or OGG</p>
+            <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
+          </label>
+        )}
+      </motion.div>
+
+      {video && (
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-4">
+          <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Trim & Effects</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Start: {startTime.toFixed(2)}s</label>
+              <input
+                type="range"
+                min="0"
+                max={duration}
+                value={startTime}
+                onChange={(e) => setStartTime(Math.min(parseFloat(e.target.value), endTime))}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">End: {endTime.toFixed(2)}s</label>
+              <input
+                type="range"
+                min="0"
+                max={duration}
+                value={endTime}
+                onChange={(e) => setEndTime(Math.max(parseFloat(e.target.value), startTime))}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Brightness: {brightness}%</label>
+              <input type="range" min="50" max="150" value={brightness} onChange={(e) => setBrightness(parseFloat(e.target.value))} className="w-full" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Contrast: {contrast}%</label>
+              <input type="range" min="50" max="150" value={contrast} onChange={(e) => setContrast(parseFloat(e.target.value))} className="w-full" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2 flex items-center gap-1">
+                <Volume2 className="w-3 h-3" /> Volume: {(volume * 100).toFixed(0)}%
               </label>
-            )}
-          </motion.div>
+              <input type="range" min="0" max="1" step="0.1" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="w-full" />
+            </div>
+            <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 gap-2">
+              <Download className="w-4 h-4" /> Export Video
+            </Button>
+          </div>
+        </motion.div>
+      )}
 
-          {video && (
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Trim & Effects</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Start: {startTime.toFixed(2)}s</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max={duration}
-                    value={startTime}
-                    onChange={(e) => setStartTime(Math.min(parseFloat(e.target.value), endTime))}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">End: {endTime.toFixed(2)}s</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max={duration}
-                    value={endTime}
-                    onChange={(e) => setEndTime(Math.max(parseFloat(e.target.value), startTime))}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Brightness: {brightness}%</label>
-                  <input type="range" min="50" max="150" value={brightness} onChange={(e) => setBrightness(parseFloat(e.target.value))} className="w-full" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Contrast: {contrast}%</label>
-                  <input type="range" min="50" max="150" value={contrast} onChange={(e) => setContrast(parseFloat(e.target.value))} className="w-full" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2 flex items-center gap-1">
-                    <Volume2 className="w-3 h-3" /> Volume: {(volume * 100).toFixed(0)}%
-                  </label>
-                  <input type="range" min="0" max="1" step="0.1" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="w-full" />
-                </div>
-                <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 gap-2">
-                  <Download className="w-4 h-4" /> Export Video
-                </Button>
+      {/* Thumbnail Creator */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
+        <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Thumbnail Creator</h3>
+        <div className="grid lg:grid-cols-2 gap-6">
+          <div>
+            <div className="flex justify-center bg-slate-100 dark:bg-[#050a14] rounded-xl p-4 mb-4">
+              <canvas ref={canvasRef} className="max-w-full border-2 border-slate-300 dark:border-blue-900/40 rounded-lg" style={{ maxHeight: "400px" }} />
+            </div>
+            <Button onClick={handleDownloadThumbnail} className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 gap-2">
+              <Download className="w-4 h-4" /> Download Thumbnail
+            </Button>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Size</label>
+              <div className="space-y-2">
+                {presets.map((p) => (
+                  <button
+                    key={p.name}
+                    onClick={() => setPreset(p)}
+                    className={`w-full p-2 text-sm rounded-lg border-2 transition-all ${
+                      preset.name === p.name ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 font-medium text-cyan-900 dark:text-cyan-300" : "border-slate-200 dark:border-blue-900/40 text-slate-700 dark:text-blue-400/60 hover:border-slate-300"
+                    }`}
+                  >
+                    {p.name} ({p.ratio})
+                  </button>
+                ))}
               </div>
-            </motion.div>
-          )}
-        </TabsContent>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2 flex items-center gap-2">
+                <Palette className="w-4 h-4" /> Colors
+              </label>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Background</label>
+                  <div className="flex gap-2">
+                    <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} className="w-12 h-10 rounded cursor-pointer border border-slate-300" />
+                    <Input value={bgColor} onChange={(e) => setBgColor(e.target.value)} className="text-sm flex-1" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Text Color</label>
+                  <div className="flex gap-2">
+                    <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-12 h-10 rounded cursor-pointer border border-slate-300" />
+                    <Input value={textColor} onChange={(e) => setTextColor(e.target.value)} className="text-sm flex-1" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2 flex items-center gap-2">
+                <Type className="w-4 h-4" /> Text
+              </label>
+              <div className="space-y-3">
+                <Input value={mainText} onChange={(e) => setMainText(e.target.value.toUpperCase())} placeholder="Your text here" className="text-sm uppercase" />
+                <div>
+                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Font Size: {fontSize}px</label>
+                  <input type="range" min="20" max="100" value={fontSize} onChange={(e) => setFontSize(parseInt(e.target.value))} className="w-full" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Background Image</label>
+              <label className="flex flex-col items-center justify-center p-3 border-2 border-dashed border-slate-300 dark:border-blue-900/40 rounded-lg cursor-pointer hover:border-slate-400 transition-colors">
+                <Zap className="w-5 h-5 text-slate-400 dark:text-blue-400/40 mb-1" />
+                <p className="text-xs text-slate-600 dark:text-blue-400/60">Upload Image</p>
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </label>
+              {uploadedImage && (
+                <Button onClick={() => setUploadedImage(null)} variant="outline" size="sm" className="w-full mt-2">
+                  <Trash2 className="w-3 h-3 mr-1" /> Remove
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
-
-
-        {/* Video, Thumbnail, Music, Media, and AI all merged into Intros Editor */}
-        <TabsContent value="editor" className="space-y-6">
+      {/* Intro & Outro Creator */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
+        <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Intro & Outro Creator</h3>
+        <div className="grid lg:grid-cols-2 gap-6">
           <div className="space-y-4">
             {/* Intro Preview */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
-              <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Intro Preview</h3>
+            <div>
+              <p className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Intro Preview</p>
               <div className="aspect-video rounded-xl flex items-center justify-center overflow-hidden" style={{ background: selectedTemplate.bg }}>
                 <div className={`text-center ${getAnimationClass()}`}>
                   <p className="text-sm font-medium text-slate-400 mb-2">INTRO</p>
@@ -343,14 +412,14 @@ export default function VideoEditorAdvanced() {
                   </p>
                 </div>
               </div>
-              <Button onClick={() => handleDownloadIntro("intro")} className="w-full mt-4 bg-gradient-to-r from-cyan-500 to-blue-600 gap-2">
+              <Button onClick={() => handleDownloadIntro("intro")} className="w-full mt-2 bg-gradient-to-r from-cyan-500 to-blue-600 gap-2">
                 <Download className="w-4 h-4" /> Download Intro
               </Button>
-            </motion.div>
+            </div>
 
             {/* Outro Preview */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
-              <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Outro Preview</h3>
+            <div>
+              <p className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Outro Preview</p>
               <div className="aspect-video rounded-xl flex items-center justify-center overflow-hidden" style={{ background: selectedTemplate.bg }}>
                 <div className={`text-center ${getAnimationClass()}`}>
                   <p className="text-sm font-medium text-slate-400 mb-2">OUTRO</p>
@@ -359,15 +428,15 @@ export default function VideoEditorAdvanced() {
                   </p>
                 </div>
               </div>
-              <Button onClick={() => handleDownloadIntro("outro")} className="w-full mt-4 bg-gradient-to-r from-cyan-500 to-blue-600 gap-2">
+              <Button onClick={() => handleDownloadIntro("outro")} className="w-full mt-2 bg-gradient-to-r from-cyan-500 to-blue-600 gap-2">
                 <Download className="w-4 h-4" /> Download Outro
               </Button>
-            </motion.div>
+            </div>
           </div>
 
           <div className="space-y-4">
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-3">Templates</h3>
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Templates</label>
               <div className="grid grid-cols-2 gap-2">
                 {introTemplates.map((t) => (
                   <button
@@ -382,21 +451,14 @@ export default function VideoEditorAdvanced() {
                   </button>
                 ))}
               </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4 flex items-center gap-2">
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2 flex items-center gap-2">
                 <Type className="w-4 h-4" /> Text
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Intro Text</label>
-                  <Input value={introText} onChange={(e) => setIntroText(e.target.value)} placeholder="Your Channel" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Outro Text</label>
-                  <Input value={outroText} onChange={(e) => setOutroText(e.target.value)} placeholder="Thanks for Watching!" />
-                </div>
+              </label>
+              <div className="space-y-3">
+                <Input value={introText} onChange={(e) => setIntroText(e.target.value)} placeholder="Your Channel" />
+                <Input value={outroText} onChange={(e) => setOutroText(e.target.value)} placeholder="Thanks for Watching!" />
                 <div>
                   <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Font Size: {introFontSize}px</label>
                   <input type="range" min="24" max="72" value={introFontSize} onChange={(e) => setIntroFontSize(parseInt(e.target.value))} className="w-full" />
@@ -406,119 +468,119 @@ export default function VideoEditorAdvanced() {
                   <input type="range" min="1" max="10" value={introDuration} onChange={(e) => setIntroDuration(parseInt(e.target.value))} className="w-full" />
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
-        </TabsContent>
+        </div>
+      </motion.div>
 
-          {/* Music & Audio */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
-            <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Music & Audio</h3>
-            {music ? (
-              <div className="space-y-4">
-                <div className="bg-slate-100 dark:bg-[#050a14] rounded-xl p-4 flex items-center gap-4">
-                  <Music className="w-8 h-8 text-blue-400" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-900 dark:text-[#c8dff5] truncate">{music.name}</p>
-                    <p className="text-sm text-slate-600 dark:text-blue-400/50">{(music.duration || 0).toFixed(1)}s</p>
+      {/* Music & Audio */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
+        <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Music & Audio</h3>
+        {music ? (
+          <div className="space-y-4">
+            <div className="bg-slate-100 dark:bg-[#050a14] rounded-xl p-4 flex items-center gap-4">
+              <Music className="w-8 h-8 text-blue-400" />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-slate-900 dark:text-[#c8dff5] truncate">{music.name}</p>
+                <p className="text-sm text-slate-600 dark:text-blue-400/50">{(music.duration || 0).toFixed(1)}s</p>
+              </div>
+              <button onClick={() => setMusic(null)} className="p-2 hover:bg-slate-200 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Volume: {(musicVolume * 100).toFixed(0)}%</label>
+              <input type="range" min="0" max="1" step="0.1" value={musicVolume} onChange={(e) => setMusicVolume(parseFloat(e.target.value))} className="w-full" />
+            </div>
+          </div>
+        ) : (
+          <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-slate-300 dark:border-blue-900/40 rounded-lg cursor-pointer hover:border-slate-400 transition-colors">
+            <Music className="w-12 h-12 text-slate-400 dark:text-blue-400/40 mb-2" />
+            <p className="font-medium text-slate-900 dark:text-[#e8f4ff]">Upload Music</p>
+            <p className="text-sm text-slate-500 dark:text-blue-400/50">MP3, WAV, or OGG</p>
+            <input type="file" accept="audio/*" onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) setMusic({ name: file.name, url: URL.createObjectURL(file), duration: 120 });
+            }} className="hidden" />
+          </label>
+        )}
+        <Button onClick={() => setAiType("music") || setAiModalOpen(true)} className="w-full mt-4 gap-2">
+          <Sparkles className="w-4 h-4" /> Generate with AI
+        </Button>
+      </motion.div>
+
+      {/* Media Library */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
+        <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Media Library</h3>
+        <div className="flex gap-2 mb-4">
+          <Input 
+            placeholder="Search media..." 
+            value={searchMedia} 
+            onChange={(e) => setSearchMedia(e.target.value)}
+            className="flex-1"
+          />
+          <Button variant="outline">
+            <Search className="w-4 h-4" />
+          </Button>
+        </div>
+        {filteredMedia.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[400px] overflow-y-auto">
+            {filteredMedia.map(m => (
+              <motion.div key={m.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="group relative rounded-lg overflow-hidden bg-slate-100 dark:bg-[#050a14] border border-slate-200 dark:border-blue-900/40 hover:border-blue-500/50 transition-colors cursor-pointer">
+                {m.type === "image" && m.url && (
+                  <img src={m.url} alt={m.name} className="w-full aspect-square object-cover group-hover:scale-105 transition-transform" />
+                )}
+                {m.type === "audio" && (
+                  <div className="w-full aspect-square flex items-center justify-center">
+                    <Music className="w-12 h-12 text-blue-400/40" />
                   </div>
-                  <button onClick={() => setMusic(null)} className="p-2 hover:bg-slate-200 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
-                    <X className="w-4 h-4" />
-                  </button>
+                )}
+                {m.type === "video" && (
+                  <div className="w-full aspect-square flex items-center justify-center bg-black">
+                    <Play className="w-12 h-12 text-blue-400/40" fill="currentColor" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Button size="sm" variant="secondary">Use</Button>
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Volume: {(musicVolume * 100).toFixed(0)}%</label>
-                  <input type="range" min="0" max="1" step="0.1" value={musicVolume} onChange={(e) => setMusicVolume(parseFloat(e.target.value))} className="w-full" />
-                </div>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-slate-300 dark:border-blue-900/40 rounded-lg cursor-pointer hover:border-slate-400 transition-colors">
-                <Music className="w-12 h-12 text-slate-400 dark:text-blue-400/40 mb-2" />
-                <p className="font-medium text-slate-900 dark:text-[#e8f4ff]">Upload Music</p>
-                <p className="text-sm text-slate-500 dark:text-blue-400/50">MP3, WAV, or OGG</p>
-                <input type="file" accept="audio/*" onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) setMusic({ name: file.name, url: URL.createObjectURL(file), duration: 120 });
-                }} className="hidden" />
-              </label>
-            )}
-            <Button onClick={() => setAiType("music") || setAiModalOpen(true)} className="w-full mt-4 gap-2">
-              <Sparkles className="w-4 h-4" /> Generate with AI
-            </Button>
-          </motion.div>
+                <p className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-1 truncate">{m.name}</p>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-slate-500 dark:text-blue-400/40">
+            <Image className="w-12 h-12 mx-auto mb-2 opacity-50" />
+            <p>No media assets yet</p>
+          </div>
+        )}
+      </motion.div>
 
-          {/* Media Library */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
-            <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Media Library</h3>
-            <div className="flex gap-2 mb-4">
-              <Input 
-                placeholder="Search media..." 
-                value={searchMedia} 
-                onChange={(e) => setSearchMedia(e.target.value)}
-                className="flex-1"
-              />
-              <Button variant="outline">
-                <Search className="w-4 h-4" />
-              </Button>
-            </div>
-            {filteredMedia.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[600px] overflow-y-auto">
-                {filteredMedia.map(m => (
-                  <motion.div key={m.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="group relative rounded-lg overflow-hidden bg-slate-100 dark:bg-[#050a14] border border-slate-200 dark:border-blue-900/40 hover:border-blue-500/50 transition-colors cursor-pointer">
-                    {m.type === "image" && m.url && (
-                      <img src={m.url} alt={m.name} className="w-full aspect-square object-cover group-hover:scale-105 transition-transform" />
-                    )}
-                    {m.type === "audio" && (
-                      <div className="w-full aspect-square flex items-center justify-center">
-                        <Music className="w-12 h-12 text-blue-400/40" />
-                      </div>
-                    )}
-                    {m.type === "video" && (
-                      <div className="w-full aspect-square flex items-center justify-center bg-black">
-                        <Play className="w-12 h-12 text-blue-400/40" fill="currentColor" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button size="sm" variant="secondary">Use</Button>
-                    </div>
-                    <p className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-1 truncate">{m.name}</p>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-slate-500 dark:text-blue-400/40">
-                <Image className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No media assets yet</p>
-              </div>
-            )}
-          </motion.div>
-
-          {/* AI Generation */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
-            <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">AI Generation</h3>
-            <div className="grid md:grid-cols-3 gap-4 mb-6">
-              {[
-                { id: "image", icon: Image, label: "Generate Image", desc: "Create images with AI" },
-                { id: "video", icon: MessageSquare, label: "Generate Video", desc: "Synthesize video content" },
-                { id: "music", icon: Music, label: "Generate Music", desc: "Create background tracks" },
-              ].map(tool => (
-                <motion.button
-                  key={tool.id}
-                  whileHover={{ scale: 1.02 }}
-                  onClick={() => setAiType(tool.id) || setAiModalOpen(true)}
-                  className="bg-slate-100 dark:bg-[#050a14] rounded-xl border border-slate-200 dark:border-blue-900/40 p-4 hover:border-blue-500/50 transition-colors text-left"
-                >
-                  <tool.icon className="w-6 h-6 text-blue-400 mb-2" />
-                  <h4 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-1 text-sm">{tool.label}</h4>
-                  <p className="text-xs text-slate-600 dark:text-blue-400/60">{tool.desc}</p>
-                </motion.button>
-              ))}
-            </div>
-            <div className="border-t border-slate-200 dark:border-blue-900/40 pt-4">
-              <h4 className="text-sm font-semibold text-slate-900 dark:text-[#e8f4ff] mb-3">Content Tools</h4>
-              <AIContentTools />
-            </div>
-          </motion.div>
-      </Tabs>
+      {/* AI Generation */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
+        <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">AI Generation Tools</h3>
+        <div className="grid md:grid-cols-3 gap-4 mb-6">
+          {[
+            { id: "image", icon: Image, label: "Generate Image", desc: "Create images with AI" },
+            { id: "video", icon: MessageSquare, label: "Generate Video", desc: "Synthesize video content" },
+            { id: "music", icon: Music, label: "Generate Music", desc: "Create background tracks" },
+          ].map(tool => (
+            <motion.button
+              key={tool.id}
+              whileHover={{ scale: 1.02 }}
+              onClick={() => setAiType(tool.id) || setAiModalOpen(true)}
+              className="bg-slate-100 dark:bg-[#050a14] rounded-xl border border-slate-200 dark:border-blue-900/40 p-4 hover:border-blue-500/50 transition-colors text-left"
+            >
+              <tool.icon className="w-6 h-6 text-blue-400 mb-2" />
+              <h4 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-1 text-sm">{tool.label}</h4>
+              <p className="text-xs text-slate-600 dark:text-blue-400/60">{tool.desc}</p>
+            </motion.button>
+          ))}
+        </div>
+        <div className="border-t border-slate-200 dark:border-blue-900/40 pt-4">
+          <h4 className="text-sm font-semibold text-slate-900 dark:text-[#e8f4ff] mb-3">Content Generation</h4>
+          <AIContentTools />
+        </div>
+      </motion.div>
 
       {/* AI Generation Modal */}
       {aiModalOpen && (
