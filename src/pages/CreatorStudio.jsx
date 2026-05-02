@@ -4,25 +4,31 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import {
   Globe, Bot, Upload, BarChart3, Calendar,
-  Users, ImageIcon, ArrowLeft, TrendingUp, Edit3, Zap, Activity, ShoppingBag
+  Users, ImageIcon, ArrowLeft, TrendingUp, Edit3, Zap, Activity, ShoppingBag, Clock, LayoutTemplate
 } from "lucide-react";
 import ProductionHub from "@/components/studio/ProductionHub";
-import PlanningHub from "@/components/studio/PlanningHub";
+import PlanningOverview from "@/components/studio/PlanningOverview";
 import TeamManagement from "@/components/studio/TeamManagement";
 import AnalyticsHub from "@/components/studio/AnalyticsHub";
 import AnalyticsPlus from "@/components/studio/AnalyticsPlus";
 import ChannelEditor from "@/components/studio/ChannelEditor";
 import CommunityEngagement from "@/components/studio/CommunityEngagement";
+import Templates from "@/pages/Templates";
+import Meetings from "@/pages/Meetings";
+import TimeTrackingAnalytics from "@/pages/TimeTrackingAnalytics";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
-  { id: "editchannel",label: "Channel",       icon: Edit3,      component: ChannelEditor },
-  { id: "production", label: "Production",    icon: Upload,     component: ProductionHub },
-  { id: "planning",   label: "Planning",      icon: Calendar,   component: PlanningHub },
-  { id: "analytics",  label: "Analytics",     icon: BarChart3,  component: AnalyticsHub },
-  { id: "discover",   label: "Discover",      icon: TrendingUp, component: AnalyticsPlus },
-  { id: "community",  label: "Community",     icon: Users,      component: CommunityEngagement },
-  { id: "team",       label: "Team",          icon: Users,      component: TeamManagement },
+  { id: "editchannel",  label: "Channel",       icon: Edit3,          component: ChannelEditor },
+  { id: "production",   label: "Production",    icon: Upload,         component: ProductionHub },
+  { id: "planning",     label: "Planning",      icon: Calendar,       component: PlanningOverview },
+  { id: "meetings",     label: "Meetings",      icon: Users,          component: Meetings },
+  { id: "templates",    label: "Templates",     icon: LayoutTemplate, component: Templates },
+  { id: "timetracking", label: "Time Tracking", icon: Clock,          component: TimeTrackingAnalytics },
+  { id: "analytics",    label: "Analytics",     icon: BarChart3,      component: AnalyticsHub },
+  { id: "discover",     label: "Discover",      icon: TrendingUp,     component: AnalyticsPlus },
+  { id: "community",    label: "Community",     icon: Users,          component: CommunityEngagement },
+  { id: "team",         label: "Team",          icon: Users,          component: TeamManagement },
 ];
 
 export default function CreatorStudio() {
