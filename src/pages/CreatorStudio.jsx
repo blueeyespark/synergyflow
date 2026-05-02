@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import {
   Globe, Bot, Upload, BarChart3, Calendar,
-  Users, ImageIcon, ArrowLeft, TrendingUp, Edit3, Zap
+  Users, ImageIcon, ArrowLeft, TrendingUp, Edit3, Zap, Activity, ShoppingBag
 } from "lucide-react";
 import ContentProductionHub from "@/components/studio/ContentProductionHub";
 import MediaLibrary from "./MediaLibrary";
@@ -23,6 +23,11 @@ import DiscoveryRecommendations from "@/components/studio/DiscoveryRecommendatio
 import StreamingTechnical from "@/components/studio/StreamingTechnical";
 import CommunityEngagement from "@/components/studio/CommunityEngagement";
 import MonetizationRevenue from "@/components/studio/MonetizationRevenue";
+import SponsorDashboard from "@/components/studio/SponsorDashboard";
+import MerchShelfStudio from "@/components/studio/MerchShelfStudio";
+import ContentCalendarStudio from "@/components/studio/ContentCalendarStudio";
+import StreamHealthMonitor from "@/components/studio/StreamHealthMonitor";
+import CollaborationStudio from "@/components/studio/CollaborationStudio";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
@@ -31,15 +36,19 @@ const tabs = [
   { id: "production", label: "Production",     icon: Upload,     component: ContentProductionHub },
   { id: "media",      label: "Media",          icon: ImageIcon,  component: MediaLibrary },
   { id: "planning",   label: "Planning",       icon: Calendar,   component: PlanningHub },
+  { id: "calendar",   label: "Content Calendar",icon: Calendar,  component: ContentCalendarStudio },
   { id: "ai",         label: "AI Assistant",   icon: Zap,        component: AIAssistantHub },
   { id: "analytics",  label: "Analytics",      icon: BarChart3,  component: StreamerAnalytics },
   { id: "deep-dive",  label: "Deep Dive",      icon: TrendingUp, component: AnalyticsDeepDive },
   { id: "discovery",  label: "Discovery",      icon: TrendingUp, component: DiscoveryRecommendations },
   { id: "streaming",  label: "Streaming",      icon: Upload,     component: StreamingTechnical },
+  { id: "health",     label: "Stream Health",  icon: Activity,   component: StreamHealthMonitor },
   { id: "community",  label: "Community",      icon: Users,      component: CommunityEngagement },
   { id: "monetize",   label: "Monetization",   icon: BarChart3,  component: MonetizationRevenue },
+  { id: "sponsors",   label: "Sponsors",       icon: Zap,        component: SponsorDashboard },
+  { id: "merch",      label: "Merch Shop",     icon: ShoppingBag,component: MerchShelfStudio },
   { id: "trending",   label: "Trending",       icon: TrendingUp, component: TrendingForCreators },
-  { id: "collab",     label: "Collaboration",  icon: Users,      component: CollaborationTools },
+  { id: "collab",     label: "Collaboration",  icon: Users,      component: CollaborationStudio },
   { id: "team",       label: "Team",           icon: Users,      component: TeamManagement },
   { id: "client",     label: "Client Portal",  icon: Globe,      component: ClientPortal },
   { id: "discord",    label: "Discord Bot",    icon: Bot,        component: DiscordBot },
