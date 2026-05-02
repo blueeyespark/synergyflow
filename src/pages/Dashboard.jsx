@@ -39,6 +39,7 @@ const SIDEBAR_NAV = [
   { icon: PlaySquare, label: "Clips",         to: "/Shorts" },
   { icon: History,    label: "Watch History", to: "/WatchHistory" },
   { icon: Bookmark,   label: "Saved",         to: "/SavedVideos" },
+  { icon: ListVideo,  label: "Playlists",     to: "/Playlists" },
 ];
 
 function fmt(n) {

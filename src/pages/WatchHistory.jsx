@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { History, PlaySquare } from "lucide-react";
+import { History, PlaySquare, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import VideoPlayerModal from "@/components/dashboard/VideoPlayerModal";
@@ -58,6 +58,10 @@ export default function WatchHistory() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-6xl mx-auto px-4 py-6">
+        <Link to="/" className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-6 font-semibold">
+          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        </Link>
+
         <div className="flex items-center gap-3 mb-8">
           <div className="w-10 h-10 rounded-2xl bg-blue-400/20 flex items-center justify-center">
             <History className="w-5 h-5 text-blue-400" />

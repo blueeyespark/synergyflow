@@ -12,6 +12,7 @@ import Tasks from './pages/Tasks';
 import AITools from './pages/AITools';
 import WatchHistory from './pages/WatchHistory';
 import SavedVideos from './pages/SavedVideos';
+import Playlists from './pages/Playlists';
 import CreatorStudio from './pages/CreatorStudio';
 import Dashboard from './pages/Dashboard';
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -87,6 +88,7 @@ const AuthenticatedApp = () => {
       <Route path="/VideoAnalytics" element={<LayoutWrapper currentPageName="VideoAnalytics"><VideoAnalyticsPage /></LayoutWrapper>} />
       <Route path="/WatchHistory" element={<LayoutWrapper currentPageName="WatchHistory"><WatchHistory /></LayoutWrapper>} />
       <Route path="/SavedVideos" element={<LayoutWrapper currentPageName="SavedVideos"><SavedVideos /></LayoutWrapper>} />
+      <Route path="/Playlists" element={<LayoutWrapper currentPageName="Playlists"><Playlists /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

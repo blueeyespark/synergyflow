@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
-import { Bookmark, PlaySquare } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Bookmark, PlaySquare, ArrowLeft, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import VideoPlayerModal from "@/components/dashboard/VideoPlayerModal";
@@ -30,6 +30,8 @@ export default function SavedVideos() {
     try { return JSON.parse(localStorage.getItem("watchLater") || "[]"); } catch { return []; }
   });
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
 
@@ -43,6 +45,25 @@ export default function SavedVideos() {
     queryKey: ["videos-all"],
     queryFn: () => base44.entities.Video.list("-created_date", 80),
     staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: playlists = [] } = useQuery({
+    queryKey: ["playlists", user?.email],
+    queryFn: () => user?.email ? base44.entities.Playlist.filter({ owner_email: user.email }) : [],
+    enabled: !!user?.email,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const addToPlaylistMutation = useMutation({
+    mutationFn: ({ playlistId, videoId }) => {
+      const playlist = playlists.find(p => p.id === playlistId);
+      const updated = [...(playlist?.video_ids || []), videoId].filter((id, idx, arr) => arr.indexOf(id) === idx);
+      return base44.entities.Playlist.update(playlistId, { video_ids: updated });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["playlists"] });
+      setShowPlaylistModal(false);
+    },
   });
 
   const channelMap = channels.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
@@ -61,6 +82,10 @@ export default function SavedVideos() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-6xl mx-auto px-4 py-6">
+        <Link to="/" className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-6 font-semibold">
+          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        </Link>
+
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-blue-400/20 flex items-center justify-center">
@@ -86,9 +111,31 @@ export default function SavedVideos() {
                   <div className="flex-1" onClick={() => handleOpenVideo(v)}>
                     <VideoCard video={v} channel={channelMap[v.channel_id]} onClick={handleOpenVideo} compact />
                   </div>
-                  <button onClick={() => removeSaved(v.id)} className="ml-4 px-3 py-1.5 text-xs text-red-400/60 hover:text-red-400 border border-red-400/20 hover:border-red-400/40 rounded-lg transition-all opacity-0 group-hover:opacity-100">
-                    Remove
-                  </button>
+                  <div className="ml-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <button onClick={() => setShowPlaylistModal(v.id)} className="px-3 py-1.5 text-xs text-blue-400/60 hover:text-blue-400 border border-blue-400/20 hover:border-blue-400/40 rounded-lg transition-all flex items-center gap-1">
+                      <Plus className="w-3 h-3" /> Add to Playlist
+                    </button>
+                    <button onClick={() => removeSaved(v.id)} className="px-3 py-1.5 text-xs text-red-400/60 hover:text-red-400 border border-red-400/20 hover:border-red-400/40 rounded-lg transition-all">
+                      Remove
+                    </button>
+                  </div>
+                  {showPlaylistModal === v.id && (
+                    <div className="absolute right-0 top-full mt-2 z-50 bg-card border border-[#0d2040] rounded-lg shadow-xl w-48 py-2">
+                      {playlists.length > 0 ? (
+                        playlists.map(p => (
+                          <button
+                            key={p.id}
+                            onClick={() => addToPlaylistMutation.mutate({ playlistId: p.id, videoId: v.id })}
+                            className="w-full text-left px-4 py-2 text-xs text-[#c8dff5] hover:bg-blue-900/20 transition-colors"
+                          >
+                            {p.name}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-4 py-2 text-xs text-blue-400/40">No playlists yet. <Link to="/Playlists" className="text-blue-400 hover:text-blue-300">Create one</Link></div>
+                      )}
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>
