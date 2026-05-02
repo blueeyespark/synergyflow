@@ -123,15 +123,7 @@ export default function ShortsPage({ onClose }) {
   });
 
   const channelMap = channels.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
-  const shorts = videos.length > 0 ? videos : Array.from({ length: 5 }, (_, i) => ({
-    id: `demo-${i}`,
-    title: ["This trick changed my life 🔥", "POV: You discovered this app", "You won't believe this #shorts", "Wait for it... 😂", "Life hack that actually works"][i],
-    thumbnail_url: `https://images.unsplash.com/photo-${["1536240478700-b869ad10a2ab", "1611162616475-46b635cb6868", "1574717024653-61fd2cf4d44d", "1598488035139-bdbb2231ce04", "1618005182384-a83a8bd57fbe"][i]}?w=400&h=700&fit=crop`,
-    like_count: Math.floor(Math.random() * 50000),
-    comment_count: Math.floor(Math.random() * 5000),
-    tags: ["viral", "shorts", "trending"],
-    channel_id: null,
-  }));
+  const shorts = videos;
 
   const goNext = () => setCurrentIndex(i => Math.min(i + 1, shorts.length - 1));
   const goPrev = () => setCurrentIndex(i => Math.max(i - 1, 0));

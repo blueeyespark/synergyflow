@@ -11,11 +11,7 @@ import StreamGoals from "@/components/live/StreamGoals";
 import RaidWidget from "@/components/live/RaidWidget";
 import { Link } from "react-router-dom";
 
-const DEMO_STREAMS = [
-  { id: "s1", title: "Late Night Gaming Session! Come hang 🎮", channel: "NightStreamCo", viewers: 2341, category: "Gaming", thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=450&fit=crop", avatar_color: "from-red-500 to-orange-500" },
-  { id: "s2", title: "Drawing Your Characters LIVE! 🎨", channel: "PixelWizard", viewers: 891, category: "Art", thumbnail: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=450&fit=crop", avatar_color: "from-blue-500 to-indigo-500" },
-  { id: "s3", title: "Tech Talk & Q&A — Ask Me Anything!", channel: "TechTalker", viewers: 5102, category: "Tech", thumbnail: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=450&fit=crop", avatar_color: "from-green-500 to-teal-500" },
-];
+
 
 const CATEGORIES = ["All", "Gaming", "Art", "Tech", "IRL", "Music", "Sports"];
 
@@ -39,9 +35,7 @@ export default function LivePage() {
   });
 
   const liveChannels = channels.filter(c => c.is_live);
-  const streams = liveChannels.length > 0
-    ? liveChannels.map(c => ({ id: c.id, title: c.description || `${c.channel_name} is live!`, channel: c.channel_name, viewers: Math.floor(Math.random() * 5000) + 100, category: c.categories?.[0] || "IRL", thumbnail: c.banner_url, avatar_color: "from-indigo-500 to-purple-600" }))
-    : DEMO_STREAMS;
+  const streams = liveChannels.map(c => ({ id: c.id, title: c.description || `${c.channel_name} is live!`, channel: c.channel_name, viewers: Math.floor(Math.random() * 5000) + 100, category: c.categories?.[0] || "IRL", thumbnail: c.banner_url, avatar_color: "from-indigo-500 to-purple-600" }));
 
   const filtered = activeCategory === "All" ? streams : streams.filter(s => s.category === activeCategory);
 
