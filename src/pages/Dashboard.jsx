@@ -389,9 +389,9 @@ export default function Dashboard() {
 
         <div className="h-px bg-[#0d2040]/80 my-3" />
 
-        <Link to="/CreatorStudio" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#1e78ff]/15 to-[#a855f7]/10 border border-[#1e78ff]/25 text-[#1e78ff] hover:from-[#1e78ff]/25 transition-all mb-3">
+        <Link to="/Channel" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#1e78ff]/15 to-[#a855f7]/10 border border-[#1e78ff]/25 text-[#1e78ff] hover:from-[#1e78ff]/25 transition-all mb-3">
           <PlusCircle className="w-4 h-4 flex-shrink-0" />
-          <span className="text-xs font-bold">Creator Studio</span>
+          <span className="text-xs font-bold">My Channel</span>
         </Link>
 
         <div className="h-px bg-[#0d2040]/80 my-3" />
@@ -668,9 +668,9 @@ export default function Dashboard() {
             <div className="p-3 space-y-1">
               {[
                 { label: "Go Live Now", to: "/StreamerDashboard", icon: Radio, color: "text-red-400" },
-                { label: "Upload Video", to: "/CreatorStudio", icon: PlusCircle, color: "text-[#1e78ff]" },
                 { label: "View My Channel", to: "/Channel", icon: Star, color: "text-yellow-400" },
-                { label: "Analytics", to: "/CreatorStudio", icon: BarChart2, color: "text-green-400" },
+                { label: "Browse Live", to: "/Live", icon: Radio, color: "text-red-400" },
+                { label: "My Clips", to: "/Shorts", icon: BarChart2, color: "text-green-400" },
               ].map(a => (
                 <Link key={a.label} to={a.to} className="flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-blue-900/15 transition-colors group">
                   <a.icon className={`w-4 h-4 flex-shrink-0 ${a.color}`} />

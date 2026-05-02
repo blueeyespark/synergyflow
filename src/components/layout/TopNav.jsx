@@ -5,7 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, Moon, Sun, Settings, LogOut, Search,
-  Tv, Zap, Users, Scan, LayoutDashboard,
+  Tv, Users, Scan, LayoutDashboard,
   Radio, PlaySquare, ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -162,7 +162,6 @@ export default function TopNav({
                   {/* Menu items */}
                   <div className="py-1">
                     <MenuItem icon={Tv} label="View Channel" to="/Channel" onClick={() => setAccountOpen(false)} />
-                    <MenuItem icon={Zap} label="Creator Studio" to="/CreatorStudio" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={Radio} label="Go Live" to="/StreamerDashboard" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={PlaySquare} label="Your Clips" to="/Shorts" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={Scan} label="AI Tools" to="/AITools" onClick={() => setAccountOpen(false)} />
@@ -230,7 +229,6 @@ export default function TopNav({
                 { label: "Home", icon: LayoutDashboard, to: "/" },
                 { label: "Live", icon: Radio, to: "/Live" },
                 { label: "Clips", icon: PlaySquare, to: "/Shorts" },
-                { label: "Creator Studio", icon: Zap, to: "/CreatorStudio" },
                 { label: "My Channel", icon: Tv, to: "/Channel" },
                 { label: "Go Live", icon: Radio, to: "/StreamerDashboard" },
                 { label: "AI Tools", icon: Scan, to: "/AITools" },

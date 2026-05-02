@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import {
   Globe, Bot, Upload, BarChart3, Calendar,
-  Users, ImageIcon, ArrowLeft, DollarSign, TrendingUp, Edit3
+  Users, ImageIcon, ArrowLeft, TrendingUp, Edit3, Zap
 } from "lucide-react";
 import ContentProductionHub from "@/components/studio/ContentProductionHub";
 import MediaLibrary from "./MediaLibrary";
@@ -15,6 +16,7 @@ import TeamManagement from "@/components/studio/TeamManagement";
 import StreamerAnalytics from "@/components/studio/StreamerAnalytics";
 import TrendingForCreators from "@/components/studio/TrendingForCreators";
 import ChannelEditor from "@/components/studio/ChannelEditor";
+import { Button } from "@/components/ui/button";
 
 const tabs = [
   { id: "channel",    label: "My Channel",   icon: Users,      component: ChannelPage },
@@ -30,9 +32,48 @@ const tabs = [
 ];
 
 export default function CreatorStudio() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
   const urlParams = new URLSearchParams(window.location.search);
   const tabParam = urlParams.get("tab");
   const [activeTab, setActiveTab] = useState(tabParam || "channel");
+
+  useEffect(() => {
+    base44.auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  const { data: channels = [] } = useQuery({
+    queryKey: ["channels-all"],
+    queryFn: () => base44.entities.Channel.list(),
+    enabled: !!user?.email,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const myChannels = channels.filter(c => c.creator_email === user?.email);
+
+  // Gate: must have at least one channel
+  if (!loading && user && myChannels.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#03080f] flex items-center justify-center p-4">
+        <div className="text-center max-w-sm">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#1e78ff]/20 to-[#a855f7]/20 border border-blue-900/40 flex items-center justify-center mx-auto mb-5">
+            <Users className="w-9 h-9 text-blue-400/40" />
+          </div>
+          <h2 className="text-2xl font-black text-[#e8f4ff] mb-2">No Channel Yet</h2>
+          <p className="text-blue-400/50 text-sm mb-6">You need a channel before you can access Creator Studio.</p>
+          <Link to="/Channel">
+            <Button className="gap-2 w-full"><Zap className="w-4 h-4" /> Create a Channel</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <div className="min-h-screen bg-[#03080f] flex items-center justify-center"><div className="w-6 h-6 border-2 border-[#1e78ff]/30 border-t-[#1e78ff] rounded-full animate-spin" /></div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#03080f] text-[#e8f4ff]">
@@ -42,11 +83,11 @@ export default function CreatorStudio() {
           {/* Top row */}
           <div className="flex items-center gap-4 pt-4 pb-2">
             <Link
-              to="/"
+              to="/Channel"
               className="flex items-center gap-1.5 text-sm font-semibold text-blue-400 hover:text-blue-200 bg-blue-900/20 hover:bg-blue-900/30 border border-blue-900/40 rounded-lg px-3 py-1.5 transition-all flex-shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
-              Dashboard
+              My Channel
             </Link>
             <div>
               <h1 className="text-xl font-black tracking-wide" style={{ background: 'linear-gradient(135deg,#1e78ff,#00c8ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
