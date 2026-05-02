@@ -442,9 +442,9 @@ export default function Dashboard() {
                 </button>
               ))}
 
-              <div className={`ml-auto flex items-center gap-2 bg-white dark:bg-[#0a1525] border ${searchFocused ? "border-[#1e78ff]/50" : "border-slate-300 dark:border-[#0d2040]"} rounded-xl px-3 py-1.5 w-48 sm:w-64 transition-all`}>
+              <div className={`ml-auto flex items-center gap-2 bg-white dark:bg-input border ${searchFocused ? "border-[#1e78ff]/50 ring-2 ring-[#1e78ff]/20" : "border-slate-300 dark:border-[#0d2040]"} rounded-xl px-3 py-1.5 w-48 sm:w-64 transition-all`}>
                 <Search className="w-4 h-4 text-slate-500 dark:text-blue-400/40 flex-shrink-0" />
-                <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onFocus={() => setSearchFocused(true)} onBlur={() => setSearchFocused(false)} placeholder="Search..." className="flex-1 text-sm text-slate-800 dark:text-blue-100 placeholder-slate-400 dark:placeholder-blue-400/30 outline-none bg-transparent min-w-0" />
+                <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onFocus={() => setSearchFocused(true)} onBlur={() => setSearchFocused(false)} placeholder="Search..." className="flex-1 text-sm text-slate-800 dark:text-[#c8dff5] placeholder-slate-400 dark:placeholder-[#3a6080] focus:outline-none bg-transparent min-w-0" />
                 {searchQuery && <button onClick={() => setSearchQuery("")} className="text-blue-400/40 hover:text-blue-300"><X className="w-3.5 h-3.5" /></button>}
               </div>
             </div>
