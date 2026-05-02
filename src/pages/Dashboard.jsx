@@ -376,10 +376,10 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background text-foreground dark:bg-[#03080f] dark:text-[#e8f4ff] flex">
 
       {/* ── LEFT SIDEBAR ─────────────────────────────────────── */}
-      <aside className="hidden sm:flex flex-col w-52 md:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto py-4 px-2.5 z-40 border-r border-slate-200 dark:border-[#0d2040]/80 bg-white dark:bg-gradient-to-b dark:from-[#020b14] dark:to-[#03080f]">
+      <aside className="hidden sm:flex flex-col w-52 md:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto py-4 px-2.5 z-40 border-r border-slate-200 dark:border-[#0d2040]/80 bg-white dark:bg-[#03080f]">
         <div className="space-y-0.5 mb-3">
           {SIDEBAR_NAV.map(item => (
-            <Link key={item.label} to={item.to} className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-blue-400/60 hover:bg-blue-900/20 hover:text-blue-200 transition-all w-full">
+            <Link key={item.label} to={item.to} className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-slate-600 dark:text-blue-400/60 hover:bg-slate-100 dark:hover:bg-blue-900/20 hover:text-slate-800 dark:hover:text-blue-200 transition-all w-full">
               <item.icon className="w-4 h-4 flex-shrink-0" />
               <span>{item.label}</span>
             </Link>
@@ -396,23 +396,23 @@ export default function Dashboard() {
         <div className="h-px bg-[#0d2040]/80 my-3" />
 
         {/* Following list */}
-        <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-3 mb-2">Following</p>
+        <p className="text-xs font-bold text-slate-400 dark:text-blue-400/30 uppercase tracking-widest px-3 mb-2">Following</p>
         {[...subscribedChannelIds].length === 0 ? (
-          <p className="text-xs text-blue-400/20 px-3 py-1">Not following anyone</p>
+          <p className="text-xs text-slate-400 dark:text-blue-400/20 px-3 py-1">Not following anyone</p>
         ) : (
           <div className="space-y-0.5">
             {[...subscribedChannelIds].slice(0, 8).map(cid => {
               const ch = channelMap[cid];
               if (!ch) return null;
               return (
-                <Link key={cid} to={`/Channel?id=${cid}`} className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-blue-400/60 hover:bg-blue-900/20 hover:text-blue-200 transition-all">
+                <Link key={cid} to={`/Channel?id=${cid}`} className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 dark:text-blue-400/60 hover:bg-slate-100 dark:hover:bg-blue-900/20 hover:text-slate-800 dark:hover:text-blue-200 transition-all">
                   <div className="relative flex-shrink-0">
                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] flex items-center justify-center text-white text-xs font-black">
                       {ch.channel_name?.charAt(0)}
                     </div>
                     {ch.is_live && <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 border border-[#03080f]" />}
                   </div>
-                  <span className="text-xs truncate">{ch.channel_name}</span>
+                  <span className="text-xs truncate text-slate-700 dark:text-slate-300">{ch.channel_name}</span>
                   {ch.is_live && <span className="ml-auto text-xs text-red-400 font-bold">LIVE</span>}
                 </Link>
               );
@@ -426,7 +426,7 @@ export default function Dashboard() {
         <div className="flex-1 min-w-0">
 
           {/* Sticky top bar */}
-          <div className="sticky top-16 z-30 border-b border-slate-200 dark:border-[#0d2040]/80 px-4 pt-3 pb-1 space-y-2 bg-white dark:bg-[#03080f]/97" style={{ backdropFilter: "blur(20px)" }}>
+          <div className="sticky top-16 z-30 border-b border-slate-200 dark:border-[#0d2040]/80 px-4 pt-3 pb-1 space-y-2 bg-white dark:bg-[#03080f]" style={{ backdropFilter: "blur(20px)" }}>
 
             {/* Tabs + Search */}
             <div className="flex items-center gap-1 flex-wrap">
@@ -435,7 +435,7 @@ export default function Dashboard() {
                   className={`text-sm font-semibold px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 flex-shrink-0 ${
                     activeTab === tab.id
                       ? "bg-[#1e78ff]/15 text-[#1e78ff] border border-[#1e78ff]/25"
-                      : "text-blue-400/50 hover:text-blue-300 hover:bg-blue-900/10"
+                      : "text-slate-600 dark:text-blue-400/50 hover:text-slate-800 dark:hover:text-blue-300 hover:bg-slate-100 dark:hover:bg-blue-900/10"
                   }`}>
                   {tab.label}
                   {tab.badge > 0 && <span className="text-xs bg-[#1e78ff]/20 text-[#1e78ff] px-1.5 py-0.5 rounded-full">{tab.badge}</span>}
@@ -492,7 +492,7 @@ export default function Dashboard() {
 
                   {/* Search header */}
                   {searchQuery && (
-                    <p className="text-blue-300/80 text-sm mb-4">Results for <span className="text-[#e8f4ff] font-semibold">"{searchQuery}"</span> — {displayVideos.length} video{displayVideos.length !== 1 ? "s" : ""}</p>
+                    <p className="text-slate-600 dark:text-blue-300/80 text-sm mb-4">Results for <span className="text-foreground dark:text-[#e8f4ff] font-semibold">"{searchQuery}"</span> — {displayVideos.length} video{displayVideos.length !== 1 ? "s" : ""}</p>
                   )}
 
                   {/* Clips row */}
@@ -502,7 +502,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-2">
                           <Zap className="w-4 h-4 text-[#a855f7]" />
                           <h2 className="text-sm font-bold text-[#e8f4ff]">Shorts & Clips</h2>
-                          <span className="text-xs text-blue-400/40">{clips.length}</span>
+                          <span className="text-xs text-slate-500 dark:text-blue-400/40">{clips.length}</span>
                         </div>
                         <button onClick={() => navigate("/Shorts")} className="text-xs text-[#1e78ff] hover:text-[#00c8ff] font-semibold transition-colors">View all →</button>
                       </div>
@@ -523,8 +523,8 @@ export default function Dashboard() {
                         )}
                         <h2 className="text-sm font-bold text-[#e8f4ff]">
                           {searchQuery ? "Search Results" : activeMood !== "all" ? "Matching Videos" : "Recommended for You"}
-                        </h2>
-                        <span className="text-xs text-blue-400/30">{displayVideos.length}</span>
+                                </h2>
+                                <span className="text-xs text-slate-500 dark:text-blue-400/30">{displayVideos.length}</span>
                       </div>
                       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                         {displayVideos.map((video, i) => (
@@ -539,8 +539,8 @@ export default function Dashboard() {
                       <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-[#060d18] border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
                         <PlaySquare className="w-7 h-7 text-slate-400 dark:text-blue-400/30" />
                       </div>
-                      <h3 className="text-[#e8f4ff] font-bold text-lg mb-1">{searchQuery ? "No results found" : "No videos in this mood"}</h3>
-                      <p className="text-blue-400/40 text-sm mb-5">{searchQuery ? "Try different keywords" : "Try another mood or explore all"}</p>
+                      <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">{searchQuery ? "No results found" : "No videos in this mood"}</h3>
+                       <p className="text-slate-600 dark:text-blue-400/40 text-sm mb-5">{searchQuery ? "Try different keywords" : "Try another mood or explore all"}</p>
                       {activeMood !== "all" && <button onClick={() => setActiveMood("all")} className="text-sm text-[#1e78ff] hover:text-[#00c8ff] font-semibold">Browse all videos</button>}
                     </div>
                   )}
@@ -571,8 +571,8 @@ export default function Dashboard() {
                     <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-[#060d18] border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
                        <UserPlus className="w-7 h-7 text-slate-400 dark:text-blue-400/30" />
                     </div>
-                    <h3 className="text-[#e8f4ff] font-bold text-lg mb-1">No channels followed</h3>
-                    <p className="text-blue-400/40 text-sm">Explore content and follow creators you love</p>
+                    <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">No channels followed</h3>
+                     <p className="text-slate-600 dark:text-blue-400/40 text-sm">Explore content and follow creators you love</p>
                   </div>
                 )}
               </motion.div>
@@ -584,11 +584,11 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#1e78ff]" />
-                    <h2 className="text-sm font-bold text-[#e8f4ff]">Watch Later</h2>
-                    <span className="text-xs text-blue-400/40">{watchLaterVideos.length} saved</span>
+                    <h2 className="text-sm font-bold text-foreground dark:text-[#e8f4ff]">Watch Later</h2>
+                    <span className="text-xs text-slate-600 dark:text-blue-400/40">{watchLaterVideos.length} saved</span>
                   </div>
                   {watchLaterVideos.length > 0 && (
-                    <button onClick={() => { localStorage.removeItem("watchLater"); setWatchLater([]); }} className="text-xs text-red-400/60 hover:text-red-400 transition-colors">Clear all</button>
+                    <button onClick={() => { localStorage.removeItem("watchLater"); setWatchLater([]); }} className="text-xs text-red-600 dark:text-red-400/60 hover:text-red-700 dark:hover:text-red-400 transition-colors">Clear all</button>
                   )}
                 </div>
                 {watchLaterVideos.length > 0 ? (
@@ -600,8 +600,8 @@ export default function Dashboard() {
                     <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-[#060d18] border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
                        <Clock className="w-7 h-7 text-slate-400 dark:text-blue-400/30" />
                     </div>
-                    <h3 className="text-[#e8f4ff] font-bold text-lg mb-1">Nothing saved yet</h3>
-                    <p className="text-blue-400/40 text-sm">Hover a video and click ⋯ → Watch Later</p>
+                    <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">Nothing saved yet</h3>
+                    <p className="text-slate-600 dark:text-blue-400/40 text-sm">Hover a video and click ⋯ → Watch Later</p>
                   </div>
                 )}
               </motion.div>
@@ -610,7 +610,7 @@ export default function Dashboard() {
         </div>
 
         {/* ── RIGHT SIDEBAR ─────────────────────────────────────── */}
-        <aside className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-l border-slate-200 dark:border-[#0d2040]/80 px-4 pb-8 overflow-y-auto space-y-5 bg-white dark:bg-[#03080f]" style={{ marginTop: "5rem" }}>
+        <aside className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-l border-slate-200 dark:border-[#0d2040]/80 px-4 pb-8 overflow-y-auto space-y-5 bg-slate-50 dark:bg-[#03080f]" style={{ marginTop: "5rem" }}>
 
           {/* Live channels */}
           {liveChannels.length > 0 && (
@@ -619,13 +619,13 @@ export default function Dashboard() {
 
           {/* AI "What to Watch" */}
           <div className="rounded-2xl bg-white dark:bg-[#060d18] border border-slate-200 dark:border-[#0d2040] overflow-hidden">
-            <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[#0d2040]">
+            <div className="flex items-center gap-2.5 px-4 py-3 border-b border-slate-200 dark:border-[#0d2040]">
               <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#a855f7] to-[#1e78ff] flex items-center justify-center flex-shrink-0">
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
               <div>
-                <p className="text-xs font-bold text-[#e8f4ff]">What to Watch</p>
-                <p className="text-xs text-blue-400/40">AI-powered picks</p>
+                <p className="text-xs font-bold text-foreground dark:text-[#e8f4ff]">What to Watch</p>
+                <p className="text-xs text-slate-600 dark:text-blue-400/40">AI-powered picks</p>
               </div>
             </div>
             <div className="p-4">
@@ -659,9 +659,9 @@ export default function Dashboard() {
 
           {/* Quick links */}
           <div className="rounded-2xl bg-white dark:bg-[#060d18] border border-slate-200 dark:border-[#0d2040] overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-[#0d2040]">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-200 dark:border-[#0d2040]">
               <PlaySquare className="w-4 h-4 text-[#1e78ff]" />
-              <p className="text-xs font-bold text-[#e8f4ff]">Clips</p>
+              <p className="text-xs font-bold text-foreground dark:text-[#e8f4ff]">Clips</p>
             </div>
             <div className="p-3 space-y-1">
               {[
