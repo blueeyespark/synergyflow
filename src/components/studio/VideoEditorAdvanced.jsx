@@ -25,7 +25,7 @@ const introTemplates = [
 ];
 
 export default function VideoEditorAdvanced() {
-  const [tab, setTab] = useState("video");
+  const [tab, setTab] = useState("editor");
   const [user, setUser] = useState(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiType, setAiType] = useState(null);
@@ -220,28 +220,13 @@ export default function VideoEditorAdvanced() {
     <div className="space-y-6">
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="mb-6 flex flex-wrap gap-1 h-auto">
-          <TabsTrigger value="video" className="gap-2">
-            <Upload className="w-4 h-4" /> Video
-          </TabsTrigger>
-          <TabsTrigger value="thumbnail" className="gap-2">
-            <Palette className="w-4 h-4" /> Thumbnail
-          </TabsTrigger>
-          <TabsTrigger value="intros" className="gap-2">
-            <Type className="w-4 h-4" /> Intros
-          </TabsTrigger>
-          <TabsTrigger value="music" className="gap-2">
-            <Music className="w-4 h-4" /> Music
-          </TabsTrigger>
-          <TabsTrigger value="media" className="gap-2">
-            <Image className="w-4 h-4" /> Media Library
-          </TabsTrigger>
-          <TabsTrigger value="ai" className="gap-2">
-            <Sparkles className="w-4 h-4" /> AI Assistant
+          <TabsTrigger value="editor" className="gap-2">
+            <Type className="w-4 h-4" /> Intros Editor
           </TabsTrigger>
         </TabsList>
 
-        {/* Video Editor Tab */}
-        <TabsContent value="video" className="space-y-4">
+        {/* Intros Editor Tab */}
+        <TabsContent value="editor" className="space-y-4">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
             {video ? (
               <div className="space-y-4">
@@ -342,94 +327,11 @@ export default function VideoEditorAdvanced() {
           )}
         </TabsContent>
 
-        {/* Thumbnail Tab */}
-        <TabsContent value="thumbnail" className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
-              <div className="flex justify-center bg-slate-100 dark:bg-[#050a14] rounded-xl p-4 mb-4">
-                <canvas ref={canvasRef} className="max-w-full border-2 border-slate-300 dark:border-blue-900/40 rounded-lg" style={{ maxHeight: "500px" }} />
-              </div>
-              <Button onClick={handleDownloadThumbnail} className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 gap-2">
-                <Download className="w-4 h-4" /> Download Thumbnail
-              </Button>
-            </motion.div>
-          </div>
 
+
+        {/* Video, Thumbnail, Music, Media, and AI all merged into Intros Editor */}
+        <TabsContent value="editor" className="space-y-6">
           <div className="space-y-4">
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-3">Size</h3>
-              <div className="space-y-2">
-                {presets.map((p) => (
-                  <button
-                    key={p.name}
-                    onClick={() => setPreset(p)}
-                    className={`w-full p-2 text-sm rounded-lg border-2 transition-all ${
-                      preset.name === p.name ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 font-medium text-cyan-900 dark:text-cyan-300" : "border-slate-200 dark:border-blue-900/40 text-slate-700 dark:text-blue-400/60 hover:border-slate-300"
-                    }`}
-                  >
-                    {p.name} ({p.ratio})
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-3 flex items-center gap-2">
-                <Palette className="w-4 h-4" /> Colors
-              </h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Background</label>
-                  <div className="flex gap-2">
-                    <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} className="w-12 h-10 rounded cursor-pointer border border-slate-300" />
-                    <Input value={bgColor} onChange={(e) => setBgColor(e.target.value)} className="text-sm flex-1" />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Text Color</label>
-                  <div className="flex gap-2">
-                    <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-12 h-10 rounded cursor-pointer border border-slate-300" />
-                    <Input value={textColor} onChange={(e) => setTextColor(e.target.value)} className="text-sm flex-1" />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-3 flex items-center gap-2">
-                <Type className="w-4 h-4" /> Text
-              </h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Main Text</label>
-                  <Input value={mainText} onChange={(e) => setMainText(e.target.value.toUpperCase())} placeholder="Your text here" className="text-sm uppercase" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-blue-400/60 block mb-2">Font Size: {fontSize}px</label>
-                  <input type="range" min="20" max="100" value={fontSize} onChange={(e) => setFontSize(parseInt(e.target.value))} className="w-full" />
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-3">Background Image</h3>
-              <label className="flex flex-col items-center justify-center p-3 border-2 border-dashed border-slate-300 dark:border-blue-900/40 rounded-lg cursor-pointer hover:border-slate-400 transition-colors">
-                <Zap className="w-5 h-5 text-slate-400 dark:text-blue-400/40 mb-1" />
-                <p className="text-xs text-slate-600 dark:text-blue-400/60">Upload Image</p>
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-              </label>
-              {uploadedImage && (
-                <Button onClick={() => setUploadedImage(null)} variant="outline" size="sm" className="w-full mt-2">
-                  <Trash2 className="w-3 h-3 mr-1" /> Remove
-                </Button>
-              )}
-            </motion.div>
-          </div>
-        </TabsContent>
-
-        {/* Intros & Outros Tab */}
-        <TabsContent value="intros" className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
             {/* Intro Preview */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
               <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Intro Preview</h3>
@@ -508,8 +410,7 @@ export default function VideoEditorAdvanced() {
           </div>
         </TabsContent>
 
-        {/* Music Tab */}
-        <TabsContent value="music" className="space-y-4">
+          {/* Music & Audio */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
             <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Music & Audio</h3>
             {music ? (
@@ -544,11 +445,10 @@ export default function VideoEditorAdvanced() {
               <Sparkles className="w-4 h-4" /> Generate with AI
             </Button>
           </motion.div>
-        </TabsContent>
 
-        {/* Media Library Tab */}
-        <TabsContent value="media" className="space-y-4">
+          {/* Media Library */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
+            <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">Media Library</h3>
             <div className="flex gap-2 mb-4">
               <Input 
                 placeholder="Search media..." 
@@ -591,34 +491,33 @@ export default function VideoEditorAdvanced() {
               </div>
             )}
           </motion.div>
-        </TabsContent>
 
-        {/* AI Assistant Tab */}
-        <TabsContent value="ai" className="space-y-4">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid md:grid-cols-3 gap-4 mb-6">
-            {[
-              { id: "image", icon: Image, label: "Generate Image", desc: "Create images with AI" },
-              { id: "video", icon: MessageSquare, label: "Generate Video", desc: "Synthesize video content" },
-              { id: "music", icon: Music, label: "Generate Music", desc: "Create background tracks" },
-            ].map(tool => (
-              <motion.button
-                key={tool.id}
-                whileHover={{ scale: 1.02 }}
-                onClick={() => setAiType(tool.id) || setAiModalOpen(true)}
-                className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6 hover:border-blue-500/50 transition-colors text-left"
-              >
-                <tool.icon className="w-8 h-8 text-blue-400 mb-3" />
-                <h4 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-1">{tool.label}</h4>
-                <p className="text-sm text-slate-600 dark:text-blue-400/60">{tool.desc}</p>
-              </motion.button>
-            ))}
+          {/* AI Generation */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6">
+            <h3 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-4">AI Generation</h3>
+            <div className="grid md:grid-cols-3 gap-4 mb-6">
+              {[
+                { id: "image", icon: Image, label: "Generate Image", desc: "Create images with AI" },
+                { id: "video", icon: MessageSquare, label: "Generate Video", desc: "Synthesize video content" },
+                { id: "music", icon: Music, label: "Generate Music", desc: "Create background tracks" },
+              ].map(tool => (
+                <motion.button
+                  key={tool.id}
+                  whileHover={{ scale: 1.02 }}
+                  onClick={() => setAiType(tool.id) || setAiModalOpen(true)}
+                  className="bg-slate-100 dark:bg-[#050a14] rounded-xl border border-slate-200 dark:border-blue-900/40 p-4 hover:border-blue-500/50 transition-colors text-left"
+                >
+                  <tool.icon className="w-6 h-6 text-blue-400 mb-2" />
+                  <h4 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-1 text-sm">{tool.label}</h4>
+                  <p className="text-xs text-slate-600 dark:text-blue-400/60">{tool.desc}</p>
+                </motion.button>
+              ))}
+            </div>
+            <div className="border-t border-slate-200 dark:border-blue-900/40 pt-4">
+              <h4 className="text-sm font-semibold text-slate-900 dark:text-[#e8f4ff] mb-3">Content Tools</h4>
+              <AIContentTools />
+            </div>
           </motion.div>
-
-          <div className="border-t border-slate-200 dark:border-blue-900/40 pt-6">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-[#e8f4ff] mb-4">Content Tools</h3>
-            <AIContentTools />
-          </div>
-        </TabsContent>
       </Tabs>
 
       {/* AI Generation Modal */}
