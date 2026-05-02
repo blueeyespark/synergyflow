@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Image, BarChart2, X, ThumbsUp, MessageCircle, Send, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import AuthPrompt from "@/components/AuthPrompt";
 
 function timeAgo(dateStr) {
   if (!dateStr) return "recently";
@@ -18,13 +19,14 @@ function timeAgo(dateStr) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function PostCard({ post, user, onLike, onComment }) {
+function PostCard({ post, user, onLike, onComment, onAuthRequired }) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [localLikes, setLocalLikes] = useState(post.likes || 0);
   const [liked, setLiked] = useState(false);
 
   const handleLike = () => {
+    if (!user) { onAuthRequired("like posts"); return; }
     if (liked) return;
     setLiked(true);
     setLocalLikes(l => l + 1);
@@ -32,9 +34,15 @@ function PostCard({ post, user, onLike, onComment }) {
   };
 
   const handleComment = async () => {
+    if (!user) { onAuthRequired("comment on posts"); return; }
     if (!commentText.trim()) return;
     await onComment(post.id, commentText);
     setCommentText("");
+  };
+
+  const handleShowComments = () => {
+    if (!user) { onAuthRequired("comment on posts"); return; }
+    setShowComments(!showComments);
   };
 
   return (
@@ -100,7 +108,7 @@ function PostCard({ post, user, onLike, onComment }) {
           {localLikes > 0 && <span>{localLikes}</span>}
         </button>
         <button
-          onClick={() => setShowComments(!showComments)}
+          onClick={handleShowComments}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
         >
           <MessageCircle className="w-4 h-4" />
@@ -258,6 +266,7 @@ function CreatePostBox({ user, onPost }) {
 
 export default function CommunityPosts() {
   const [user, setUser] = useState(null);
+  const [authPrompt, setAuthPrompt] = useState(null);
   const queryClient = useQueryClient();
 
   useEffect(() => { base44.auth.me().then(setUser); }, []);
@@ -332,7 +341,16 @@ export default function CommunityPosts() {
 
   return (
     <div className="space-y-4">
-      <CreatePostBox user={user} onPost={createPost} />
+      {user ? (
+        <CreatePostBox user={user} onPost={createPost} />
+      ) : (
+        <button
+          onClick={() => setAuthPrompt("create community posts")}
+          className="w-full py-4 bg-white dark:bg-zinc-900 border border-dashed border-gray-300 dark:border-zinc-700 rounded-2xl text-sm text-gray-400 dark:text-zinc-500 hover:border-gray-400 dark:hover:border-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 transition-colors flex items-center justify-center gap-2"
+        >
+          <MessageCircle className="w-4 h-4" /> Sign in to post to the community...
+        </button>
+      )}
 
       {isLoading ? (
         <div className="text-center py-8 text-gray-400 dark:text-zinc-500 text-sm">Loading posts...</div>
@@ -344,10 +362,12 @@ export default function CommunityPosts() {
       ) : (
         <AnimatePresence>
           {normalisedPosts.map(post => (
-            <PostCard key={post.id} post={post} user={user} onLike={handleLike} onComment={handleComment} />
+            <PostCard key={post.id} post={post} user={user} onLike={handleLike} onComment={handleComment} onAuthRequired={setAuthPrompt} />
           ))}
         </AnimatePresence>
       )}
+
+      {authPrompt && <AuthPrompt action={authPrompt} onClose={() => setAuthPrompt(null)} />}
     </div>
   );
 }

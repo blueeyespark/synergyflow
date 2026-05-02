@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { X, ThumbsUp, ThumbsDown, Share2, Bell, MoreHorizontal, ChevronUp, ChevronDown, Settings, Clock, Scissors } from "lucide-react";
+import { X, ThumbsUp, ThumbsDown, Share2, Bell, MoreHorizontal, ChevronUp, ChevronDown, Settings, Clock } from "lucide-react";
 import MerchShelf from "@/components/video/MerchShelf";
 import ClipsMaker from "@/components/video/ClipsMaker";
 import { motion, AnimatePresence } from "framer-motion";
+import AuthPrompt from "@/components/AuthPrompt";
 
 function timeAgoShort(dateStr) {
   if (!dateStr) return "";
@@ -44,6 +45,7 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [user, setUser] = useState(null);
+  const [authPrompt, setAuthPrompt] = useState(null); // action string or null
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [sleepTimer, setSleepTimer] = useState(null);
@@ -60,8 +62,13 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
       .then(setComments).catch(() => {});
   }, [video.id]);
 
-  const handleLike = () => { setLiked(!liked); if (disliked) setDisliked(false); };
-  const handleDislike = () => { setDisliked(!disliked); if (liked) setLiked(false); };
+  const requireAuth = (action, fn) => {
+    if (!user) { setAuthPrompt(action); return; }
+    fn();
+  };
+
+  const handleLike = () => requireAuth("like videos", () => { setLiked(!liked); if (disliked) setDisliked(false); });
+  const handleDislike = () => requireAuth("dislike videos", () => { setDisliked(!disliked); if (liked) setLiked(false); });
 
   const setSpeed = (speed) => {
     setPlaybackSpeed(speed);
@@ -179,7 +186,7 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
                       <p className="text-gray-500 dark:text-zinc-400 text-xs">{formatViews(channel?.subscriber_count || 0)} subscribers</p>
                     </div>
                     <button
-                      onClick={() => setSubscribed(!subscribed)}
+                      onClick={() => requireAuth("subscribe to channels", () => setSubscribed(!subscribed))}
                       className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors flex-shrink-0 ${
                         subscribed
                           ? "bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-300 dark:hover:bg-zinc-600"
@@ -285,7 +292,7 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
                 {activeTab === "comments" && (
                 <div>
                   <h3 className="text-gray-900 dark:text-white font-semibold mb-3">{comments.length} Comments</h3>
-                  {user && (
+                  {user ? (
                     <div className="flex gap-3 mb-4">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                         {user.full_name?.charAt(0) || "U"}
@@ -306,6 +313,13 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
                         )}
                       </div>
                     </div>
+                  ) : (
+                    <button
+                      onClick={() => setAuthPrompt("comment on videos")}
+                      className="w-full mb-4 py-2.5 text-sm text-gray-400 dark:text-zinc-500 border border-dashed border-gray-300 dark:border-zinc-700 rounded-xl hover:border-gray-400 dark:hover:border-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 transition-colors"
+                    >
+                      Sign in to comment...
+                    </button>
                   )}
                   <div className="space-y-4">
                     {comments.map(c => {
@@ -370,6 +384,8 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
           </div>
         </motion.div>
       </motion.div>
+
+      {authPrompt && <AuthPrompt action={authPrompt} onClose={() => setAuthPrompt(null)} />}
     </AnimatePresence>
   );
 }
