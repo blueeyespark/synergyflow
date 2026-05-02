@@ -369,9 +369,6 @@ export default function Dashboard() {
   const TABS = [
     { id: "home",      label: "Home" },
     { id: "following", label: "Following", badge: mySubscriptions.length },
-    { id: "trending",  label: "Trending" },
-    { id: "watchlater",label: "Watch Later", badge: watchLater.length },
-    { id: "history",   label: "Watch History", badge: watchHistory.length },
   ];
 
   return (
