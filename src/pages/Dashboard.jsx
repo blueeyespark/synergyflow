@@ -678,7 +678,7 @@ export default function Dashboard() {
                   <span className="text-xs text-blue-300/60 group-hover:text-blue-200 transition-colors">{a.label}</span>
                   <ChevronRight className="w-3 h-3 text-blue-400/20 ml-auto" />
                 </Link>
-              );
+                );
               })}
             </div>
           </div>
