@@ -33,14 +33,7 @@ const SIDEBAR_LIBRARY = [
   { icon: Download, label: "Downloads" },
 ];
 
-const MOCK_FOLLOWING = [
-  { name: "NightOwlGG", avatar: "N", color: "#6366f1", live: true },
-  { name: "ByteQueen", avatar: "B", color: "#ec4899", live: false },
-  { name: "ZenithCast", avatar: "Z", color: "#8b5cf6", live: true },
-  { name: "PixelFrost", avatar: "P", color: "#06b6d4", live: false },
-  { name: "SolarFlare", avatar: "S", color: "#f59e0b", live: true },
-  { name: "ArcLight", avatar: "A", color: "#22c55e", live: false },
-];
+
 
 function formatViews(n) {
   if (!n) return "0";
@@ -380,24 +373,34 @@ export default function Dashboard() {
 
         {/* Following */}
         <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-3 mb-2">Following</p>
-        <div className="space-y-0.5">
-          {(showMoreFollowing ? MOCK_FOLLOWING : MOCK_FOLLOWING.slice(0, 5)).map(ch => (
-            <button key={ch.name} className={`${btnBase} ${btnIdle}`}>
-              <div className="relative flex-shrink-0">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-black" style={{ background: ch.color }}>
-                  {ch.avatar}
-                </div>
-                {ch.live && <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 border border-[#03080f]" />}
-              </div>
-              <span className="text-xs truncate">{ch.name}</span>
-              {ch.live && <span className="ml-auto text-xs text-red-400 font-semibold">LIVE</span>}
-            </button>
-          ))}
-        </div>
-        <button onClick={() => setShowMoreFollowing(!showMoreFollowing)} className={`${btnBase} ${btnIdle} text-xs mt-0.5`}>
-          <ChevronDown className={`w-4 h-4 text-blue-400/30 transition-transform ${showMoreFollowing ? "rotate-180" : ""}`} />
-          {showMoreFollowing ? "Show less" : "Show more"}
-        </button>
+        {[...subscribedChannelIds].length === 0 ? (
+          <p className="text-xs text-blue-400/30 px-3 py-1">Not following anyone yet</p>
+        ) : (
+          <div className="space-y-0.5">
+            {[...subscribedChannelIds].slice(0, showMoreFollowing ? undefined : 5).map(cid => {
+              const ch = channelMap[cid];
+              if (!ch) return null;
+              return (
+                <Link key={cid} to={`/Channel?id=${cid}`} className={`${btnBase} ${btnIdle}`}>
+                  <div className="relative flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] flex items-center justify-center text-white text-xs font-black">
+                      {ch.channel_name?.charAt(0) || "C"}
+                    </div>
+                    {ch.is_live && <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 border border-[#03080f]" />}
+                  </div>
+                  <span className="text-xs truncate">{ch.channel_name}</span>
+                  {ch.is_live && <span className="ml-auto text-xs text-red-400 font-semibold">LIVE</span>}
+                </Link>
+              );
+            })}
+            {[...subscribedChannelIds].length > 5 && (
+              <button onClick={() => setShowMoreFollowing(!showMoreFollowing)} className={`${btnBase} ${btnIdle} text-xs mt-0.5`}>
+                <ChevronDown className={`w-4 h-4 text-blue-400/30 transition-transform ${showMoreFollowing ? "rotate-180" : ""}`} />
+                {showMoreFollowing ? "Show less" : `+${[...subscribedChannelIds].length - 5} more`}
+              </button>
+            )}
+          </div>
+        )}
       </aside>
 
       {/* Mobile overlay */}
