@@ -26,7 +26,7 @@ function timeAgo(dateStr) {
 }
 
 // ── Create Channel Form ────────────────────────────────────────────────────────
-function CreateChannelForm({ userEmail, onCreated }) {
+function CreateChannelForm({ userEmail, onCreated, onCancel }) {
   const [channelName, setChannelName] = useState("");
   const [description, setDescription] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -129,15 +129,18 @@ function CreateChannelForm({ userEmail, onCreated }) {
               />
             </div>
 
-            <Button onClick={handleCreate} disabled={creating || !channelName.trim()} className="w-full gap-2">
-              {creating ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Creating...</> : <><Zap className="w-4 h-4" /> Create Channel</>}
-            </Button>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  );
-}
+            <div className="flex gap-2">
+              <Button onClick={handleCreate} disabled={creating || !channelName.trim()} className="flex-1 gap-2">
+                {creating ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Creating...</> : <><Zap className="w-4 h-4" /> Create Channel</>}
+              </Button>
+              <Button variant="outline" onClick={onCancel}>Cancel</Button>
+            </div>
+            </div>
+            </div>
+            </motion.div>
+            </div>
+            );
+            }
 
 // ── Main Channel Page ─────────────────────────────────────────────────────────
 export default function ChannelPage() {
@@ -208,6 +211,7 @@ export default function ChannelPage() {
               refetchChannels();
               setShowCreateForm(false);
             }}
+            onCancel={() => navigate("/")}
           />
         );
       }
