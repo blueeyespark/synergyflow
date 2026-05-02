@@ -103,15 +103,20 @@ App: Planify - A project management and collaboration platform with:
 - AI Bug Monitor for reporting and analyzing bugs
 - Project Templates library
 - AI Scanner for self-analysis and competitor scanning
+- Creator Studio for video/content management
+- Live streaming and clips
+- Subscriptions and monetization
 
 Provide:
-1. Potential bugs or reliability issues (be specific to the features listed)
-2. UX/UI improvements for better usability
-3. Missing features that users would expect in a PM app
-4. Performance optimizations
-5. Mobile experience improvements
+1. Critical bugs, edge cases, and error handling issues (be specific)
+2. UX/UI improvements for better usability, accessibility, and performance
+3. Missing features that would add significant value
+4. Performance optimizations and caching strategies
+5. Mobile responsiveness and touch interaction improvements
+6. Security and data validation improvements
+7. Real-time sync and offline capability enhancements
 
-Be specific and actionable. Reference actual features.`;
+Be specific, actionable, and reference actual features. Include effort estimates.`;
 
 export default function AIScanner() {
   const [user, setUser] = useState(null);
@@ -150,12 +155,29 @@ export default function AIScanner() {
 
   // Auto-apply: generates code, logs it silently, and APPLIES via autoImplementCode without staff approval
   const autoApplyCode = async (item, type) => {
-    const key = `${type}-${item.title}`;
+    const itemKey = item.title || item.feature;
+    const key = `${type}-${itemKey}`;
     setAutoApplying(prev => new Set([...prev, key]));
-    toast.loading(`Auto-coding "${item.title}"...`, { id: key });
+    toast.loading(`Auto-coding "${itemKey}"...`, { id: key });
     try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an expert React/Tailwind developer working on Planify. Auto-implement this suggestion:
+      const isExternal = type === 'feature' && item.feature; // External feature has 'feature' field
+      const prompt = isExternal
+        ? `You are an expert React/Tailwind developer working on Planify. Auto-implement this external feature:
+
+Feature: "${item.feature}"
+Description: "${item.description || ''}"
+How it works: "${item.how_it_works || ''}"
+Implementation steps: "${item.implementation_steps || ''}"
+
+Generate a COMPLETE, PRODUCTION-READY React component:
+- Use Tailwind CSS, shadcn/ui (@/components/ui/), lucide-react (valid icons only), base44 SDK
+- import { base44 } from '@/api/base44Client'
+- export default function ComponentName() pattern
+- Include all state management, data fetching, and logic
+- Include dark mode support
+
+Return the FULL component code, file path, and explanation.`
+        : `You are an expert React/Tailwind developer working on Planify. Auto-implement this suggestion:
 
 Title: "${item.title}"
 Description: "${item.description || ''}"
@@ -166,7 +188,10 @@ Generate a complete, production-ready implementation. Provide:
 2. The FULL component code ready to copy-paste
 3. A one-sentence summary of what was built
 
-Rules: Use React hooks, Tailwind CSS, shadcn/ui (@/components/ui/), lucide-react (valid icons only), base44 SDK (import { base44 } from '@/api/base44Client'), export default function ComponentName() pattern.`,
+Rules: Use React hooks, Tailwind CSS, shadcn/ui (@/components/ui/), lucide-react (valid icons only), base44 SDK (import { base44 } from '@/api/base44Client'), export default function ComponentName() pattern.`;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
         model: 'claude_sonnet_4_6',
         response_json_schema: {
           type: "object",
@@ -177,31 +202,32 @@ Rules: Use React hooks, Tailwind CSS, shadcn/ui (@/components/ui/), lucide-react
           }
         }
       });
-      // Auto-log to AIAppliedChange — no confirmation needed
+      // Auto-log to AIAppliedChange
       await base44.entities.AIAppliedChange.create({
-        title: item.title,
-        source: 'self_scan',
-        change_type: type === 'ux' ? 'ux_improvement' : type === 'feature' ? 'feature' : 'other',
+        title: itemKey,
+        source: isExternal ? 'external_scan' : 'self_scan',
+        change_type: type === 'ux' ? 'ux_improvement' : 'feature',
         file_path: result.file_path || '',
         code_snippet: result.code || '',
         explanation: result.explanation || '',
         applied_by: user?.email || 'ai-scanner',
+        origin_site: isExternal ? (siteAnalysis?.site_name || url) : undefined,
       });
-      // Auto-apply the code via backend function without staff approval
+      // Auto-apply the code via backend function
       if (result.code && result.file_path) {
         try {
           await base44.functions.invoke('autoImplementCode', {
             file_path: result.file_path,
             code: result.code,
           });
-          toast.success(`✅ "${item.title}" auto-applied & logged`, { id: key });
+          toast.success(`✅ "${itemKey}" auto-applied & logged`, { id: key });
         } catch (e) {
           toast.error(`⚠️ Code logged but auto-apply failed: ${e.message}`, { id: key });
         }
       }
       setAppliedItems(prev => new Set([...prev, key]));
     } catch (e) {
-      toast.error(`❌ "${item.title}" failed: ${e.message}`, { id: key });
+      toast.error(`❌ Failed: ${e.message}`, { id: key });
     } finally {
       setAutoApplying(prev => {
         const next = new Set(prev);
@@ -694,15 +720,26 @@ Be very specific — list actual UI components, data interactions, and implement
                                 {f.implementation_steps && <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">📋 {f.implementation_steps}</p>}
                               </div>
                               {f.adaptable && (
-                                <Button size="sm" variant="outline"
-                                  className={`flex-shrink-0 text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-green-700 border-green-300 hover:bg-green-50'}`}
-                                  onClick={() => implementExternalFeature(f)}
-                                  disabled={implementing === key}
-                                >
-                                  {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Code className="w-3 h-3" />}
-                                  {isApplied ? 'View Code' : 'Generate Code'}
-                                </Button>
-                              )}
+                                 <div className="flex gap-1 flex-shrink-0">
+                                   <Button size="sm" variant="outline"
+                                     className={`text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-green-700 border-green-300 hover:bg-green-50'}`}
+                                     onClick={() => implementExternalFeature(f)}
+                                     disabled={implementing === key || autoApplying.has(key)}
+                                   >
+                                     {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Code className="w-3 h-3" />}
+                                     {isApplied ? 'View Code' : 'Generate Code'}
+                                   </Button>
+                                   <Button size="sm"
+                                     className="text-xs gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+                                     onClick={() => autoApplyCode(f, 'feature')}
+                                     disabled={implementing === key || autoApplying.has(key)}
+                                     title="AI auto-generates and applies code"
+                                   >
+                                     {autoApplying.has(key) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                                     Auto-Code
+                                   </Button>
+                                 </div>
+                               )}
                             </div>
                           </div>
                         );
