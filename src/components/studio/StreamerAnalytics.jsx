@@ -369,7 +369,7 @@ export default function StreamerAnalytics() {
             </p>
             <p className="text-xs text-blue-400/40 mb-4">Avg % of video still watching</p>
             <ResponsiveContainer width="100%" height={190}>
-              <AreaChart data={RETENTION_CURVE} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+              <AreaChart data={hasRealData ? RETENTION_CURVE : RETENTION_CURVE.map(r => ({ ...r, viewers: 0 }))} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="sa-gRet" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%"  stopColor="#22c55e" stopOpacity={0.3} />
