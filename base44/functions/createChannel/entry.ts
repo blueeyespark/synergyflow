@@ -7,11 +7,11 @@ function generateUUID() {
 }
 
 Deno.serve(async (req) => {
-  if (req.method !== 'POST') {
-    return Response.json({ error: 'Method not allowed' }, { status: 405 });
-  }
-
   try {
+    if (req.method !== 'POST') {
+      return Response.json({ error: 'Method not allowed' }, { status: 405 });
+    }
+
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
@@ -19,7 +19,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { channel_name, description, categories } = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return Response.json({ error: 'Invalid request body' }, { status: 400 });
+    }
+
+    const { channel_name, description, categories } = body;
 
     if (!channel_name) {
       return Response.json({ error: 'Channel name is required' }, { status: 400 });
@@ -44,12 +51,11 @@ Deno.serve(async (req) => {
     });
 
     return Response.json({
-      channel: channel,
-      rtmp_key: rtmpKey,
-      rtmp_url: `rtmps://live.example.com/app`,
+      data: { channel },
       message: 'Channel created successfully'
     });
   } catch (error) {
+    console.error('Channel creation error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
