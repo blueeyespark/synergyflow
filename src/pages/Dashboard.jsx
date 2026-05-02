@@ -128,7 +128,7 @@ function VideoCard({ video, channel, onClick, watched, user, compact = false }) 
             <MoreVertical className="w-3.5 h-3.5" />
           </button>
           {showMenu && (
-            <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-[#060d18] border border-slate-200 dark:border-blue-900/40 rounded-xl shadow-xl w-48 py-1 text-sm">
+            <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-card border border-slate-200 dark:border-blue-900/40 rounded-xl shadow-xl w-48 py-1 text-sm">
               <button className="w-full flex items-center gap-2 px-3 py-2 hover:bg-blue-900/20 text-blue-200 transition-colors" onClick={toggleWatchLater}>
                 <Clock className="w-4 h-4" /> {watchLater ? "Remove from Watch Later" : "Watch Later"}
               </button>
@@ -618,7 +618,7 @@ export default function Dashboard() {
           )}
 
           {/* AI "What to Watch" */}
-          <div className="rounded-2xl bg-white dark:bg-[#060d18] border border-slate-200 dark:border-[#0d2040] overflow-hidden">
+          <div className="rounded-2xl bg-white dark:bg-card border border-slate-200 dark:border-[#0d2040] overflow-hidden">
             <div className="flex items-center gap-2.5 px-4 py-3 border-b border-slate-200 dark:border-[#0d2040]">
               <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#a855f7] to-[#1e78ff] flex items-center justify-center flex-shrink-0">
                 <Sparkles className="w-3.5 h-3.5 text-white" />
@@ -635,7 +635,7 @@ export default function Dashboard() {
 
           {/* Trending now quick list */}
           {trending.length > 0 && (
-            <div className="rounded-2xl bg-white dark:bg-[#060d18] border border-slate-200 dark:border-[#0d2040] overflow-hidden">
+            <div className="rounded-2xl bg-white dark:bg-card border border-slate-200 dark:border-[#0d2040] overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-200 dark:border-[#0d2040]">
                 <TrendingUp className="w-4 h-4 text-orange-400" />
                 <p className="text-xs font-bold text-[#e8f4ff]">Trending Now</p>
@@ -658,7 +658,7 @@ export default function Dashboard() {
           )}
 
           {/* Quick links */}
-          <div className="rounded-2xl bg-white dark:bg-[#060d18] border border-slate-200 dark:border-[#0d2040] overflow-hidden">
+          <div className="rounded-2xl bg-white dark:bg-card border border-slate-200 dark:border-[#0d2040] overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-200 dark:border-[#0d2040]">
               <PlaySquare className="w-4 h-4 text-[#1e78ff]" />
               <p className="text-xs font-bold text-foreground dark:text-[#e8f4ff]">Clips</p>
@@ -690,7 +690,7 @@ export default function Dashboard() {
             className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
             onClick={e => e.target === e.currentTarget && setShowWatchPartyModal(false)}>
             <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }}
-              className="bg-white dark:bg-[#060d18] border border-slate-200 dark:border-blue-900/40 rounded-2xl p-6 w-full max-w-sm relative">
+              className="bg-white dark:bg-card border border-slate-200 dark:border-blue-900/40 rounded-2xl p-6 w-full max-w-sm relative">
               <button onClick={() => setShowWatchPartyModal(false)} className="absolute top-3 right-3 text-slate-500 dark:text-blue-400/40 hover:text-slate-700 dark:hover:text-blue-300"><X className="w-4 h-4" /></button>
               <div className="w-12 h-12 rounded-2xl bg-[#a855f7]/20 flex items-center justify-center mx-auto mb-4">
                 <Users className="w-6 h-6 text-[#a855f7]" />
