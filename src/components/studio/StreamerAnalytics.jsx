@@ -236,9 +236,9 @@ export default function StreamerAnalytics() {
   const viewsData = useMemo(() => {
     return DAILY_90.slice(90 - range).map(d => ({
       date: d.date,
-      views:       analyticsMap[d.date]?.views      || (hasRealData ? d.views : 0),
-      watch_hours: analyticsMap[d.date]?.watch_time || (hasRealData ? d.watch_hours : 0),
-      subs_gained: hasRealData ? d.subs_gained : 0,
+      views:       analyticsMap[d.date]?.views      ?? 0,
+      watch_hours: analyticsMap[d.date]?.watch_time ?? 0,
+      subs_gained: 0,
     }));
   }, [range, analyticsMap, hasRealData]);
 
@@ -275,10 +275,10 @@ export default function StreamerAnalytics() {
 
         {/* KPI grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <KPI icon={Eye}           label="Total Views"    value={fmt(totalViews)}    sub="all time"         color="#1e78ff" change={18} />
-          <KPI icon={Play}          label="Videos"         value={activeVideos.length} sub="published"       color="#a855f7" change={5}  />
-          <KPI icon={ThumbsUp}      label="Total Likes"    value={fmt(totalLikes)}    sub="all time"         color="#22c55e" change={11} />
-          <KPI icon={MessageSquare} label="Comments"       value={fmt(totalComments)} sub="all time"         color="#f97316" change={7}  />
+          <KPI icon={Eye}           label="Total Views"    value={fmt(totalViews)}    sub="all time"   color="#1e78ff" change={hasRealData ? 18 : undefined} />
+          <KPI icon={Play}          label="Videos"         value={activeVideos.length} sub="published" color="#a855f7" change={hasRealData ? 5  : undefined} />
+          <KPI icon={ThumbsUp}      label="Total Likes"    value={fmt(totalLikes)}    sub="all time"   color="#22c55e" change={hasRealData ? 11 : undefined} />
+          <KPI icon={MessageSquare} label="Comments"       value={fmt(totalComments)} sub="all time"   color="#f97316" change={hasRealData ? 7  : undefined} />
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
           <KPI icon={Clock}         label="Avg Duration"   value={avgDur > 0 ? `${Math.floor(avgDur/60)}m ${avgDur%60}s` : "—"} color="#06b6d4" />
@@ -405,15 +405,7 @@ export default function StreamerAnalytics() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={MOCK_CONTENT.map(c => ({ name: c.title.slice(0, 12), views: c.views }))} layout="vertical" barSize={13} margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 10, fill: "#3a6080" }} tickLine={false} axisLine={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "#3a6080" }} tickLine={false} width={72} />
-                  <Tooltip content={<CyberTooltip />} />
-                  <Bar dataKey="views" name="Views" fill="#f59e0b" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <p className="text-xs text-blue-400/40 text-center py-16">Upload videos to see category data</p>
             )}
           </Card>
 
@@ -676,7 +668,7 @@ export default function StreamerAnalytics() {
           </p>
           <p className="text-xs text-blue-400/40 mb-4">Based on audience activity patterns — higher score = more viewers online</p>
           <ResponsiveContainer width="100%" height={210}>
-            <BarChart data={BEST_TIMES} barSize={20} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+            <BarChart data={hasRealData ? BEST_TIMES : BEST_TIMES.map(t => ({ ...t, score: 0 }))} barSize={20} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
               <XAxis dataKey="hour" tick={{ fontSize: 11, fill: "#3a6080" }} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#3a6080" }} tickLine={false} axisLine={false} domain={[0, 100]} />
@@ -684,7 +676,10 @@ export default function StreamerAnalytics() {
               <Bar dataKey="score" name="Audience Score" fill="#1e78ff" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-          <p className="text-xs text-[#1e78ff] font-bold mt-2">⚡ Peak: 8 PM — best time to go live or premiere</p>
+          {hasRealData
+            ? <p className="text-xs text-[#1e78ff] font-bold mt-2">⚡ Peak: 8 PM — best time to go live or premiere</p>
+            : <p className="text-xs text-blue-400/40 mt-2">Start streaming to see audience activity patterns</p>
+          }
         </Card>
 
         <div className="grid lg:grid-cols-2 gap-5">
@@ -692,14 +687,18 @@ export default function StreamerAnalytics() {
             <p className="text-sm font-bold text-[#e8f4ff] mb-4 flex items-center gap-2">
               <Target className="w-4 h-4 text-green-400" /> Upload Strategy Tips
             </p>
-            <div className="space-y-2.5">
-              {STRATEGY_TIPS.map((t, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 bg-[#0a1525] border border-blue-900/30 rounded-xl">
-                  <span className="text-xs font-bold text-[#1e78ff] bg-[#1e78ff]/15 rounded-lg px-1.5 py-0.5 flex-shrink-0 tabular-nums">{t.score}</span>
-                  <p className="text-xs text-[#9fc3e8]">{t.tip}</p>
-                </div>
-              ))}
-            </div>
+            {hasRealData ? (
+              <div className="space-y-2.5">
+                {STRATEGY_TIPS.map((t, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 bg-[#0a1525] border border-blue-900/30 rounded-xl">
+                    <span className="text-xs font-bold text-[#1e78ff] bg-[#1e78ff]/15 rounded-lg px-1.5 py-0.5 flex-shrink-0 tabular-nums">{t.score}</span>
+                    <p className="text-xs text-[#9fc3e8]">{t.tip}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-blue-400/40 text-center py-10">Upload content to unlock personalized strategy tips</p>
+            )}
           </Card>
 
           <Card>
@@ -707,7 +706,7 @@ export default function StreamerAnalytics() {
               <Zap className="w-4 h-4 text-yellow-400" /> Format Retention Rates
             </p>
             <div className="space-y-4">
-              {CONTENT_FORMATS.map((f, i) => (
+              {(hasRealData ? CONTENT_FORMATS : CONTENT_FORMATS.map(f => ({ ...f, retention: 0 }))).map((f, i) => (
                 <div key={i}>
                   <div className="flex justify-between text-xs mb-1.5">
                     <span className="text-[#c8dff5]">{f.format}</span>
