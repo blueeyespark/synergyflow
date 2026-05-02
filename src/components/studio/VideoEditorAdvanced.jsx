@@ -595,43 +595,29 @@ export default function VideoEditorAdvanced() {
 
         {/* AI Assistant Tab */}
         <TabsContent value="ai" className="space-y-4">
-          <Tabs defaultValue="generation" className="w-full">
-            <TabsList className="mb-4 flex flex-wrap gap-1 h-auto">
-              <TabsTrigger value="generation" className="gap-2">
-                <Sparkles className="w-3.5 h-3.5" /> Generation
-              </TabsTrigger>
-              <TabsTrigger value="content" className="gap-2">
-                <MessageSquare className="w-3.5 h-3.5" /> Content Tools
-              </TabsTrigger>
-            </TabsList>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid md:grid-cols-3 gap-4 mb-6">
+            {[
+              { id: "image", icon: Image, label: "Generate Image", desc: "Create images with AI" },
+              { id: "video", icon: MessageSquare, label: "Generate Video", desc: "Synthesize video content" },
+              { id: "music", icon: Music, label: "Generate Music", desc: "Create background tracks" },
+            ].map(tool => (
+              <motion.button
+                key={tool.id}
+                whileHover={{ scale: 1.02 }}
+                onClick={() => setAiType(tool.id) || setAiModalOpen(true)}
+                className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6 hover:border-blue-500/50 transition-colors text-left"
+              >
+                <tool.icon className="w-8 h-8 text-blue-400 mb-3" />
+                <h4 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-1">{tool.label}</h4>
+                <p className="text-sm text-slate-600 dark:text-blue-400/60">{tool.desc}</p>
+              </motion.button>
+            ))}
+          </motion.div>
 
-            {/* Generation Tab */}
-            <TabsContent value="generation" className="space-y-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid md:grid-cols-3 gap-4">
-                {[
-                  { id: "image", icon: Image, label: "Generate Image", desc: "Create images with AI" },
-                  { id: "video", icon: MessageSquare, label: "Generate Video", desc: "Synthesize video content" },
-                  { id: "music", icon: Music, label: "Generate Music", desc: "Create background tracks" },
-                ].map(tool => (
-                  <motion.button
-                    key={tool.id}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => setAiType(tool.id) || setAiModalOpen(true)}
-                    className="bg-white dark:bg-[#060d18] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-sm p-6 hover:border-blue-500/50 transition-colors text-left"
-                  >
-                    <tool.icon className="w-8 h-8 text-blue-400 mb-3" />
-                    <h4 className="font-semibold text-slate-900 dark:text-[#e8f4ff] mb-1">{tool.label}</h4>
-                    <p className="text-sm text-slate-600 dark:text-blue-400/60">{tool.desc}</p>
-                  </motion.button>
-                ))}
-              </motion.div>
-            </TabsContent>
-
-            {/* Content Tools Tab */}
-            <TabsContent value="content" className="space-y-4">
-              <AIContentTools />
-            </TabsContent>
-          </Tabs>
+          <div className="border-t border-slate-200 dark:border-blue-900/40 pt-6">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-[#e8f4ff] mb-4">Content Tools</h3>
+            <AIContentTools />
+          </div>
         </TabsContent>
       </Tabs>
 
