@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -287,16 +287,15 @@ export default function Dashboard() {
     staleTime: 2 * 60 * 1000,
   });
 
-  const channelMap = channels.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
-  const subscribedChannelIds = new Set(mySubscriptions.map(s => s.channel_id));
-  const liveChannels = channels.filter(c => c.is_live);
+  const channelMap = useMemo(() => channels.reduce((acc, c) => { acc[c.id] = c; return acc; }, {}), [channels]);
+  const subscribedChannelIds = useMemo(() => new Set(mySubscriptions.map(s => s.channel_id)), [mySubscriptions]);
+  const liveChannels = useMemo(() => channels.filter(c => c.is_live), [channels]);
   const featuredLive = liveChannels[0];
 
-  const mainVideos = videos.filter(v => v.status !== "deleted" && v.status !== "uploading");
-  const clips = mainVideos.filter(v => v.duration_seconds > 0 && v.duration_seconds < 90);
-  const regularVideos = mainVideos.filter(v => !v.duration_seconds || v.duration_seconds >= 60);
+  const mainVideos = useMemo(() => videos.filter(v => v.status !== "deleted" && v.status !== "uploading"), [videos]);
+  const clips = useMemo(() => mainVideos.filter(v => v.duration_seconds > 0 && v.duration_seconds < 90), [mainVideos]);
+  const regularVideos = useMemo(() => mainVideos.filter(v => !v.duration_seconds || v.duration_seconds >= 60), [mainVideos]);
 
-  // Mood filtering
   const moodKeywords = {
     chill: ["chill", "relax", "lofi", "calm", "sleep", "ambient", "study"],
     hype: ["hype", "epic", "insane", "crazy", "highlight", "gaming", "clutch", "wins"],
@@ -309,10 +308,13 @@ export default function Dashboard() {
     social: ["vlog", "irl", "reaction", "collab", "podcast", "interview", "stream"],
   };
 
-  const filterByMood = (vids) => {
-    if (activeMood === "all") return vids;
+  const displayVideos = useMemo(() => {
+    if (searchQuery) {
+      return mainVideos.filter(v => v.title?.toLowerCase().includes(searchQuery.toLowerCase()) || v.description?.toLowerCase().includes(searchQuery.toLowerCase()));
+    }
+    if (activeMood === "all") return regularVideos;
     const keywords = moodKeywords[activeMood] || [];
-    return vids.filter(v =>
+    const moodFiltered = regularVideos.filter(v =>
       keywords.some(kw =>
         v.title?.toLowerCase().includes(kw) ||
         v.description?.toLowerCase().includes(kw) ||
@@ -320,17 +322,13 @@ export default function Dashboard() {
         v.tags?.some(t => t.toLowerCase().includes(kw))
       )
     );
-  };
+    return moodFiltered.length > 0 ? moodFiltered : regularVideos;
+  }, [mainVideos, regularVideos, activeMood, searchQuery, moodKeywords]);
 
-  const moodFiltered = filterByMood(regularVideos);
-  const displayVideos = searchQuery
-    ? mainVideos.filter(v => v.title?.toLowerCase().includes(searchQuery.toLowerCase()) || v.description?.toLowerCase().includes(searchQuery.toLowerCase()))
-    : moodFiltered.length > 0 ? moodFiltered : regularVideos;
-
-  const trending = [...regularVideos].sort((a, b) => (b.view_count || 0) - (a.view_count || 0)).slice(0, 6);
-  const subVideos = regularVideos.filter(v => subscribedChannelIds.has(v.channel_id)).sort((a, b) => new Date(b.published_date || b.created_date) - new Date(a.published_date || a.created_date));
-  const watchLaterVideos = mainVideos.filter(v => watchLater.includes(v.id));
-  const continueWatching = mainVideos.filter(v => watchHistory.slice(0, 10).includes(v.id));
+  const trending = useMemo(() => [...regularVideos].sort((a, b) => (b.view_count || 0) - (a.view_count || 0)).slice(0, 6), [regularVideos]);
+  const subVideos = useMemo(() => regularVideos.filter(v => subscribedChannelIds.has(v.channel_id)).sort((a, b) => new Date(b.published_date || b.created_date) - new Date(a.published_date || a.created_date)), [regularVideos, subscribedChannelIds]);
+  const watchLaterVideos = useMemo(() => mainVideos.filter(v => watchLater.includes(v.id)), [mainVideos, watchLater]);
+  const continueWatching = useMemo(() => mainVideos.filter(v => watchHistory.slice(0, 10).includes(v.id)), [mainVideos, watchHistory]);
 
   const handleOpenVideo = useCallback((video) => {
     setSelectedVideo(video);
@@ -478,10 +476,8 @@ export default function Dashboard() {
                         <Link to="/Shorts" className="text-xs text-[#1e78ff] hover:text-[#00c8ff] font-semibold transition-colors">View all →</Link>
                       </div>
                       <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-                        {clips.slice(0, 12).map((v, i) => (
-                          <motion.div key={v.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
-                            <ClipCard video={v} onClick={handleOpenVideo} />
-                          </motion.div>
+                        {clips.slice(0, 12).map((v) => (
+                          <ClipCard key={v.id} video={v} onClick={handleOpenVideo} />
                         ))}
                       </div>
                     </section>
@@ -502,11 +498,9 @@ export default function Dashboard() {
                                 <span className="text-xs text-slate-500 dark:text-blue-400/30">{displayVideos.length}</span>
                       </div>
                       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                        {displayVideos.map((video, i) => (
-                          <motion.div key={video.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                            <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} user={user} />
-                          </motion.div>
-                        ))}
+                         {displayVideos.map((video) => (
+                           <VideoCard key={video.id} video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} user={user} />
+                         ))}
                       </div>
                     </section>
                   ) : (
@@ -531,10 +525,8 @@ export default function Dashboard() {
                     <SubStrip subscriptions={mySubscriptions} channelMap={channelMap} />
                     {subVideos.length > 0 ? (
                       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                        {subVideos.map((video, i) => (
-                          <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                            <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} user={user} />
-                          </motion.div>
+                        {subVideos.map((video) => (
+                          <VideoCard key={video.id} video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} user={user} />
                         ))}
                       </div>
                     ) : (
