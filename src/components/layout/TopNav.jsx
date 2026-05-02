@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
-import WorkspaceSelector from "@/components/workspace/WorkspaceSelector";
 import NavDropdown from "./NavDropdown";
 
 const navGroups = [
@@ -66,10 +65,7 @@ export default function TopNav({
               </div>
               <span className="font-black hidden sm:block text-lg tracking-widest uppercase" style={{background:'linear-gradient(135deg,#1e78ff,#00c8ff)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>VStream</span>
             </Link>
-            <span className="text-blue-800 hidden sm:block">/</span>
-            <div className="hidden sm:block">
-              <WorkspaceSelector currentWorkspace={currentWorkspace} onWorkspaceChange={onWorkspaceChange} user={user} />
-            </div>
+
           </div>
 
           {/* Desktop Nav */}
