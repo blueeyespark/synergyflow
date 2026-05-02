@@ -47,6 +47,7 @@ export default function TopNav({
   onMarkAsRead,
   onMarkAllRead,
   onDeleteNotification,
+  newVideos = [],
   currentWorkspace,
   onWorkspaceChange,
 }) {
@@ -109,6 +110,7 @@ export default function TopNav({
               onMarkAsRead={onMarkAsRead}
               onMarkAllRead={onMarkAllRead}
               onDelete={onDeleteNotification}
+              newVideos={newVideos}
             />
 
             <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-blue-900/40">

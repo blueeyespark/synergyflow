@@ -70,6 +70,39 @@ export default function Layout({ children, currentPageName }) {
     refetchInterval: 30000,
   });
 
+  const { data: subscriptions = [] } = useQuery({
+    queryKey: ["my-subscriptions", user?.email],
+    queryFn: () => base44.entities.Subscription.filter({ subscriber_email: user.email, status: "active" }),
+    enabled: !!user?.email,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const { data: allVideos = [] } = useQuery({
+    queryKey: ["videos-all"],
+    queryFn: () => base44.entities.Video.list("-created_date", 60),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: allChannels = [] } = useQuery({
+    queryKey: ["channels-all"],
+    queryFn: () => base44.entities.Channel.list(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // New videos from subscribed channels in the last 7 days
+  const newVideosFromFollowed = (() => {
+    const subscribedChannelIds = new Set(subscriptions.map(s => s.channel_id));
+    const channelMap = allChannels.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return allVideos
+      .filter(v =>
+        subscribedChannelIds.has(v.channel_id) &&
+        v.status === "ready" &&
+        new Date(v.created_date).getTime() > sevenDaysAgo
+      )
+      .map(v => ({ video: v, channel: channelMap[v.channel_id] }));
+  })();
+
   const markAsReadMutation = useMutation({
     mutationFn: (id) => base44.entities.Notification.update(id, { is_read: true }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
@@ -164,6 +197,7 @@ export default function Layout({ children, currentPageName }) {
         onMarkAsRead={(id) => markAsReadMutation.mutate(id)}
         onMarkAllRead={() => markAllReadMutation.mutate()}
         onDeleteNotification={(id) => deleteNotificationMutation.mutate(id)}
+        newVideos={newVideosFromFollowed}
         currentWorkspace={currentWorkspace}
         onWorkspaceChange={setCurrentWorkspace}
       />

@@ -13,6 +13,7 @@ import {
   BarChart2, MessageSquare, Share2, Star, Zap, Target, Radio,
   Calendar, Globe
 } from "lucide-react";
+import CreatorSummaryBanner from "./CreatorSummaryBanner";
 
 // ── Static seed data (stable references, no random on render) ────────────────
 
@@ -268,6 +269,8 @@ export default function StreamerAnalytics() {
 
   return (
     <div className="space-y-8 pb-6">
+
+      <CreatorSummaryBanner />
 
       {/* ── 1. PERFORMANCE OVERVIEW ──────────────────────────────────────── */}
       <section>
