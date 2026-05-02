@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Sparkles, TrendingUp, Heart, MessageCircle, Share2, Play, BarChart, Eye } from "lucide-react";
+import { Sparkles, TrendingUp, Heart, Play, BarChart } from "lucide-react";
 
 export default function AnalyticsPlus() {
   const [user, setUser] = useState(null);
-  useState(() => { base44.auth.me().then(setUser); }, []);
+  useEffect(() => { base44.auth.me().then(setUser); }, []);
 
   const { data: videos = [] } = useQuery({
     queryKey: ["videos-discovery"],

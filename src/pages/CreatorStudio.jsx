@@ -3,8 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Globe, Bot, Upload, BarChart3, Calendar,
-  Users, ImageIcon, ArrowLeft, TrendingUp, Edit3, Zap, Activity, ShoppingBag
+  Upload, BarChart3, Calendar, Users, ArrowLeft, TrendingUp, Edit3, Zap
 } from "lucide-react";
 import ProductionHub from "@/components/studio/ProductionHub";
 import PlanningHub from "@/components/studio/PlanningHub";
@@ -16,7 +15,7 @@ import CommunityEngagement from "@/components/studio/CommunityEngagement";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
-  { id: "editchannel",label: "Channel",       icon: Edit3,      component: ChannelEditor },
+  { id: "channel",    label: "Channel",       icon: Edit3,      component: ChannelEditor },
   { id: "production", label: "Production",    icon: Upload,     component: ProductionHub },
   { id: "planning",   label: "Planning",      icon: Calendar,   component: PlanningHub },
   { id: "analytics",  label: "Analytics",     icon: BarChart3,  component: AnalyticsHub },
@@ -31,8 +30,8 @@ export default function CreatorStudio() {
   const navigate = useNavigate();
 
   const urlParams = new URLSearchParams(window.location.search);
-  const tabParam = urlParams.get("tab");
-  const [activeTab, setActiveTab] = useState(tabParam || "channel");
+  const tabParam = urlParams.get("tab") || "production";
+  const [activeTab, setActiveTab] = useState(tabParam);
 
   useEffect(() => {
     base44.auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
@@ -115,17 +114,12 @@ export default function CreatorStudio() {
         </div>
       </div>
 
-      {/* Content — tabs stay mounted to avoid re-connection storms */}
+      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {tabs.map(tab => {
-          const TabComponent = tab.component;
-          const isActive = activeTab === tab.id;
-          return (
-            <div key={tab.id} style={{ display: isActive ? "block" : "none" }}>
-              <TabComponent />
-            </div>
-          );
-        })}
+        {(() => {
+          const ActiveTab = tabs.find(t => t.id === activeTab);
+          return ActiveTab ? <ActiveTab.component /> : null;
+        })()}
       </div>
     </div>
   );

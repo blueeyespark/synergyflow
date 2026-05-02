@@ -7,7 +7,6 @@ import ThumbnailMaker from "@/pages/ThumbnailMaker";
 import IntroOutroMaker from "@/pages/IntroOutroMaker";
 import MediaLibrary from "@/pages/MediaLibrary";
 import AIAssistantHub from "./AIAssistantHub";
-import StreamingTechnical from "./StreamingTechnical";
 
 const subtabs = [
   { id: "upload", label: "Upload", icon: Upload, component: VideoUpload },
