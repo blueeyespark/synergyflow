@@ -1,18 +1,83 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   Scan, Globe, Loader2, CheckCircle, AlertCircle,
-  Lightbulb, Code, Sparkles, ArrowRight, Wand2, Bug,
-  Plus, Check, Zap, Lock
+                        Lightbulb, Code, Sparkles, ArrowRight, Wand2, Bug,
+                        Plus, Check, Zap, Lock, History, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { formatDistanceToNow, parseISO } from "date-fns";
 import CodePreviewModal from "@/components/scanner/CodePreviewModal";
+
+// ──────────────────────────────────────────────────────────────
+// Applied Changes & Bug Fixes Log Component
+// ──────────────────────────────────────────────────────────────
+function AppliedChangesLog() {
+  const { data: changes = [], isLoading } = useQuery({
+    queryKey: ["ai-changes"],
+    queryFn: () => base44.entities.AIAppliedChange.list("-created_date", 200),
+  });
+  const qc = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.AIAppliedChange.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ai-changes"] }),
+  });
+
+  const TYPE_COLORS = {
+    ux_improvement: "bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400",
+    feature: "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400",
+    bug_fix: "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400",
+    other: "bg-slate-100 text-slate-700",
+  };
+
+  if (isLoading) return <div className="text-center py-6 text-slate-400"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></div>;
+
+  return (
+    <div className="space-y-3">
+      {changes.length === 0 ? (
+        <p className="text-center py-6 text-slate-400">No changes logged yet. Auto-apply improvements from the scanner.</p>
+      ) : (
+        changes.map(change => (
+          <motion.div key={change.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+            className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-600">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap mb-2">
+                  <Badge className={TYPE_COLORS[change.change_type] || TYPE_COLORS.other}>{change.change_type?.replace("_", " ")}</Badge>
+                  {change.source === "self_scan" && <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400"><Sparkles className="w-3 h-3 mr-1" />Self Scan</Badge>}
+                  {change.source === "external_scan" && <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"><Globe className="w-3 h-3 mr-1" />External</Badge>}
+                </div>
+                <p className="font-medium text-sm text-slate-800 dark:text-slate-100">{change.title}</p>
+                {change.file_path && <p className="text-xs text-indigo-500 font-mono mt-1">{change.file_path}</p>}
+                {change.explanation && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{change.explanation}</p>}
+                <span className="text-xs text-slate-400 mt-2 block">
+                  {change.applied_by && `by ${change.applied_by} · `}
+                  {change.created_date ? formatDistanceToNow(parseISO(change.created_date), { addSuffix: true }) : ""}
+                </span>
+              </div>
+              <Button size="icon" variant="ghost" className="h-7 w-7 text-slate-400 hover:text-red-500 flex-shrink-0"
+                onClick={() => deleteMutation.mutate(change.id)} disabled={deleteMutation.isPending}>
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+            {change.code_snippet && (
+              <details className="mt-3">
+                <summary className="text-xs text-indigo-500 cursor-pointer font-medium">View code snippet</summary>
+                <pre className="mt-2 bg-slate-900 text-slate-100 rounded p-2 text-xs overflow-x-auto max-h-48 whitespace-pre-wrap">{change.code_snippet}</pre>
+              </details>
+            )}
+          </motion.div>
+        ))
+      )}
+    </div>
+  );
+}
 
 const SELF_ISSUES_PROMPT = `You are an expert UX/UI engineer and product analyst. Analyze the following Planify app description and identify bugs, UX issues, and feature improvements:
 
@@ -377,8 +442,9 @@ Be very specific — list actual UI components, data interactions, and implement
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full mb-6">
-            <TabsTrigger value="self" className="flex-1"><Sparkles className="w-4 h-4 mr-2" />Scan This App</TabsTrigger>
-            <TabsTrigger value="external" className="flex-1"><Globe className="w-4 h-4 mr-2" />Scan External Site</TabsTrigger>
+            <TabsTrigger value="self" className="flex-1"><Sparkles className="w-4 h-4 mr-2" />Scan & Fix</TabsTrigger>
+            <TabsTrigger value="external" className="flex-1"><Globe className="w-4 h-4 mr-2" />External Sites</TabsTrigger>
+            <TabsTrigger value="history" className="flex-1"><History className="w-4 h-4 mr-2" />History</TabsTrigger>
           </TabsList>
 
           {/* ── SELF SCAN ── */}
@@ -661,12 +727,22 @@ Be very specific — list actual UI components, data interactions, and implement
               </div>
             )}
           </TabsContent>
+
+          {/* ── HISTORY ── */}
+          <TabsContent value="history">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5 shadow-sm">
+              <h4 className="font-semibold mb-4 flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                <History className="w-4 h-4" /> Applied Changes & Bug Fixes
+              </h4>
+              <AppliedChangesLog />
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
 
-      {/* Code Preview Modal */}
-      {codeModal && (
-        <CodePreviewModal
+          {/* Code Preview Modal */}
+          {codeModal && (
+          <CodePreviewModal
           open={!!codeModal}
           onOpenChange={() => setCodeModal(null)}
           title={codeModal.title}
