@@ -72,7 +72,7 @@ export default function Layout({ children, currentPageName }) {
 
   const { data: subscriptions = [] } = useQuery({
     queryKey: ["my-subscriptions", user?.email],
-    queryFn: () => base44.entities.Subscription.filter({ subscriber_email: user.email, status: "active" }),
+    queryFn: () => base44.entities.Subscription.filter({ subscriber_email: user?.email, status: "active" }),
     enabled: !!user?.email,
     staleTime: 2 * 60 * 1000,
   });
