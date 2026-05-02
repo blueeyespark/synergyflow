@@ -373,11 +373,13 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#03080f] text-[#e8f4ff] flex">
+    <div className="min-h-screen bg-background text-foreground dark:bg-[#03080f] dark:text-[#e8f4ff] flex">
 
       {/* ── LEFT SIDEBAR ─────────────────────────────────────── */}
-      <aside className="hidden sm:flex flex-col w-52 md:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto py-4 px-2.5 z-40 border-r border-[#0d2040]/80"
-        style={{ background: "linear-gradient(180deg,#020b14 0%,#03080f 100%)" }}>
+      <aside className="hidden sm:flex flex-col w-52 md:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto py-4 px-2.5 z-40 border-r border-slate-200 dark:border-[#0d2040]/80"
+        style={{ background: "linear-gradient(180deg, var(--light-bg-start), var(--light-bg-end))" }}
+        className="dark:bg-none"
+        style={{ background: "var(--background-gradient)" }}>
         <div className="space-y-0.5 mb-3">
           {SIDEBAR_NAV.map(item => (
             <Link key={item.label} to={item.to} className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-blue-400/60 hover:bg-blue-900/20 hover:text-blue-200 transition-all w-full">
@@ -427,8 +429,9 @@ export default function Dashboard() {
         <div className="flex-1 min-w-0">
 
           {/* Sticky top bar */}
-          <div className="sticky top-16 z-30 border-b border-[#0d2040]/80 px-4 pt-3 pb-1 space-y-2"
-            style={{ background: "rgba(3,8,15,0.97)", backdropFilter: "blur(20px)" }}>
+          <div className="sticky top-16 z-30 border-b border-slate-200 dark:border-[#0d2040]/80 px-4 pt-3 pb-1 space-y-2"
+            className="dark:bg-none"
+            style={{ background: "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)" }}>
 
             {/* Tabs + Search */}
             <div className="flex items-center gap-1 flex-wrap">
@@ -612,7 +615,7 @@ export default function Dashboard() {
         </div>
 
         {/* ── RIGHT SIDEBAR ─────────────────────────────────────── */}
-        <aside className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-l border-[#0d2040]/80 px-4 pb-8 overflow-y-auto space-y-5" style={{ marginTop: "5rem" }}>
+        <aside className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-l border-slate-200 dark:border-[#0d2040]/80 px-4 pb-8 overflow-y-auto space-y-5" style={{ marginTop: "5rem" }}>
 
           {/* Live channels */}
           {liveChannels.length > 0 && (

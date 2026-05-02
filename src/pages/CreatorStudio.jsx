@@ -56,7 +56,7 @@ export default function CreatorStudio() {
   // Gate: must have at least one channel
   if (!loading && user && myChannels.length === 0) {
     return (
-      <div className="min-h-screen bg-[#03080f] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background dark:bg-[#03080f] flex items-center justify-center p-4">
         <div className="text-center max-w-sm">
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#1e78ff]/20 to-[#a855f7]/20 border border-blue-900/40 flex items-center justify-center mx-auto mb-5">
             <Users className="w-9 h-9 text-blue-400/40" />
@@ -72,13 +72,13 @@ export default function CreatorStudio() {
   }
 
   if (loading) {
-    return <div className="min-h-screen bg-[#03080f] flex items-center justify-center"><div className="w-6 h-6 border-2 border-[#1e78ff]/30 border-t-[#1e78ff] rounded-full animate-spin" /></div>;
+    return <div className="min-h-screen bg-background dark:bg-[#03080f] flex items-center justify-center"><div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
   }
 
   return (
-    <div className="min-h-screen bg-[#03080f] text-[#e8f4ff]">
+    <div className="min-h-screen bg-background dark:bg-[#03080f] text-foreground dark:text-[#e8f4ff]">
       {/* Header */}
-      <div className="border-b border-blue-900/40 bg-[#03080f]/90 backdrop-blur-sm sticky top-16 z-20">
+      <div className="border-b border-slate-200 dark:border-blue-900/40 bg-white dark:bg-[#03080f]/90 backdrop-blur-sm sticky top-16 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top row */}
           <div className="flex items-center gap-4 pt-4 pb-2">
