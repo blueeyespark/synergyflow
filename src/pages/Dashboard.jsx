@@ -5,53 +5,41 @@ import {
   Home, Flame, Music, Gamepad2, Tv, Radio, BookOpen, Trophy,
   ChevronDown, ThumbsUp, Clock, ListVideo, Download, History,
   PlaySquare, ShoppingBag, MoreVertical, Search, X, TrendingUp,
-  Users, Zap, Star, PlusCircle, Compass, Menu, BarChart2
+  Users, Zap, Star, PlusCircle, Menu, BarChart2, Sparkles, Eye
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import AIContentAdvisor from "@/components/dashboard/AIContentAdvisor";
 import VideoPlayerModal from "@/components/dashboard/VideoPlayerModal";
 import FeaturedLiveStream from "@/components/dashboard/FeaturedLiveStream";
-import ExploreCategories from "@/components/dashboard/ExploreCategories";
 import LiveSidebar from "@/components/dashboard/LiveSidebar";
 import SaveToPlaylistMenu from "@/components/dashboard/SaveToPlaylistMenu";
 
-const CATEGORIES = ["All", "Gaming", "Music", "Live", "Mixes", "Reaction videos", "Simulation", "Minecraft", "Anime", "Shorts", "Mods", "Tutorials"];
-const MAIN_TABS = ["Home", "Subscriptions"];
+const CATEGORIES = ["All", "Gaming", "Music", "Live", "Clips", "Anime", "Tutorials", "Reaction", "Esports", "Mods", "Shorts"];
+const MAIN_TABS = ["Home", "Following"];
 
-const SIDEBAR_ITEMS = [
-  { icon: Home, label: "Home", active: true },
-  { icon: Flame, label: "Trending" },
-  { icon: PlaySquare, label: "Subscriptions" },
+const SIDEBAR_NAV = [
+  { icon: Home, label: "Home", to: "/" },
+  { icon: Flame, label: "Trending", to: "/" },
+  { icon: Radio, label: "Live", to: "/Live" },
+  { icon: PlaySquare, label: "Clips", to: "/Shorts" },
 ];
 
-const SIDEBAR_YOU = [
+const SIDEBAR_LIBRARY = [
   { icon: History, label: "History" },
   { icon: ListVideo, label: "Playlists" },
-  { icon: Clock, label: "Watch later" },
-  { icon: ThumbsUp, label: "Liked videos" },
-  { icon: PlaySquare, label: "Your videos" },
+  { icon: Clock, label: "Watch Later" },
+  { icon: ThumbsUp, label: "Liked" },
   { icon: Download, label: "Downloads" },
 ];
 
-const MOCK_SUBSCRIPTIONS = [
-  { name: "Toptop King", avatar: "T", color: "bg-red-500" },
-  { name: "Ruby Reactions", avatar: "R", color: "bg-pink-500" },
-  { name: "Mykora", avatar: "M", color: "bg-purple-500" },
-  { name: "HalaCG", avatar: "H", color: "bg-blue-500" },
-  { name: "Markiplier", avatar: "M", color: "bg-red-600" },
-  { name: "Liden XII", avatar: "L", color: "bg-green-500" },
-];
-
-const EXPLORE_ITEMS = [
-  { icon: Flame, label: "Trending" },
-  { icon: ShoppingBag, label: "Shopping" },
-  { icon: Music, label: "Music" },
-  { icon: Gamepad2, label: "Gaming" },
-  { icon: Tv, label: "Films" },
-  { icon: Radio, label: "Live" },
-  { icon: BookOpen, label: "Learning" },
-  { icon: Trophy, label: "Sports" },
+const MOCK_FOLLOWING = [
+  { name: "NightOwlGG", avatar: "N", color: "#6366f1", live: true },
+  { name: "ByteQueen", avatar: "B", color: "#ec4899", live: false },
+  { name: "ZenithCast", avatar: "Z", color: "#8b5cf6", live: true },
+  { name: "PixelFrost", avatar: "P", color: "#06b6d4", live: false },
+  { name: "SolarFlare", avatar: "S", color: "#f59e0b", live: true },
+  { name: "ArcLight", avatar: "A", color: "#22c55e", live: false },
 ];
 
 function formatViews(n) {
@@ -66,10 +54,10 @@ function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const days = Math.floor(diff / 86400000);
   if (days === 0) return "today";
-  if (days < 7) return `${days} days ago`;
-  if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-  if (days < 365) return `${Math.floor(days / 30)} months ago`;
-  return `${Math.floor(days / 365)} years ago`;
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  if (days < 365) return `${Math.floor(days / 30)}mo ago`;
+  return `${Math.floor(days / 365)}y ago`;
 }
 
 function formatDuration(secs) {
@@ -80,60 +68,74 @@ function formatDuration(secs) {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-function VideoCard({ video, channel, onClick, watched, badge, user }) {
+function VideoCard({ video, channel, onClick, watched, isTrending, rank, user }) {
   const [showMenu, setShowMenu] = useState(false);
   const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
 
   return (
-    <div className="group cursor-pointer relative" onClick={() => onClick(video)}>
-      {badge && <span className="absolute -top-1 -left-1 z-10 w-6 h-6 bg-red-600 text-white text-xs font-black rounded-full flex items-center justify-center">{badge}</span>}
-      <div className="relative aspect-video bg-gray-200 dark:bg-zinc-800 rounded-xl overflow-hidden mb-2">
+    <motion.div
+      className="group cursor-pointer relative"
+      onClick={() => onClick(video)}
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.15 }}
+    >
+      {/* Thumbnail */}
+      <div className="relative aspect-video rounded-2xl overflow-hidden mb-3 bg-[#060d18]">
         <img
           src={video.thumbnail_url || `https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop&sig=${video.id}`}
           alt={video.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
+        {/* Gradient overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+        {/* Watch progress */}
         {watched && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-400 dark:bg-zinc-600">
-            <div className="h-full bg-red-600 w-1/3" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
+            <div className="h-full bg-[#1e78ff] w-1/3" />
           </div>
         )}
+
+        {/* Duration badge */}
         {video.duration_seconds > 0 && (
-          <span className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded">
+          <span className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-sm text-white text-xs font-semibold px-2 py-0.5 rounded-lg">
             {formatDuration(video.duration_seconds)}
           </span>
         )}
+
+        {/* LIVE badge */}
         {video.status === "live" && (
-          <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">● LIVE</span>
+          <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> LIVE
+          </span>
         )}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 rounded-full p-3">
-            <div className="w-0 h-0 border-t-[10px] border-b-[10px] border-l-[18px] border-transparent border-l-white ml-1" />
+
+        {/* Trending rank */}
+        {isTrending && rank && (
+          <div className="absolute top-2 left-2 w-7 h-7 rounded-xl bg-[#1e78ff] text-white text-xs font-black flex items-center justify-center shadow-lg shadow-blue-900/50">
+            #{rank}
+          </div>
+        )}
+
+        {/* Play button */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="w-12 h-12 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 flex items-center justify-center">
+            <div className="w-0 h-0 border-t-[9px] border-b-[9px] border-l-[16px] border-transparent border-l-white ml-1" />
           </div>
         </div>
-      </div>
-      <div className="flex gap-2">
-        <Link to={channel ? `/Channel?id=${channel.id}` : "#"} onClick={e => e.stopPropagation()} className="flex-shrink-0 mt-0.5">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold hover:ring-2 hover:ring-indigo-400 transition-all">
-            {channel?.channel_name?.charAt(0) || "C"}
-          </div>
-        </Link>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white line-clamp-2 leading-snug">{video.title}</h3>
-          <Link to={channel ? `/Channel?id=${channel.id}` : "#"} onClick={e => e.stopPropagation()} className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5 truncate hover:underline block">{channel?.channel_name || "Creator"}</Link>
-          <p className="text-xs text-gray-400 dark:text-zinc-500">{formatViews(video.view_count)} views · {timeAgo(video.published_date || video.created_date)}</p>
-        </div>
-        <div className="relative flex-shrink-0" onClick={e => e.stopPropagation()}>
+
+        {/* 3-dot menu */}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
           <button
-            className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-white p-1"
             onClick={() => setShowMenu(!showMenu)}
+            className="w-7 h-7 rounded-lg bg-black/50 backdrop-blur-sm text-white flex items-center justify-center hover:bg-black/70"
           >
-            <MoreVertical className="w-4 h-4" />
+            <MoreVertical className="w-3.5 h-3.5" />
           </button>
           {showMenu && (
-            <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl shadow-xl w-44 py-1 text-sm">
+            <div className="absolute right-0 top-full mt-1 z-50 bg-[#060d18] border border-blue-900/40 rounded-xl shadow-xl shadow-black/50 w-44 py-1 text-sm">
               <button
-                className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300 transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 hover:bg-blue-900/20 text-blue-200 transition-colors"
                 onClick={() => { setShowPlaylistMenu(true); setShowMenu(false); }}
               >
                 <ListVideo className="w-4 h-4" /> Save to playlist
@@ -141,57 +143,68 @@ function VideoCard({ video, channel, onClick, watched, badge, user }) {
             </div>
           )}
           {showPlaylistMenu && user?.email && (
-            <SaveToPlaylistMenu
-              videoId={video.id}
-              userEmail={user.email}
-              onClose={() => setShowPlaylistMenu(false)}
-            />
+            <SaveToPlaylistMenu videoId={video.id} userEmail={user.email} onClose={() => setShowPlaylistMenu(false)} />
           )}
         </div>
       </div>
-    </div>
+
+      {/* Info row */}
+      <div className="flex gap-2.5 px-0.5">
+        <Link to={channel ? `/Channel?id=${channel.id}` : "#"} onClick={e => e.stopPropagation()} className="flex-shrink-0 mt-0.5">
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-black ring-2 ring-transparent hover:ring-[#1e78ff]/60 transition-all"
+            style={{ background: `linear-gradient(135deg, #1e78ff, #a855f7)` }}
+          >
+            {channel?.channel_name?.charAt(0) || "C"}
+          </div>
+        </Link>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-semibold text-[#e8f4ff] line-clamp-2 leading-snug mb-0.5">{video.title}</h3>
+          <Link to={channel ? `/Channel?id=${channel.id}` : "#"} onClick={e => e.stopPropagation()} className="text-xs text-blue-400/60 hover:text-blue-300 truncate block transition-colors">{channel?.channel_name || "Creator"}</Link>
+          <p className="text-xs text-blue-400/40 mt-0.5">{formatViews(video.view_count)} views · {timeAgo(video.published_date || video.created_date)}</p>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
-function ShortCard({ video, onClick }) {
+function ClipCard({ video, onClick }) {
   return (
-    <div className="group cursor-pointer flex-shrink-0 w-32 sm:w-36 md:w-40" onClick={() => onClick(video)}>
-      <div className="relative aspect-[9/16] bg-gray-200 dark:bg-zinc-800 rounded-xl overflow-hidden mb-2">
+    <div className="group cursor-pointer flex-shrink-0 w-36 sm:w-40" onClick={() => onClick(video)}>
+      <div className="relative aspect-[9/16] rounded-2xl overflow-hidden mb-2 bg-[#060d18]">
         <img
           src={video.thumbnail_url || `https://images.unsplash.com/photo-1536240478700-b869ad10a2ab?w=200&h=356&fit=crop&sig=${video.id}`}
           alt={video.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-        <p className="absolute bottom-2 left-2 right-2 text-xs text-white font-medium line-clamp-2 leading-tight">{video.title}</p>
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="bg-black/60 rounded-full p-2">
-            <div className="w-0 h-0 border-t-[8px] border-b-[8px] border-l-[14px] border-transparent border-l-white ml-0.5" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+        <p className="absolute bottom-3 left-3 right-3 text-xs text-white font-semibold line-clamp-2 leading-tight">{video.title}</p>
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="w-8 h-8 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center">
+            <div className="w-0 h-0 border-t-[7px] border-b-[7px] border-l-[12px] border-transparent border-l-white ml-0.5" />
           </div>
         </div>
       </div>
-      <p className="text-xs text-gray-500 dark:text-zinc-400 px-1 truncate">{formatViews(video.view_count)} views</p>
+      <p className="text-xs text-blue-400/50 px-1 truncate">{formatViews(video.view_count)} views</p>
     </div>
   );
 }
 
-function PlaylistsSidebarSection({ userEmail, sidebarBtnBase, sidebarBtnIdle }) {
+function PlaylistsSidebarSection({ userEmail, btnBase, btnIdle }) {
   const { data: playlists = [] } = useQuery({
     queryKey: ["playlists", userEmail],
     queryFn: () => base44.entities.Playlist.filter({ owner_email: userEmail }),
     enabled: !!userEmail,
     staleTime: 2 * 60 * 1000,
   });
-  if (playlists.length === 0) {
-    return <p className="text-xs text-gray-400 dark:text-zinc-600 px-3 py-1">No playlists yet</p>;
-  }
+  if (playlists.length === 0) return <p className="text-xs text-blue-400/30 px-3 py-1">No playlists yet</p>;
   return (
     <>
       {playlists.slice(0, 5).map(p => (
-        <button key={p.id} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
-          <ListVideo className="w-4 h-4 flex-shrink-0" />
+        <button key={p.id} className={`${btnBase} ${btnIdle}`}>
+          <ListVideo className="w-4 h-4 flex-shrink-0 text-blue-400/50" />
           <span className="truncate text-xs">{p.name}</span>
-          <span className="ml-auto text-xs text-gray-400 dark:text-zinc-600">{p.video_ids?.length || 0}</span>
+          <span className="ml-auto text-xs text-blue-400/30">{p.video_ids?.length || 0}</span>
         </button>
       ))}
     </>
@@ -200,21 +213,27 @@ function PlaylistsSidebarSection({ userEmail, sidebarBtnBase, sidebarBtnIdle }) 
 
 function HubCards() {
   const cards = [
-    { to: "/Live", icon: Radio, label: "Live", desc: "Watch live streams", color: "from-red-500 to-orange-500", bg: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900" },
-    { to: "/Shorts", icon: Zap, label: "Shorts", desc: "Quick vertical videos", color: "from-pink-500 to-purple-600", bg: "bg-pink-50 dark:bg-pink-950/30 border-pink-200 dark:border-pink-900" },
-    { to: "/Channel", icon: Users, label: "My Channel", desc: "Your public channel", color: "from-blue-500 to-indigo-600", bg: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900" },
-    { to: "/StreamerDashboard", icon: Star, label: "Go Live", desc: "Start streaming now", color: "from-purple-500 to-violet-600", bg: "bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-900" },
+    { to: "/Live", icon: Radio, label: "Live Streams", desc: "Watch right now", gradient: "from-red-500 to-rose-600", glow: "shadow-red-900/40" },
+    { to: "/Shorts", icon: Zap, label: "Clips & Shorts", desc: "Bite-sized content", gradient: "from-[#a855f7] to-[#6366f1]", glow: "shadow-purple-900/40" },
+    { to: "/Channel", icon: Users, label: "My Channel", desc: "Manage your brand", gradient: "from-[#1e78ff] to-[#06b6d4]", glow: "shadow-blue-900/40" },
+    { to: "/StreamerDashboard", icon: Sparkles, label: "Go Live", desc: "Start broadcasting", gradient: "from-[#f59e0b] to-[#f97316]", glow: "shadow-orange-900/40" },
   ];
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
       {cards.map((c) => (
         <Link key={c.to} to={c.to}>
-          <motion.div whileHover={{ scale: 1.03 }} className={`rounded-2xl border p-4 cursor-pointer transition-shadow hover:shadow-md ${c.bg}`}>
-            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${c.color} flex items-center justify-center mb-3`}>
+          <motion.div
+            whileHover={{ scale: 1.03, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            className={`relative overflow-hidden rounded-2xl p-4 cursor-pointer border border-white/5 bg-[#060d18] hover:border-white/10 transition-all shadow-lg ${c.glow}`}
+          >
+            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${c.gradient} flex items-center justify-center mb-3 shadow-lg`}>
               <c.icon className="w-5 h-5 text-white" />
             </div>
-            <p className="font-bold text-sm text-gray-900 dark:text-white">{c.label}</p>
-            <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">{c.desc}</p>
+            <p className="font-bold text-sm text-[#e8f4ff]">{c.label}</p>
+            <p className="text-xs text-blue-400/50 mt-0.5">{c.desc}</p>
+            {/* Subtle glow in corner */}
+            <div className={`absolute -bottom-4 -right-4 w-16 h-16 rounded-full bg-gradient-to-br ${c.gradient} opacity-10 blur-xl`} />
           </motion.div>
         </Link>
       ))}
@@ -226,11 +245,10 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [activeMainTab, setActiveMainTab] = useState("Home");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [showMoreSubs, setShowMoreSubs] = useState(false);
+  const [showMoreFollowing, setShowMoreFollowing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
-  const [selectedStream, setSelectedStream] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [watchHistory, setWatchHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem("watchHistory") || "[]"); } catch { return []; }
@@ -264,7 +282,7 @@ export default function Dashboard() {
   const featuredLive = liveStreams[0];
 
   const mainVideos = videos.filter(v => v.status !== "deleted" && v.status !== "uploading");
-  const shorts = mainVideos.filter(v => v.duration_seconds > 0 && v.duration_seconds < 90);
+  const clips = mainVideos.filter(v => v.duration_seconds > 0 && v.duration_seconds < 90);
   const regularVideos = mainVideos.filter(v => !v.duration_seconds || v.duration_seconds >= 60);
 
   const subVideos = mainVideos
@@ -290,260 +308,366 @@ export default function Dashboard() {
 
   const categoryFiltered = activeCategory === "All" ? regularVideos
     : activeCategory === "Live" ? regularVideos.filter(v => v.status === "live")
-    : activeCategory === "Shorts" ? shorts
+    : activeCategory === "Clips" ? clips
     : regularVideos.filter(v =>
         v.category?.toLowerCase().includes(activeCategory.toLowerCase()) ||
         v.tags?.some(t => t.toLowerCase().includes(activeCategory.toLowerCase()))
       );
 
   const displayVideos = searchFiltered || (categoryFiltered.length > 0 ? categoryFiltered : regularVideos);
-  const showShorts = !searchQuery && (activeCategory === "All" || activeCategory === "Shorts") && shorts.length > 0;
+  const showClips = !searchQuery && (activeCategory === "All" || activeCategory === "Clips") && clips.length > 0;
   const trending = [...regularVideos].sort((a, b) => (b.view_count || 0) - (a.view_count || 0)).slice(0, 4);
+  const trendingSet = new Set(trending.map(v => v.id));
 
-  const sidebarBtnBase = "flex items-center gap-3 px-3 py-2 rounded-xl text-sm w-full text-left transition-colors";
-  const sidebarBtnIdle = "text-blue-400/70 hover:bg-blue-900/20 hover:text-blue-200";
-  const sidebarBtnActive = "bg-[#1e78ff]/15 text-[#1e78ff] border border-[#1e78ff]/30 font-medium";
+  const btnBase = "flex items-center gap-3 px-3 py-2 rounded-xl text-sm w-full text-left transition-all duration-150";
+  const btnIdle = "text-blue-400/60 hover:bg-blue-900/20 hover:text-blue-200";
+  const btnActive = "bg-[#1e78ff]/15 text-[#1e78ff] border border-[#1e78ff]/25 font-semibold";
 
   return (
     <div className="min-h-screen bg-[#03080f] text-[#e8f4ff] flex">
-      {/* Sidebar */}
-      <aside className={`flex flex-col w-48 sm:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto bg-[#03080f] py-3 px-2 z-40 border-r border-blue-900/30 transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"}`}>
-        {SIDEBAR_ITEMS.map(item => (
-          <button key={item.label} className={`${sidebarBtnBase} ${item.active ? sidebarBtnActive : sidebarBtnIdle}`}>
-            <item.icon className="w-5 h-5 flex-shrink-0" />
-            {item.label}
-          </button>
-        ))}
-        <Link to="/Live" className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
-          <Radio className="w-5 h-5 flex-shrink-0 text-red-500" /> Live
+
+      {/* ── LEFT SIDEBAR ─────────────────────────────────────────────── */}
+      <aside className={`flex flex-col w-52 sm:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto py-4 px-2.5 z-40 border-r border-[#0d2040]/80 transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"}`}
+        style={{ background: "linear-gradient(180deg, #020b14 0%, #03080f 100%)" }}
+      >
+        {/* Navigation */}
+        <div className="space-y-0.5 mb-1">
+          {SIDEBAR_NAV.map(item => (
+            <Link key={item.label} to={item.to} className={`${btnBase} ${item.label === "Home" ? btnActive : btnIdle}`}>
+              <item.icon className="w-4 h-4 flex-shrink-0" />
+              <span>{item.label}</span>
+              {item.label === "Live" && liveStreams.length > 0 && (
+                <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              )}
+            </Link>
+          ))}
+        </div>
+
+        <div className="h-px bg-[#0d2040]/80 my-3" />
+
+        {/* Creator Studio CTA */}
+        <Link to="/CreatorStudio"
+          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#1e78ff]/15 to-[#a855f7]/10 border border-[#1e78ff]/25 text-[#1e78ff] hover:from-[#1e78ff]/25 hover:to-[#a855f7]/15 transition-all mb-1"
+        >
+          <div className="w-6 h-6 rounded-lg bg-[#1e78ff]/20 flex items-center justify-center flex-shrink-0">
+            <PlusCircle className="w-3.5 h-3.5" />
+          </div>
+          <span className="text-xs font-bold">Creator Studio</span>
         </Link>
-        <button onClick={() => navigate("/Shorts")} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
-          <PlaySquare className="w-5 h-5 flex-shrink-0" /> Shorts
+
+        <div className="h-px bg-[#0d2040]/80 my-3" />
+
+        {/* Library */}
+        <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-3 mb-2">Library</p>
+        <div className="space-y-0.5">
+          {SIDEBAR_LIBRARY.map(item => (
+            <button key={item.label} className={`${btnBase} ${btnIdle}`}>
+              <item.icon className="w-4 h-4 flex-shrink-0 text-blue-400/40" />
+              <span className="text-xs">{item.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {user?.email && (
+          <>
+            <div className="h-px bg-[#0d2040]/80 my-3" />
+            <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-3 mb-2">Playlists</p>
+            <PlaylistsSidebarSection userEmail={user.email} btnBase={btnBase} btnIdle={btnIdle} />
+          </>
+        )}
+
+        <div className="h-px bg-[#0d2040]/80 my-3" />
+
+        {/* Following */}
+        <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-3 mb-2">Following</p>
+        <div className="space-y-0.5">
+          {(showMoreFollowing ? MOCK_FOLLOWING : MOCK_FOLLOWING.slice(0, 5)).map(ch => (
+            <button key={ch.name} className={`${btnBase} ${btnIdle}`}>
+              <div className="relative flex-shrink-0">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-black" style={{ background: ch.color }}>
+                  {ch.avatar}
+                </div>
+                {ch.live && <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 border border-[#03080f]" />}
+              </div>
+              <span className="text-xs truncate">{ch.name}</span>
+              {ch.live && <span className="ml-auto text-xs text-red-400 font-semibold">LIVE</span>}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setShowMoreFollowing(!showMoreFollowing)} className={`${btnBase} ${btnIdle} text-xs mt-0.5`}>
+          <ChevronDown className={`w-4 h-4 text-blue-400/30 transition-transform ${showMoreFollowing ? "rotate-180" : ""}`} />
+          {showMoreFollowing ? "Show less" : "Show more"}
         </button>
-        <Link to="/Channel" className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
-          <Users className="w-5 h-5 flex-shrink-0" /> My Channel
-        </Link>
-
-        <hr className="border-blue-900/30 my-3" />
-        <Link to="/CreatorStudio" className={`${sidebarBtnBase} bg-[#1e78ff]/10 border border-[#1e78ff]/30 text-[#1e78ff] hover:bg-[#1e78ff]/20`}>
-          <PlusCircle className="w-5 h-5 flex-shrink-0" /> Creator Studio
-        </Link>
-
-
-        <hr className="border-blue-900/30 my-3" />
-        <p className="text-xs font-semibold text-blue-500/50 uppercase tracking-wider px-3 mb-1">You</p>
-        {SIDEBAR_YOU.map(item => (
-          <button key={item.label} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
-            <item.icon className="w-5 h-5 flex-shrink-0" />
-            {item.label}
-          </button>
-        ))}
-
-        <hr className="border-blue-900/30 my-3" />
-        <p className="text-xs font-semibold text-blue-500/50 uppercase tracking-wider px-3 mb-1">My Playlists</p>
-        {user?.email && <PlaylistsSidebarSection userEmail={user.email} sidebarBtnBase={sidebarBtnBase} sidebarBtnIdle={sidebarBtnIdle} />}
-
-        <hr className="border-blue-900/30 my-3" />
-        <p className="text-xs font-semibold text-blue-500/50 uppercase tracking-wider px-3 mb-1">Subscriptions</p>
-        {(showMoreSubs ? MOCK_SUBSCRIPTIONS : MOCK_SUBSCRIPTIONS.slice(0, 4)).map(sub => (
-          <button key={sub.name} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
-            <div className={`w-6 h-6 rounded-full ${sub.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>{sub.avatar}</div>
-            <span className="truncate text-xs">{sub.name}</span>
-          </button>
-        ))}
-        <button onClick={() => setShowMoreSubs(!showMoreSubs)} className={`${sidebarBtnBase} ${sidebarBtnIdle} text-xs`}>
-          <ChevronDown className={`w-4 h-4 transition-transform ${showMoreSubs ? "rotate-180" : ""}`} />
-          {showMoreSubs ? "Show less" : "Show more"}
-        </button>
-
-        <hr className="border-blue-900/30 my-3" />
-        <p className="text-xs font-semibold text-blue-500/50 uppercase tracking-wider px-3 mb-1">Explore</p>
-        {EXPLORE_ITEMS.map(item => (
-          <button key={item.label} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
-            <item.icon className="w-4 h-4 flex-shrink-0" />
-            <span className="text-xs">{item.label}</span>
-          </button>
-        ))}
       </aside>
 
-      {/* Overlay for mobile */}
-      {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-30 sm:hidden" onClick={() => setSidebarOpen(false)} />}
+      {/* Mobile overlay */}
+      {sidebarOpen && <div className="fixed inset-0 bg-black/60 z-30 sm:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Main */}
-      <main className="flex-1 min-w-0 ml-0 sm:ml-48 md:ml-56 flex">
+      {/* ── MAIN CONTENT ─────────────────────────────────────────────── */}
+      <main className="flex-1 min-w-0 ml-0 sm:ml-52 md:ml-56 flex">
         <div className="flex-1 min-w-0">
-          {/* Sticky bar */}
-          <div className="sticky top-16 z-30 bg-[#03080f]/95 backdrop-blur-sm border-b border-blue-900/30 px-3 sm:px-4 pt-2 pb-1 space-y-2">
-            {/* Main tabs */}
-            <div className="flex gap-5 overflow-x-auto scrollbar-hide">
+
+          {/* Sticky top bar */}
+          <div className="sticky top-16 z-30 border-b border-[#0d2040]/80 px-4 pt-3 pb-1 space-y-2"
+            style={{ background: "rgba(3,8,15,0.97)", backdropFilter: "blur(20px)" }}
+          >
+            {/* Tabs */}
+            <div className="flex items-center gap-1">
+              <button className="sm:hidden p-2 hover:bg-blue-900/20 rounded-lg mr-1" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                <Menu className="w-5 h-5 text-blue-400" />
+              </button>
               {MAIN_TABS.map(tab => (
                 <button key={tab} onClick={() => setActiveMainTab(tab)}
-                  className={`text-sm font-semibold pb-2 border-b-2 flex-shrink-0 transition-colors ${
+                  className={`text-sm font-semibold px-4 py-2 rounded-xl transition-all flex-shrink-0 ${
                     activeMainTab === tab
-                      ? "border-[#1e78ff] text-[#1e78ff]"
-                      : "border-transparent text-blue-500/50 hover:text-blue-300"
+                      ? "bg-[#1e78ff]/15 text-[#1e78ff] border border-[#1e78ff]/25"
+                      : "text-blue-400/50 hover:text-blue-300 hover:bg-blue-900/10"
                   }`}
                 >
                   {tab}
-                  {tab === "Subscriptions" && mySubscriptions.length > 0 && (
-                    <span className="ml-1.5 text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded-full">{mySubscriptions.length}</span>
+                  {tab === "Following" && mySubscriptions.length > 0 && (
+                    <span className="ml-1.5 text-xs bg-[#1e78ff]/20 text-[#1e78ff] px-1.5 py-0.5 rounded-full">{mySubscriptions.length}</span>
                   )}
                 </button>
               ))}
+
+              {/* Search */}
+              {activeMainTab === "Home" && (
+                <div className={`ml-auto flex items-center gap-2 bg-[#060d18] border ${searchFocused ? "border-[#1e78ff]/50" : "border-[#0d2040]"} rounded-xl px-3 py-1.5 w-48 sm:w-64 transition-all`}>
+                  <Search className="w-4 h-4 text-blue-400/40 flex-shrink-0" />
+                  <input
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
+                    placeholder="Search..."
+                    className="flex-1 text-sm text-blue-100 placeholder-blue-400/30 outline-none bg-transparent min-w-0"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery("")} className="text-blue-400/40 hover:text-blue-300">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Search + category chips — only on Home tab */}
-            {activeMainTab === "Home" && (
-              <>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setSidebarOpen(!sidebarOpen)} className="sm:hidden flex-shrink-0 p-2 hover:bg-blue-900/20 rounded-lg transition-colors">
-                    <Menu className="w-5 h-5 text-blue-400" />
+            {/* Category chips */}
+            {activeMainTab === "Home" && !searchQuery && (
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
+                {CATEGORIES.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`flex-shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                      activeCategory === cat
+                        ? "bg-[#1e78ff] text-white shadow-lg shadow-blue-900/50"
+                        : "bg-[#060d18] text-blue-400/60 border border-[#0d2040] hover:bg-[#0d1a2e] hover:text-blue-200 hover:border-blue-800/50"
+                    }`}
+                  >
+                    {cat}
                   </button>
-                  <div className={`flex items-center gap-2 bg-[#060d18] border ${searchFocused ? "border-[#1e78ff]/60" : "border-blue-900/40"} rounded-full px-3 py-1.5 flex-1 transition-colors`}>
-                    <Search className="w-4 h-4 text-blue-500/60 flex-shrink-0" />
-                    <input
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      onFocus={() => setSearchFocused(true)}
-                      onBlur={() => setSearchFocused(false)}
-                      placeholder="Search videos..."
-                      className="flex-1 text-blue-100 text-sm outline-none"
-                      style={{background:'transparent',border:'none'}}
-                    />
-                    {searchQuery && (
-                      <button onClick={() => setSearchQuery("")} className="text-blue-500/60 hover:text-blue-300">
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-                {!searchQuery && (
-                  <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
-                    {CATEGORIES.map(cat => (
-                      <button
-                        key={cat}
-                        onClick={() => setActiveCategory(cat)}
-                        className={`flex-shrink-0 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                          activeCategory === cat
-                            ? "bg-[#1e78ff] text-white border border-[#1e78ff]/50"
-                            : "bg-[#060d18] text-blue-400/70 border border-blue-900/30 hover:bg-blue-900/20 hover:text-blue-200"
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </>
+                ))}
+              </div>
             )}
           </div>
 
-          <div className="px-3 sm:px-4 pb-20 md:pb-8 space-y-8 mt-4">
-            {/* ── HOME TAB ── */}
+          {/* Page content */}
+          <div className="px-4 pb-24 md:pb-8 mt-5 space-y-8">
+            {/* ── HOME ── */}
             {activeMainTab === "Home" && (
-              <>
-                {!searchQuery && activeCategory === "All" && (
+              <AnimatePresence mode="wait">
+                <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+
+                  {!searchQuery && activeCategory === "All" && (
+                    <>
+                      {/* Featured live banner */}
+                      {featuredLive && (
+                        <FeaturedLiveStream
+                          stream={featuredLive}
+                          channel={channelMap[featuredLive.id]}
+                          onSelect={() => setSelectedVideo(featuredLive)}
+                        />
+                      )}
+
+                      {/* Quick-access hub */}
+                      <HubCards />
+                    </>
+                  )}
+
+                  {/* Search header */}
+                  {searchQuery && (
+                    <div className="flex items-center gap-2 mb-4">
+                      <Search className="w-4 h-4 text-blue-400/40" />
+                      <p className="text-blue-300/80 text-sm">
+                        Results for <span className="text-[#e8f4ff] font-semibold">"{searchQuery}"</span>
+                        <span className="text-blue-400/40 ml-1">— {displayVideos.length} video{displayVideos.length !== 1 ? "s" : ""}</span>
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Clips row */}
+                  {showClips && (
+                    <section>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-lg bg-[#a855f7]/20 flex items-center justify-center">
+                            <Zap className="w-3.5 h-3.5 text-[#a855f7]" />
+                          </div>
+                          <h2 className="text-sm font-bold text-[#e8f4ff]">Clips & Shorts</h2>
+                          <span className="text-xs text-blue-400/40">{clips.length}</span>
+                        </div>
+                        <button onClick={() => navigate("/Shorts")} className="text-xs text-[#1e78ff] hover:text-[#00c8ff] font-semibold transition-colors">View all →</button>
+                      </div>
+                      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
+                        {clips.slice(0, 12).map(v => <ClipCard key={v.id} video={v} onClick={handleOpenVideo} />)}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* Video grid */}
+                  {displayVideos.length > 0 ? (
+                    <section>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          {!searchQuery && activeCategory === "All" && <TrendingUp className="w-4 h-4 text-[#1e78ff]" />}
+                          <h2 className="text-sm font-bold text-[#e8f4ff]">
+                            {searchQuery ? "Search Results" : activeCategory !== "All" ? activeCategory : "Recommended for You"}
+                          </h2>
+                          <span className="text-xs text-blue-400/30">{displayVideos.length}</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                        {displayVideos.map((video, i) => {
+                          const rank = trending.findIndex(v => v.id === video.id);
+                          return (
+                            <motion.div key={video.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+                              <VideoCard
+                                video={video}
+                                channel={channelMap[video.channel_id]}
+                                onClick={handleOpenVideo}
+                                watched={watchHistory.includes(video.id)}
+                                isTrending={trendingSet.has(video.id)}
+                                rank={rank !== -1 ? rank + 1 : null}
+                                user={user}
+                              />
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-24 text-center">
+                      <div className="w-16 h-16 rounded-2xl bg-[#060d18] border border-[#0d2040] flex items-center justify-center mb-4">
+                        <PlaySquare className="w-7 h-7 text-blue-400/30" />
+                      </div>
+                      <h3 className="text-[#e8f4ff] font-bold text-lg mb-1">No videos yet</h3>
+                      <p className="text-blue-400/40 text-sm mb-5">{searchQuery ? "Try a different search term" : "Be the first to upload something great"}</p>
+                      {!searchQuery && (
+                        <Link to="/CreatorStudio" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1e78ff]/15 border border-[#1e78ff]/30 text-[#1e78ff] text-sm font-semibold hover:bg-[#1e78ff]/25 transition-colors">
+                          <PlusCircle className="w-4 h-4" /> Open Creator Studio
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            )}
+
+            {/* ── FOLLOWING TAB ── */}
+            {activeMainTab === "Following" && (
+              <motion.div key="following" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                {mySubscriptions.length > 0 ? (
                   <>
-                    {featuredLive && <FeaturedLiveStream stream={featuredLive} channel={channelMap[featuredLive.id]} onSelect={() => { setSelectedStream(featuredLive); }} />}
-                    <ExploreCategories onCategorySelect={cat => { setActiveCategory(cat); }} />
-                    <HubCards />
-                  </>
-                )}
-
-                {searchQuery && (
-                  <div className="flex items-center gap-2 mb-4">
-                    <Search className="w-4 h-4 text-gray-400 dark:text-zinc-400" />
-                    <p className="text-gray-600 dark:text-zinc-300 text-sm">Results for <span className="text-gray-900 dark:text-white font-semibold">"{searchQuery}"</span> — {displayVideos.length} video{displayVideos.length !== 1 ? "s" : ""}</p>
-                  </div>
-                )}
-
-                {/* Shorts */}
-                {showShorts && (
-                  <section>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Zap className="w-5 h-5 text-pink-500" />
-                      <h2 className="text-base font-bold text-gray-900 dark:text-white">Shorts</h2>
-                    </div>
-                    <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-3 px-3">
-                      {shorts.slice(0, 10).map(v => <ShortCard key={v.id} video={v} onClick={handleOpenVideo} />)}
-                    </div>
-                  </section>
-                )}
-
-                {/* Video grid with trending badges */}
-                {displayVideos.length > 0 ? (
-                  <section>
-                    <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3">
-                      {searchQuery ? "Search Results" : activeCategory !== "All" ? activeCategory : "Recommended Videos"}
-                    </h2>
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-                      {displayVideos.map((video, i) => {
-                        const trendingIndex = trending.findIndex(v => v.id === video.id);
-                        const badge = trendingIndex !== -1 ? `#${trendingIndex + 1}` : null;
+                    {/* Channel avatars strip */}
+                    <div className="flex gap-3 overflow-x-auto pb-4 mb-4 scrollbar-hide">
+                      {[...subscribedChannelIds].map(cid => {
+                        const ch = channelMap[cid];
+                        if (!ch) return null;
                         return (
-                          <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                            <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} badge={badge} user={user} />
-                          </motion.div>
+                          <Link key={cid} to={`/Channel?id=${cid}`} className="flex flex-col items-center gap-1.5 flex-shrink-0 group">
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1e78ff] to-[#a855f7] flex items-center justify-center text-white text-lg font-black ring-2 ring-transparent group-hover:ring-[#1e78ff]/50 transition-all overflow-hidden">
+                              {ch.avatar_url ? <img src={ch.avatar_url} className="w-full h-full object-cover" alt="" /> : ch.channel_name?.charAt(0)}
+                            </div>
+                            <p className="text-xs text-blue-400/50 truncate max-w-[60px] text-center group-hover:text-blue-300 transition-colors">{ch.channel_name}</p>
+                          </Link>
                         );
                       })}
                     </div>
-                  </section>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <PlaySquare className="w-12 h-12 text-gray-300 dark:text-zinc-700 mb-3" />
-                    <h3 className="text-gray-900 dark:text-white font-semibold mb-1">No videos found</h3>
-                    <p className="text-gray-500 dark:text-zinc-500 text-sm mb-4">{searchQuery ? "Try a different search" : "Be the first to upload a video!"}</p>
-                    {!searchQuery && (
-                      <Link to="/CreatorStudio" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
-                        <PlusCircle className="w-4 h-4" /> Go to Creator Studio
-                      </Link>
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                      {subVideos.map((video, i) => (
+                        <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+                          <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} user={user} />
+                        </motion.div>
+                      ))}
+                    </div>
+                    {subVideos.length === 0 && (
+                      <div className="text-center py-16">
+                        <p className="text-blue-400/40 text-sm">No new uploads from channels you follow</p>
+                      </div>
                     )}
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-24 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-[#060d18] border border-[#0d2040] flex items-center justify-center mb-4">
+                      <Users className="w-7 h-7 text-blue-400/30" />
+                    </div>
+                    <h3 className="text-[#e8f4ff] font-bold text-lg mb-1">No channels followed</h3>
+                    <p className="text-blue-400/40 text-sm">Explore content and follow creators you love</p>
                   </div>
                 )}
-              </>
-            )}
-
-            {/* ── SUBSCRIPTIONS TAB ── */}
-            {activeMainTab === "Subscriptions" && mySubscriptions.length > 0 && (
-              <>
-                <div className="flex gap-4 overflow-x-auto pb-3 mb-6 scrollbar-hide">
-                  {[...subscribedChannelIds].map(cid => {
-                    const ch = channelMap[cid];
-                    if (!ch) return null;
-                    return (
-                      <Link key={cid} to={`/Channel?id=${cid}`} className="flex flex-col items-center gap-1.5 flex-shrink-0">
-                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold ring-2 ring-indigo-300 dark:ring-indigo-700 overflow-hidden">
-                          {ch.avatar_url ? <img src={ch.avatar_url} className="w-full h-full object-cover" alt="" /> : ch.channel_name?.charAt(0)}
-                        </div>
-                        <p className="text-xs text-gray-600 dark:text-zinc-400 truncate max-w-[60px] text-center">{ch.channel_name}</p>
-                      </Link>
-                    );
-                  })}
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-                  {subVideos.map((video, i) => (
-                    <motion.div key={video.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-                      <VideoCard video={video} channel={channelMap[video.channel_id]} onClick={handleOpenVideo} watched={watchHistory.includes(video.id)} user={user} />
-                    </motion.div>
-                  ))}
-                </div>
-              </>
+              </motion.div>
             )}
           </div>
         </div>
 
-        {/* Right Sidebar — Live + AI */}
-        <aside className="hidden lg:flex flex-col w-60 xl:w-72 flex-shrink-0 border-l border-blue-900/30 px-3 xl:px-4 pb-8 overflow-y-auto space-y-4" style={{ marginTop: "5rem" }}>
-          {liveStreams.length > 0 && <LiveSidebar liveChannels={liveStreams} onSelectStream={setSelectedStream} />}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-6 h-6 rounded-lg bg-[#1e78ff]/20 border border-[#1e78ff]/40 flex items-center justify-center">
-                <span className="text-[#1e78ff] font-black text-xs">V</span>
+        {/* ── RIGHT SIDEBAR ────────────────────────────────────────────── */}
+        <aside className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-l border-[#0d2040]/80 px-4 pb-8 overflow-y-auto space-y-5" style={{ marginTop: "5rem" }}>
+          {liveStreams.length > 0 && (
+            <LiveSidebar liveChannels={liveStreams} onSelectStream={ch => handleOpenVideo(ch)} />
+          )}
+
+          {/* AI advisor panel */}
+          <div className="rounded-2xl bg-[#060d18] border border-[#0d2040] overflow-hidden">
+            <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[#0d2040]">
+              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#1e78ff] to-[#a855f7] flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="text-sm font-bold text-blue-200">VStream AI</span>
+              <div>
+                <p className="text-xs font-bold text-[#e8f4ff]">VStream AI</p>
+                <p className="text-xs text-blue-400/40">Content intelligence</p>
+              </div>
             </div>
-            <AIContentAdvisor videos={displayVideos} channels={channels} user={user} />
+            <div className="p-4">
+              <AIContentAdvisor videos={displayVideos} channels={channels} user={user} />
+            </div>
           </div>
+
+          {/* Trending quick list */}
+          {trending.length > 0 && (
+            <div className="rounded-2xl bg-[#060d18] border border-[#0d2040] overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-[#0d2040]">
+                <Flame className="w-4 h-4 text-orange-400" />
+                <p className="text-xs font-bold text-[#e8f4ff]">Trending Now</p>
+              </div>
+              <div className="p-3 space-y-2">
+                {trending.map((v, i) => (
+                  <button key={v.id} onClick={() => handleOpenVideo(v)} className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-blue-900/15 transition-colors text-left group">
+                    <span className="text-xs font-black text-[#1e78ff] w-5 flex-shrink-0">#{i + 1}</span>
+                    <div className="w-10 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-[#0a1525]">
+                      <img src={v.thumbnail_url || `https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=80&h=45&fit=crop&sig=${v.id}`} alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-[#c8dff5] truncate group-hover:text-white transition-colors">{v.title}</p>
+                      <p className="text-xs text-blue-400/40 flex items-center gap-1 mt-0.5">
+                        <Eye className="w-3 h-3" /> {formatViews(v.view_count)}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </aside>
       </main>
 
