@@ -225,34 +225,6 @@ function SubStrip({ subscriptions, channelMap, onChannelClick }) {
   );
 }
 
-// ─── Gift Drop Banner (Twitch-style drops) ────────────────────────────────────
-function DropsBanner() {
-  const [dismissed, setDismissed] = useState(() => localStorage.getItem("dropsBannerDismissed") === "1");
-  if (dismissed) return null;
-  return (
-    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#f59e0b]/15 to-[#f97316]/10 border border-[#f59e0b]/25 p-4 mb-5">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#f59e0b]/20 flex items-center justify-center flex-shrink-0">
-            <Gift className="w-4.5 h-4.5 text-[#f59e0b]" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-[#e8f4ff]">🎁 Drops Active</p>
-            <p className="text-xs text-blue-400/50">Watch live streams to earn exclusive channel rewards</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link to="/Live" className="text-xs font-bold text-[#f59e0b] hover:text-[#fbbf24] transition-colors whitespace-nowrap">Watch Now →</Link>
-          <button onClick={() => { setDismissed(true); localStorage.setItem("dropsBannerDismissed","1"); }} className="text-blue-400/30 hover:text-blue-300 p-1">
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
 // ─── Mood Picker Row ──────────────────────────────────────────────────────────
 function MoodRow({ activeMood, setActiveMood }) {
   return (
@@ -458,12 +430,10 @@ export default function Dashboard() {
           <div className="px-4 pb-24 md:pb-8 mt-5 space-y-8">
             {activeTab === "home" && (
               <AnimatePresence mode="wait">
-                <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
 
-                  {!searchQuery && activeMood === "all" && (
-                    <>
-                      {/* Drops banner */}
-                      <DropsBanner />
+              {!searchQuery && activeMood === "all" && (
+                <>
 
                       {/* Featured Live */}
                       {featuredLive && (
