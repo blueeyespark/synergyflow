@@ -152,6 +152,10 @@ export default function ChannelPage() {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [authPrompt, setAuthPrompt] = useState(null);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem("darkMode") === "true";
+    return false;
+  });
   const [activeChannelId, setActiveChannelId] = useState(() => {
     try { return localStorage.getItem("activeChannelId") || null; } catch { return null; }
   });
@@ -198,7 +202,7 @@ export default function ChannelPage() {
 
   // Loading state
   if (!user && !channelId) {
-   return <div className="min-h-screen bg-background dark:bg-[#03080f] flex items-center justify-center"><div className="text-slate-600 dark:text-blue-400/40 text-sm">Loading...</div></div>;
+    return <div className={`min-h-screen flex items-center justify-center ${darkMode ? "bg-[#03080f]" : "bg-white"}`}><div className={`text-sm ${darkMode ? "text-blue-400/40" : "text-gray-600"}`}>Loading...</div></div>;
   }
 
   // No channel found — show create form if own channel, else 404
@@ -218,13 +222,13 @@ export default function ChannelPage() {
         );
       }
       return (
-        <div className="min-h-screen bg-background dark:bg-[#03080f] flex items-center justify-center p-4">
+        <div className={`min-h-screen flex items-center justify-center p-4 ${darkMode ? "bg-[#03080f]" : "bg-white"}`}>
           <div className="text-center max-w-sm">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-200 to-slate-100 dark:from-[#1e78ff]/20 dark:to-[#a855f7]/20 border border-slate-300 dark:border-blue-900/40 flex items-center justify-center mx-auto mb-5">
-              <Users className="w-9 h-9 text-slate-400 dark:text-blue-400/40" />
+            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5 border ${darkMode ? "bg-gradient-to-br from-[#1e78ff]/20 to-[#a855f7]/20 border-blue-900/40" : "bg-gradient-to-br from-gray-200 to-gray-100 border-gray-300"}`}>
+              <Users className={`w-9 h-9 ${darkMode ? "text-blue-400/40" : "text-gray-400"}`} />
             </div>
-            <h2 className="text-2xl font-black text-foreground dark:text-[#e8f4ff] mb-2">No channel selected</h2>
-            <p className="text-slate-600 dark:text-blue-400/50 text-sm mb-6">Create a channel or switch to one using the profile menu.</p>
+            <h2 className={`text-2xl font-black mb-2 ${darkMode ? "text-[#e8f4ff]" : "text-gray-900"}`}>No channel selected</h2>
+            <p className={`text-sm mb-6 ${darkMode ? "text-blue-400/50" : "text-gray-600"}`}>Create a channel or switch to one using the profile menu.</p>
             <Button onClick={() => setShowCreateForm(true)} className="gap-2 w-full">
               <Zap className="w-4 h-4" /> Create a Channel
             </Button>
@@ -233,10 +237,10 @@ export default function ChannelPage() {
       );
     }
     return (
-      <div className="min-h-screen bg-background dark:bg-[#03080f] flex items-center justify-center p-4">
+      <div className={`min-h-screen flex items-center justify-center p-4 ${darkMode ? "bg-[#03080f]" : "bg-white"}`}>
         <div className="text-center">
-          <Users className="w-14 h-14 text-slate-300 dark:text-blue-400/20 mx-auto mb-4" />
-          <h2 className="text-2xl font-black text-foreground dark:text-[#e8f4ff] mb-2">Channel not found</h2>
+          <Users className={`w-14 h-14 mx-auto mb-4 ${darkMode ? "text-blue-400/20" : "text-gray-300"}`} />
+          <h2 className={`text-2xl font-black mb-2 ${darkMode ? "text-[#e8f4ff]" : "text-gray-900"}`}>Channel not found</h2>
           <Link to="/"><Button variant="outline">Back to Dashboard</Button></Link>
         </div>
       </div>
@@ -244,16 +248,16 @@ export default function ChannelPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background dark:bg-[#03080f] text-foreground dark:text-[#e8f4ff]">
+    <div className={`min-h-screen ${darkMode ? "bg-[#03080f] text-[#e8f4ff]" : "bg-white text-gray-900"}`}>
       {/* Banner */}
-      <div className="relative h-44 md:h-56 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-[#1e78ff]/40 dark:to-[#a855f7]/40 overflow-hidden">
+      <div className={`relative h-44 md:h-56 bg-gradient-to-r overflow-hidden ${darkMode ? "from-[#1e78ff]/40 to-[#a855f7]/40" : "from-gray-200 via-gray-100 to-gray-200"}`}>
         {channel.banner_url && <img src={channel.banner_url} alt="Banner" className="w-full h-full object-cover" />}
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-12 mb-6">
           {/* Avatar */}
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] border-4 border-[#03080f] flex items-center justify-center text-white text-3xl font-bold overflow-hidden flex-shrink-0 shadow-lg">
+          <div className={`w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] flex items-center justify-center text-white text-3xl font-bold overflow-hidden flex-shrink-0 shadow-lg border-4 ${darkMode ? "border-[#03080f]" : "border-white"}`}>
             {channel.avatar_url
               ? <img src={channel.avatar_url} alt="" className="w-full h-full object-cover" />
               : channel.channel_name?.charAt(0)
@@ -264,14 +268,14 @@ export default function ChannelPage() {
           <div className="flex-1 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl md:text-3xl font-black text-foreground dark:text-[#e8f4ff]">{channel.channel_name}</h1>
+              <h1 className={`text-2xl md:text-3xl font-black ${darkMode ? "text-[#e8f4ff]" : "text-gray-900"}`}>{channel.channel_name}</h1>
                 {channel.is_verified && <span className="text-[#1e78ff] text-lg">✓</span>}
               </div>
-              <p className="text-slate-600 dark:text-blue-400/50 text-sm mt-1">
+              <p className={`text-sm mt-1 ${darkMode ? "text-blue-400/50" : "text-gray-600"}`}>
                 {formatCount(channel.subscriber_count)} subscribers · {channelVideos.length} videos
               </p>
               {channel.description && (
-                <p className="text-slate-600 dark:text-blue-400/50 text-sm mt-1 max-w-xl line-clamp-2">{channel.description}</p>
+                <p className={`text-sm mt-1 max-w-xl line-clamp-2 ${darkMode ? "text-blue-400/50" : "text-gray-600"}`}>{channel.description}</p>
               )}
             </div>
 
@@ -333,16 +337,16 @@ export default function ChannelPage() {
             { icon: Users, label: "Subscribers", value: formatCount(channel.subscriber_count) },
             { icon: Play, label: "Videos", value: channelVideos.length },
           ].map((s, i) => (
-            <div key={i} className="bg-white dark:bg-[#060d18] border border-slate-200 dark:border-blue-900/40 rounded-xl p-3 text-center">
-              <s.icon className="w-4 h-4 text-slate-400 dark:text-blue-400/40 mx-auto mb-1" />
-              <p className="text-xl font-black text-foreground dark:text-[#e8f4ff]">{s.value}</p>
-              <p className="text-xs text-slate-500 dark:text-blue-400/40">{s.label}</p>
+            <div key={i} className={`rounded-xl p-3 text-center border ${darkMode ? "bg-[#060d18] border-blue-900/40" : "bg-gray-100 border-gray-300"}`}>
+              <s.icon className={`w-4 h-4 mx-auto mb-1 ${darkMode ? "text-blue-400/40" : "text-gray-400"}`} />
+              <p className={`text-xl font-black ${darkMode ? "text-[#e8f4ff]" : "text-gray-900"}`}>{s.value}</p>
+              <p className={`text-xs ${darkMode ? "text-blue-400/40" : "text-gray-600"}`}>{s.label}</p>
             </div>
           ))}
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-200 dark:border-blue-900/30 mb-6">
+        <div className={`flex border-b mb-6 ${darkMode ? "border-blue-900/30" : "border-gray-300"}`}>
           {[
             { id: "videos", label: "Videos", icon: Play },
             { id: "community", label: "Community", icon: MessageSquare },
@@ -351,7 +355,7 @@ export default function ChannelPage() {
               className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                 activeTab === tab.id
                   ? "border-[#1e78ff] text-[#1e78ff]"
-                  : "border-transparent text-slate-600 dark:text-blue-400/50 hover:text-slate-800 dark:hover:text-blue-300"
+                  : `border-transparent ${darkMode ? "text-blue-400/50 hover:text-blue-300" : "text-gray-600 hover:text-gray-800"}`
               }`}>
               <tab.icon className="w-4 h-4" /> {tab.label}
             </button>
@@ -362,9 +366,9 @@ export default function ChannelPage() {
         {activeTab === "videos" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-12">
             {channelVideos.length === 0 ? (
-              <div className="text-center py-16">
-                <Play className="w-12 h-12 text-slate-300 dark:text-blue-400/20 mx-auto mb-3" />
-                <p className="text-slate-500 dark:text-blue-400/40">No videos yet</p>
+               <div className="text-center py-16">
+                 <Play className={`w-12 h-12 mx-auto mb-3 ${darkMode ? "text-blue-400/20" : "text-gray-300"}`} />
+                 <p className={darkMode ? "text-blue-400/40" : "text-gray-500"}>No videos yet</p>
                 {isOwnChannel && (
                   <Link to="/CreatorStudio"><Button className="mt-4">Upload your first video</Button></Link>
                 )}
@@ -373,8 +377,8 @@ export default function ChannelPage() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {channelVideos.map((video, i) => (
                   <motion.div key={video.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-                    className="group cursor-pointer" onClick={() => setSelectedVideo(video)}>
-                    <div className="relative aspect-video bg-slate-200 dark:bg-[#060d18] rounded-xl overflow-hidden mb-2">
+                     className="group cursor-pointer" onClick={() => setSelectedVideo(video)}>
+                     <div className={`relative aspect-video rounded-xl overflow-hidden mb-2 ${darkMode ? "bg-[#060d18]" : "bg-gray-200"}`}>
                       <img
                         src={video.thumbnail_url || `https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop&sig=${video.id}`}
                         alt={video.title}
@@ -386,8 +390,8 @@ export default function ChannelPage() {
                         </div>
                       </div>
                     </div>
-                    <h3 className="text-sm font-semibold text-slate-800 dark:text-[#c8dff5] line-clamp-2 leading-snug">{video.title}</h3>
-                    <p className="text-xs text-slate-500 dark:text-blue-400/40 mt-0.5">
+                    <h3 className={`text-sm font-semibold line-clamp-2 leading-snug ${darkMode ? "text-[#c8dff5]" : "text-gray-800"}`}>{video.title}</h3>
+                     <p className={`text-xs mt-0.5 ${darkMode ? "text-blue-400/40" : "text-gray-500"}`}>
                       {formatCount(video.view_count)} views · {timeAgo(video.published_date || video.created_date)}
                     </p>
                   </motion.div>

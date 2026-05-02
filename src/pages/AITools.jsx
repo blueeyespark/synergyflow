@@ -13,6 +13,10 @@ export default function AITools() {
   const [sessionToken, setSessionToken] = useState(null);
   const [tab, setTab] = useState("scanner");
   const [confirmedStaff, setConfirmedStaff] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem("darkMode") === "true";
+    return false;
+  });
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -31,8 +35,8 @@ export default function AITools() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#03080f] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#1e78ff] border-t-transparent rounded-full animate-spin" />
+      <div className={`min-h-screen flex items-center justify-center ${darkMode ? "bg-[#03080f]" : "bg-white"}`}>
+        <div className={`w-6 h-6 border-2 border-[#1e78ff] border-t-transparent rounded-full animate-spin`} />
       </div>
     );
   }
@@ -42,7 +46,7 @@ export default function AITools() {
   }
 
   return (
-    <div className="min-h-screen bg-[#03080f] text-[#e8f4ff]">
+    <div className={`min-h-screen ${darkMode ? "bg-[#03080f] text-[#e8f4ff]" : "bg-white text-gray-900"}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
@@ -52,24 +56,24 @@ export default function AITools() {
             </div>
             <h1 className="text-3xl font-black">Staff Tools</h1>
           </div>
-          <p className="text-blue-400/50">AI Scanner, Bug Monitor, Changes Log, and User Management</p>
+          <p className={darkMode ? "text-blue-400/50" : "text-gray-600"}>AI Scanner, Bug Monitor, Changes Log, and User Management</p>
         </motion.div>
 
         {/* Admin-only: Staff Manager section */}
         {isAdmin && (
-          <div className="mb-8 bg-blue-900/10 border border-blue-900/30 rounded-2xl p-6">
+          <div className={`mb-8 rounded-2xl p-6 border ${darkMode ? "bg-blue-900/10 border-blue-900/30" : "bg-blue-50 border-blue-200"}`}>
             <StaffManager currentUser={user} />
           </div>
         )}
 
         {/* Consolidated Tools */}
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-          <TabsList className="grid grid-cols-2 gap-2 bg-[#060d18] border border-blue-900/30 p-1 rounded-xl w-full h-auto">
-            <TabsTrigger value="scanner" className="gap-2 py-2.5 data-[state=active]:bg-[#1e78ff]/20 data-[state=active]:text-[#1e78ff] data-[state=active]:border-[#1e78ff]/40 border border-transparent rounded-lg transition-all">
+          <TabsList className={`grid grid-cols-2 gap-2 p-1 rounded-xl w-full h-auto border ${darkMode ? "bg-[#060d18] border-blue-900/30" : "bg-gray-100 border-gray-300"}`}>
+            <TabsTrigger value="scanner" className={`gap-2 py-2.5 border rounded-lg transition-all ${darkMode ? "data-[state=active]:bg-[#1e78ff]/20 data-[state=active]:text-[#1e78ff] data-[state=active]:border-[#1e78ff]/40" : "data-[state=active]:bg-blue-100 data-[state=active]:text-blue-600 data-[state=active]:border-blue-300"} border-transparent`}>
               <Scan className="w-4 h-4" /> <span className="hidden sm:inline">Scanner</span>
             </TabsTrigger>
             {isAdmin && (
-              <TabsTrigger value="users" className="gap-2 py-2.5 data-[state=active]:bg-cyan-900/20 data-[state=active]:text-cyan-400 data-[state=active]:border-cyan-900/40 border border-transparent rounded-lg transition-all">
+              <TabsTrigger value="users" className={`gap-2 py-2.5 border rounded-lg transition-all ${darkMode ? "data-[state=active]:bg-cyan-900/20 data-[state=active]:text-cyan-400 data-[state=active]:border-cyan-900/40" : "data-[state=active]:bg-cyan-100 data-[state=active]:text-cyan-600 data-[state=active]:border-cyan-300"} border-transparent`}>
                 <Users className="w-4 h-4" /> <span className="hidden sm:inline">Users</span>
               </TabsTrigger>
             )}
