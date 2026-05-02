@@ -261,7 +261,7 @@ function MoodRow({ activeMood, setActiveMood }) {
         return (
           <button key={m.id} onClick={() => setActiveMood(m.id)}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold flex-shrink-0 transition-all border ${
-              active ? "bg-[#1e78ff] text-white border-[#1e78ff] shadow-lg shadow-blue-900/40" : "bg-slate-200 dark:bg-[#060d18] text-slate-700 dark:text-blue-400/60 border-slate-300 dark:border-[#0d2040] hover:bg-slate-300 dark:hover:bg-[#0d1a2e] hover:text-slate-900 dark:hover:text-blue-200"
+              active ? "bg-[#1e78ff] text-white border-[#1e78ff] shadow-lg shadow-blue-900/40" : "bg-slate-200 dark:bg-card text-slate-700 dark:text-blue-400/60 border-slate-300 dark:border-[#0d2040] hover:bg-slate-300 dark:hover:bg-[#0d1a2e] hover:text-slate-900 dark:hover:text-blue-200"
             }`}>
             <Icon className="w-3.5 h-3.5" />
             {m.label}
@@ -536,7 +536,7 @@ export default function Dashboard() {
                     </section>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-24 text-center">
-                      <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-[#060d18] border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
+                      <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-card border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
                         <PlaySquare className="w-7 h-7 text-slate-400 dark:text-blue-400/30" />
                       </div>
                       <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">{searchQuery ? "No results found" : "No videos in this mood"}</h3>
@@ -568,7 +568,7 @@ export default function Dashboard() {
                   </>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-24 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-[#060d18] border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-card border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
                        <UserPlus className="w-7 h-7 text-slate-400 dark:text-blue-400/30" />
                     </div>
                     <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">No channels followed</h3>
@@ -597,7 +597,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-24 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-[#060d18] border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-card border border-slate-300 dark:border-[#0d2040] flex items-center justify-center mb-4">
                        <Clock className="w-7 h-7 text-slate-400 dark:text-blue-400/30" />
                     </div>
                     <h3 className="text-foreground dark:text-[#e8f4ff] font-bold text-lg mb-1">Nothing saved yet</h3>
