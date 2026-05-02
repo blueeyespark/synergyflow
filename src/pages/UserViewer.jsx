@@ -14,17 +14,23 @@ import ActivityFeed from "@/components/dashboard/ActivityFeed";
 
 export default function UserViewer() {
   const [user, setUser] = useState(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   useEffect(() => {
-    base44.auth.me().then(setUser);
+    base44.auth.me().then(u => {
+      setUser(u);
+      setIsLoadingUser(false);
+    });
   }, []);
 
+  const isAdmin = user?.role === 'admin';
+
+  // Only query users if authenticated and is admin
   const { data: allUsers = [] } = useQuery({
-    queryKey: ["users", user?.role],
+    queryKey: ["users"],
     queryFn: () => base44.entities.User.list(),
-    enabled: !!user?.email && user?.role === 'admin',
+    enabled: isAdmin && !isLoadingUser,
     retry: false,
-    throwOnError: false,
   });
 
   // Get default user (first non-admin user)
@@ -35,11 +41,13 @@ export default function UserViewer() {
   const { data: projects = [] } = useQuery({
     queryKey: ["projects"],
     queryFn: () => base44.entities.Project.list("-created_date"),
+    enabled: !isLoadingUser,
   });
 
   const { data: tasks = [] } = useQuery({
     queryKey: ["tasks"],
     queryFn: () => base44.entities.Task.list("-created_date"),
+    enabled: !isLoadingUser,
   });
 
   // Filter data for default user
@@ -69,8 +77,6 @@ export default function UserViewer() {
       if (!b.due_date) return -1;
       return new Date(a.due_date) - new Date(b.due_date);
     });
-
-  const isAdmin = user?.role === 'admin';
 
   if (!isAdmin) {
     return (
