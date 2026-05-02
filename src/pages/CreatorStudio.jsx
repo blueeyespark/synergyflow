@@ -16,19 +16,23 @@ import TeamManagement from "@/components/studio/TeamManagement";
 import StreamerAnalytics from "@/components/studio/StreamerAnalytics";
 import TrendingForCreators from "@/components/studio/TrendingForCreators";
 import ChannelEditor from "@/components/studio/ChannelEditor";
+import AIAssistantHub from "@/components/studio/AIAssistantHub";
+import CollaborationTools from "@/components/studio/CollaborationTools";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
-  { id: "channel",    label: "My Channel",   icon: Users,      component: ChannelPage },
-  { id: "editchannel",label: "Edit Channel",  icon: Edit3,      component: ChannelEditor },
-  { id: "production", label: "Production",   icon: Upload,     component: ContentProductionHub },
-  { id: "media",      label: "Media",        icon: ImageIcon,  component: MediaLibrary },
-  { id: "planning",   label: "Planning",     icon: Calendar,   component: PlanningHub },
-  { id: "analytics",  label: "Analytics",   icon: BarChart3,  component: StreamerAnalytics },
-  { id: "trending",   label: "Trending",     icon: TrendingUp, component: TrendingForCreators },
-  { id: "team",       label: "Team",         icon: Users,      component: TeamManagement },
-  { id: "client",     label: "Client Portal",icon: Globe,      component: ClientPortal },
-  { id: "discord",    label: "Discord Bot",  icon: Bot,        component: DiscordBot },
+  { id: "channel",    label: "My Channel",     icon: Users,      component: ChannelPage },
+  { id: "editchannel",label: "Edit Channel",   icon: Edit3,      component: ChannelEditor },
+  { id: "production", label: "Production",     icon: Upload,     component: ContentProductionHub },
+  { id: "media",      label: "Media",          icon: ImageIcon,  component: MediaLibrary },
+  { id: "planning",   label: "Planning",       icon: Calendar,   component: PlanningHub },
+  { id: "ai",         label: "AI Assistant",   icon: Zap,        component: AIAssistantHub },
+  { id: "analytics",  label: "Analytics",      icon: BarChart3,  component: StreamerAnalytics },
+  { id: "trending",   label: "Trending",       icon: TrendingUp, component: TrendingForCreators },
+  { id: "collab",     label: "Collaboration",  icon: Users,      component: CollaborationTools },
+  { id: "team",       label: "Team",           icon: Users,      component: TeamManagement },
+  { id: "client",     label: "Client Portal",  icon: Globe,      component: ClientPortal },
+  { id: "discord",    label: "Discord Bot",    icon: Bot,        component: DiscordBot },
 ];
 
 export default function CreatorStudio() {
