@@ -64,7 +64,7 @@ export default function TopNav({
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 bg-[#03080f]/97 backdrop-blur-xl border-b border-blue-900/30"
+      className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-xl ${darkMode ? "bg-[#03080f]/97 border-b border-[#0d1820]" : "bg-white border-b border-gray-200"}`}
       role="navigation"
     >
       <div className="flex items-center justify-between h-14 px-3 sm:px-5 gap-2">
