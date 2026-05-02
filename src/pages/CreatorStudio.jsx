@@ -8,39 +8,32 @@ import {
 } from "lucide-react";
 import ContentProductionHub from "@/components/studio/ContentProductionHub";
 import MediaLibrary from "./MediaLibrary";
-import ChannelPage from "./ChannelPage";
 import ClientPortal from "./ClientPortal";
 import DiscordBot from "./DiscordBot";
 import PlanningHub from "@/components/studio/PlanningHub";
 import TeamManagement from "@/components/studio/TeamManagement";
 import StreamerAnalytics from "@/components/studio/StreamerAnalytics";
+import AnalyticsPlus from "@/components/studio/AnalyticsPlus";
 import TrendingForCreators from "@/components/studio/TrendingForCreators";
 import ChannelEditor from "@/components/studio/ChannelEditor";
 import AIAssistantHub from "@/components/studio/AIAssistantHub";
-import CollaborationTools from "@/components/studio/CollaborationTools";
-import AnalyticsDeepDive from "@/components/studio/AnalyticsDeepDive";
-import DiscoveryRecommendations from "@/components/studio/DiscoveryRecommendations";
 import StreamingTechnical from "@/components/studio/StreamingTechnical";
 import CommunityEngagement from "@/components/studio/CommunityEngagement";
 import MonetizationRevenue from "@/components/studio/MonetizationRevenue";
 import SponsorDashboard from "@/components/studio/SponsorDashboard";
 import MerchShelfStudio from "@/components/studio/MerchShelfStudio";
-import ContentCalendarStudio from "@/components/studio/ContentCalendarStudio";
 import StreamHealthMonitor from "@/components/studio/StreamHealthMonitor";
 import CollaborationStudio from "@/components/studio/CollaborationStudio";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
-  { id: "channel",    label: "My Channel",     icon: Users,      component: ChannelPage },
   { id: "editchannel",label: "Edit Channel",   icon: Edit3,      component: ChannelEditor },
   { id: "production", label: "Production",     icon: Upload,     component: ContentProductionHub },
   { id: "media",      label: "Media",          icon: ImageIcon,  component: MediaLibrary },
   { id: "planning",   label: "Planning",       icon: Calendar,   component: PlanningHub },
-  { id: "calendar",   label: "Content Calendar",icon: Calendar,  component: ContentCalendarStudio },
   { id: "ai",         label: "AI Assistant",   icon: Zap,        component: AIAssistantHub },
   { id: "analytics",  label: "Analytics",      icon: BarChart3,  component: StreamerAnalytics },
-  { id: "deep-dive",  label: "Deep Dive",      icon: TrendingUp, component: AnalyticsDeepDive },
-  { id: "discovery",  label: "Discovery",      icon: TrendingUp, component: DiscoveryRecommendations },
+  { id: "insights",   label: "Insights",       icon: TrendingUp, component: AnalyticsPlus },
   { id: "streaming",  label: "Streaming",      icon: Upload,     component: StreamingTechnical },
   { id: "health",     label: "Stream Health",  icon: Activity,   component: StreamHealthMonitor },
   { id: "community",  label: "Community",      icon: Users,      component: CommunityEngagement },

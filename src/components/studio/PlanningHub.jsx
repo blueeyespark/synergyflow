@@ -8,12 +8,13 @@ import CalendarPage from "@/pages/Calendar";
 import Meetings from "@/pages/Meetings";
 import Planner from "@/pages/Planner";
 import TimeTrackingAnalytics from "@/pages/TimeTrackingAnalytics";
+import ContentCalendarStudio from "./ContentCalendarStudio";
 
 const subtabs = [
   { id: "overview", label: "Overview", icon: LayoutDashboard, component: PlanningOverview },
   { id: "templates", label: "Templates", icon: Layout, component: Templates },
-  { id: "content", label: "Content", icon: MessageSquare, component: ContentHub },
-  { id: "schedule", label: "Schedule", icon: Calendar, component: CalendarPage },
+  { id: "calendar", label: "Content Calendar", icon: Calendar, component: ContentCalendarStudio },
+  { id: "schedule", label: "Schedule", icon: Clock, component: CalendarPage },
   { id: "meetings", label: "Meetings", icon: Users, component: Meetings },
   { id: "planner", label: "Planner", icon: Settings, component: Planner },
   { id: "time-tracking", label: "Time Tracking", icon: Clock, component: TimeTrackingAnalytics },
