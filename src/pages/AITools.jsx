@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Scan, Bug, History } from "lucide-react";
+import { Scan, Bug, History, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import AIScanner from "./AIScanner";
 import AIBugMonitor from "./AIBugMonitor";
 import AIChangesLog from "./AIChangesLog";
+import UserViewer from "./UserViewer";
 import AITokenGate from "@/components/aitools/AITokenGate";
 import StaffManager from "@/components/aitools/StaffManager";
 
@@ -56,11 +57,17 @@ export default function AITools() {
             <TabsTrigger value="changes" className="gap-2 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700">
               <History className="w-4 h-4" /> Changes Log
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="users" className="gap-2 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">
+                <Users className="w-4 h-4" /> Users
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="scanner"><AIScanner /></TabsContent>
           <TabsContent value="bugs"><AIBugMonitor /></TabsContent>
           <TabsContent value="changes"><AIChangesLog /></TabsContent>
+          {isAdmin && <TabsContent value="users"><UserViewer /></TabsContent>}
         </Tabs>
       </div>
     </div>
