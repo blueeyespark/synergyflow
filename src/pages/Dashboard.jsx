@@ -37,6 +37,8 @@ const SIDEBAR_NAV = [
   { icon: Flame,      label: "Trending",      to: "/?tab=home&mood=hype" },
   { icon: Radio,      label: "Live",          to: "/Live" },
   { icon: PlaySquare, label: "Clips",         to: "/Shorts" },
+  { icon: History,    label: "Watch History", to: "/WatchHistory" },
+  { icon: Bookmark,   label: "Saved",         to: "/SavedVideos" },
 ];
 
 function fmt(n) {
