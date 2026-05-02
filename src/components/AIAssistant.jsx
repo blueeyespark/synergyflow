@@ -214,8 +214,10 @@ EXPERTISE:
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `${getRoleContext()}
 
-CREATOR'S WORKSPACE DATA:
+WORKSPACE DATA:
 ${context}
+
+${userRole === 'admin' || userRole === 'staff' ? 'Include team performance insights and bottleneck analysis.' : (userRole === 'owner' || userRole === 'editor' ? 'Include project status updates and upcoming deadlines.' : '')}
 
 CONVERSATION SO FAR:
 ${history}
@@ -259,6 +261,23 @@ Generate 3 punchy follow-up suggestions (max 7 words each) that are different fr
       setLoading(false);
     }
   };
+
+  // Viewers get video recommendations, others get AI assistant
+  if (userRole === 'viewer') {
+    return (
+      <motion.button
+        onClick={() => setOpen(true)}
+        className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-14 h-14 rounded-full shadow-2xl overflow-hidden ring-2 ring-indigo-300 ring-offset-2 bg-gradient-to-br from-blue-500 to-blue-600"
+        animate={pulsing ? { scale: [1, 1.12, 1] } : { scale: 1 }}
+        transition={{ duration: 1.5, repeat: pulsing ? Infinity : 0 }}
+        whileHover={{ scale: 1.1 }}
+        style={{ display: open ? 'none' : 'block' }}
+        title="Video Recommendations"
+      >
+        <div className="w-full h-full flex items-center justify-center text-white text-xl">🎬</div>
+      </motion.button>
+    );
+  }
 
   return (
     <>
