@@ -36,10 +36,6 @@ function CreateChannelForm({ userEmail, onCreated, onCancel }) {
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== "undefined") return localStorage.getItem("darkMode") === "true";
-    return false;
-  });
 
   const handleImageUpload = async (file, type) => {
     if (type === "avatar") setUploadingAvatar(true);
@@ -72,16 +68,16 @@ function CreateChannelForm({ userEmail, onCreated, onCancel }) {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 ${darkMode ? "bg-[#03080f]" : "bg-white"}`}>
+    <div className="min-h-screen bg-white dark:bg-[#03080f] flex items-center justify-center p-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className={`rounded-2xl w-full max-w-lg overflow-hidden border ${darkMode ? "bg-[#060d18] border-blue-900/40" : "bg-white border-slate-200"}`}>
+        className="rounded-2xl w-full max-w-lg overflow-hidden border bg-white dark:bg-[#060d18] border-slate-200 dark:border-blue-900/40">
 
         {/* Banner preview */}
-         <div className={`relative h-32 bg-gradient-to-r overflow-hidden ${darkMode ? "from-[#1e78ff]/40 to-[#a855f7]/40" : "from-slate-200 via-slate-100 to-slate-200"}`}>
+         <div className="relative h-32 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-[#1e78ff]/40 dark:to-[#a855f7]/40 overflow-hidden">
           {bannerUrl && <img src={bannerUrl} className="w-full h-full object-cover" alt="Banner" />}
           <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-black/30 transition-colors group">
             <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files[0] && handleImageUpload(e.target.files[0], "banner")} />
-            <div className={`flex flex-col items-center gap-1 group-hover:transition-colors ${darkMode ? "text-white/60 group-hover:text-white" : "text-slate-600 group-hover:text-slate-700"}`}>
+            <div className="flex flex-col items-center gap-1 text-slate-600 dark:text-white/60 group-hover:text-slate-700 dark:group-hover:text-white group-hover:transition-colors">
               {uploadingBanner ? <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <ImageIcon className="w-5 h-5" />}
               <span className="text-xs font-medium">{bannerUrl ? "Change Banner" : "Add Banner (optional)"}</span>
             </div>
@@ -92,13 +88,13 @@ function CreateChannelForm({ userEmail, onCreated, onCancel }) {
            {/* Avatar */}
            <div className="flex items-end gap-4 mb-5">
              <label className="relative cursor-pointer group flex-shrink-0">
-               <div className={`w-20 h-20 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] border-4 flex items-center justify-center overflow-hidden ${darkMode ? "border-[#060d18]" : "border-white"}`}>
+               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] border-4 border-white dark:border-[#060d18] flex items-center justify-center overflow-hidden">
                 {avatarUrl
                   ? <img src={avatarUrl} className="w-full h-full object-cover" alt="Avatar" />
                   : <span className="text-white text-2xl font-black">{channelName.charAt(0) || "?"}</span>
                 }
                 <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  {uploadingAvatar ? <div className={`w-4 h-4 border-2 border-t-white rounded-full animate-spin ${darkMode ? "border-white/40 border-t-white" : "border-slate-400/40 border-t-slate-600"}`} /> : <Upload className={`w-4 h-4 ${darkMode ? "text-white" : "text-slate-700"}`} />}
+                  {uploadingAvatar ? <div className="w-4 h-4 border-2 border-slate-400/40 dark:border-white/40 border-t-slate-600 dark:border-t-white rounded-full animate-spin" /> : <Upload className="w-4 h-4 text-slate-700 dark:text-white" />}
                 </div>
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files[0] && handleImageUpload(e.target.files[0], "avatar")} />
@@ -109,28 +105,28 @@ function CreateChannelForm({ userEmail, onCreated, onCancel }) {
             </div>
           </div>
 
-          <h2 className={`text-xl font-black mb-5 ${darkMode ? "text-[#e8f4ff]" : "text-gray-900"}`}>Create Your Channel</h2>
+          <h2 className="text-xl font-black mb-5 text-gray-900 dark:text-[#e8f4ff]">Create Your Channel</h2>
 
           <div className="space-y-4">
             <div>
-              <label className={`text-xs font-semibold uppercase tracking-wider mb-1.5 block ${darkMode ? "text-blue-400/60" : "text-slate-600"}`}>Channel Name *</label>
+              <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block text-slate-600 dark:text-blue-400/60">Channel Name *</label>
                <input
                  value={channelName}
                  onChange={e => { setChannelName(e.target.value); setError(""); }}
                  placeholder="e.g. NightStreamCo"
-                 className={`w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition-colors ${darkMode ? "bg-[#0a1525] border-blue-900/40 focus:border-[#1e78ff]/60 text-[#c8dff5] placeholder-blue-400/30" : "bg-white border-slate-300 focus:border-slate-400 text-gray-900 placeholder-slate-400"}`}
+                 className="w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition-colors bg-white dark:bg-[#0a1525] border-slate-300 dark:border-blue-900/40 focus:border-slate-400 dark:focus:border-[#1e78ff]/60 text-gray-900 dark:text-[#c8dff5] placeholder-slate-400 dark:placeholder-blue-400/30"
                />
-               {error && <p className={`text-xs mt-1 ${darkMode ? "text-red-400" : "text-red-600"}`}>{error}</p>}
+               {error && <p className="text-xs mt-1 text-red-600 dark:text-red-400">{error}</p>}
             </div>
 
             <div>
-              <label className={`text-xs font-semibold uppercase tracking-wider mb-1.5 block ${darkMode ? "text-blue-400/60" : "text-slate-600"}`}>Description (optional)</label>
+              <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block text-slate-600 dark:text-blue-400/60">Description (optional)</label>
                <textarea
                  value={description}
                  onChange={e => setDescription(e.target.value)}
                  placeholder="Tell viewers what your channel is about..."
                  rows={3}
-                 className={`w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition-colors resize-none ${darkMode ? "bg-[#0a1525] border-blue-900/40 focus:border-[#1e78ff]/60 text-[#c8dff5] placeholder-blue-400/30" : "bg-white border-slate-300 focus:border-slate-400 text-gray-900 placeholder-slate-400"}`}
+                 className="w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition-colors resize-none bg-white dark:bg-[#0a1525] border-slate-300 dark:border-blue-900/40 focus:border-slate-400 dark:focus:border-[#1e78ff]/60 text-gray-900 dark:text-[#c8dff5] placeholder-slate-400 dark:placeholder-blue-400/30"
                />
             </div>
 
@@ -156,10 +152,6 @@ export default function ChannelPage() {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [authPrompt, setAuthPrompt] = useState(null);
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== "undefined") return localStorage.getItem("darkMode") === "true";
-    return false;
-  });
   const [activeChannelId, setActiveChannelId] = useState(() => {
     try { return localStorage.getItem("activeChannelId") || null; } catch { return null; }
   });
@@ -206,7 +198,7 @@ export default function ChannelPage() {
 
   // Loading state
   if (!user && !channelId) {
-    return <div className={`min-h-screen flex items-center justify-center ${darkMode ? "bg-[#03080f]" : "bg-white"}`}><div className={`text-sm ${darkMode ? "text-blue-400/40" : "text-gray-600"}`}>Loading...</div></div>;
+    return <div className="min-h-screen bg-white dark:bg-[#03080f] flex items-center justify-center"><div className="text-sm text-gray-600 dark:text-blue-400/40">Loading...</div></div>;
   }
 
   // No channel found — show create form if own channel, else 404
@@ -226,13 +218,13 @@ export default function ChannelPage() {
         );
       }
       return (
-        <div className={`min-h-screen flex items-center justify-center p-4 ${darkMode ? "bg-[#03080f]" : "bg-white"}`}>
+        <div className="min-h-screen bg-white dark:bg-[#03080f] flex items-center justify-center p-4">
           <div className="text-center max-w-sm">
-            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5 border ${darkMode ? "bg-gradient-to-br from-[#1e78ff]/20 to-[#a855f7]/20 border-blue-900/40" : "bg-gradient-to-br from-gray-200 to-gray-100 border-gray-300"}`}>
-              <Users className={`w-9 h-9 ${darkMode ? "text-blue-400/40" : "text-gray-400"}`} />
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5 border bg-gradient-to-br from-gray-200 dark:from-[#1e78ff]/20 to-gray-100 dark:to-[#a855f7]/20 border-gray-300 dark:border-blue-900/40">
+              <Users className="w-9 h-9 text-gray-400 dark:text-blue-400/40" />
             </div>
-            <h2 className={`text-2xl font-black mb-2 ${darkMode ? "text-[#e8f4ff]" : "text-gray-900"}`}>No channel selected</h2>
-            <p className={`text-sm mb-6 ${darkMode ? "text-blue-400/50" : "text-gray-600"}`}>Create a channel or switch to one using the profile menu.</p>
+            <h2 className="text-2xl font-black mb-2 text-gray-900 dark:text-[#e8f4ff]">No channel selected</h2>
+            <p className="text-sm mb-6 text-gray-600 dark:text-blue-400/50">Create a channel or switch to one using the profile menu.</p>
             <Button onClick={() => setShowCreateForm(true)} className="gap-2 w-full">
               <Zap className="w-4 h-4" /> Create a Channel
             </Button>
@@ -241,10 +233,10 @@ export default function ChannelPage() {
       );
     }
     return (
-      <div className={`min-h-screen flex items-center justify-center p-4 ${darkMode ? "bg-[#03080f]" : "bg-white"}`}>
+      <div className="min-h-screen bg-white dark:bg-[#03080f] flex items-center justify-center p-4">
         <div className="text-center">
-          <Users className={`w-14 h-14 mx-auto mb-4 ${darkMode ? "text-blue-400/20" : "text-gray-300"}`} />
-          <h2 className={`text-2xl font-black mb-2 ${darkMode ? "text-[#e8f4ff]" : "text-gray-900"}`}>Channel not found</h2>
+          <Users className="w-14 h-14 mx-auto mb-4 text-gray-300 dark:text-blue-400/20" />
+          <h2 className="text-2xl font-black mb-2 text-gray-900 dark:text-[#e8f4ff]">Channel not found</h2>
           <Link to="/"><Button variant="outline">Back to Dashboard</Button></Link>
         </div>
       </div>
@@ -252,16 +244,16 @@ export default function ChannelPage() {
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? "bg-[#03080f] text-[#e8f4ff]" : "bg-white text-gray-900"}`}>
+    <div className="min-h-screen bg-white dark:bg-[#03080f] text-gray-900 dark:text-[#e8f4ff]">
       {/* Banner */}
-      <div className={`relative h-44 md:h-56 bg-gradient-to-r overflow-hidden ${darkMode ? "from-[#1e78ff]/40 to-[#a855f7]/40" : "from-gray-200 via-gray-100 to-gray-200"}`}>
+      <div className="relative h-44 md:h-56 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-[#1e78ff]/40 dark:to-[#a855f7]/40 overflow-hidden">
         {channel.banner_url && <img src={channel.banner_url} alt="Banner" className="w-full h-full object-cover" />}
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-12 mb-6">
           {/* Avatar */}
-          <div className={`w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] flex items-center justify-center text-white text-3xl font-bold overflow-hidden flex-shrink-0 shadow-lg border-4 ${darkMode ? "border-[#03080f]" : "border-white"}`}>
+          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] flex items-center justify-center text-white text-3xl font-bold overflow-hidden flex-shrink-0 shadow-lg border-4 border-white dark:border-[#03080f]">
             {channel.avatar_url
               ? <img src={channel.avatar_url} alt="" className="w-full h-full object-cover" />
               : channel.channel_name?.charAt(0)
@@ -272,14 +264,14 @@ export default function ChannelPage() {
           <div className="flex-1 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className={`text-2xl md:text-3xl font-black ${darkMode ? "text-[#e8f4ff]" : "text-gray-900"}`}>{channel.channel_name}</h1>
-                {channel.is_verified && <span className="text-[#1e78ff] text-lg">✓</span>}
-              </div>
-              <p className={`text-sm mt-1 ${darkMode ? "text-blue-400/50" : "text-gray-600"}`}>
+              <h1 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-[#e8f4ff]">{channel.channel_name}</h1>
+                 {channel.is_verified && <span className="text-[#1e78ff] text-lg">✓</span>}
+               </div>
+               <p className="text-sm mt-1 text-gray-600 dark:text-blue-400/50">
                 {formatCount(channel.subscriber_count)} subscribers · {channelVideos.length} videos
               </p>
               {channel.description && (
-                <p className={`text-sm mt-1 max-w-xl line-clamp-2 ${darkMode ? "text-blue-400/50" : "text-gray-600"}`}>{channel.description}</p>
+                <p className="text-sm mt-1 max-w-xl line-clamp-2 text-gray-600 dark:text-blue-400/50">{channel.description}</p>
               )}
             </div>
 
@@ -341,16 +333,16 @@ export default function ChannelPage() {
             { icon: Users, label: "Subscribers", value: formatCount(channel.subscriber_count) },
             { icon: Play, label: "Videos", value: channelVideos.length },
           ].map((s, i) => (
-            <div key={i} className={`rounded-xl p-3 text-center border ${darkMode ? "bg-[#060d18] border-blue-900/40" : "bg-gray-100 border-gray-300"}`}>
-              <s.icon className={`w-4 h-4 mx-auto mb-1 ${darkMode ? "text-blue-400/40" : "text-gray-400"}`} />
-              <p className={`text-xl font-black ${darkMode ? "text-[#e8f4ff]" : "text-gray-900"}`}>{s.value}</p>
-              <p className={`text-xs ${darkMode ? "text-blue-400/40" : "text-gray-600"}`}>{s.label}</p>
+            <div key={i} className="rounded-xl p-3 text-center border bg-gray-100 dark:bg-[#060d18] border-gray-300 dark:border-blue-900/40">
+               <s.icon className="w-4 h-4 mx-auto mb-1 text-gray-400 dark:text-blue-400/40" />
+               <p className="text-xl font-black text-gray-900 dark:text-[#e8f4ff]">{s.value}</p>
+               <p className="text-xs text-gray-600 dark:text-blue-400/40">{s.label}</p>
             </div>
           ))}
         </div>
 
         {/* Tabs */}
-        <div className={`flex border-b mb-6 ${darkMode ? "border-blue-900/30" : "border-gray-300"}`}>
+        <div className="flex border-b border-gray-300 dark:border-blue-900/30 mb-6">
           {[
             { id: "videos", label: "Videos", icon: Play },
             { id: "community", label: "Community", icon: MessageSquare },
@@ -359,7 +351,7 @@ export default function ChannelPage() {
               className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                 activeTab === tab.id
                   ? "border-[#1e78ff] text-[#1e78ff]"
-                  : `border-transparent ${darkMode ? "text-blue-400/50 hover:text-blue-300" : "text-gray-600 hover:text-gray-800"}`
+                  : "border-transparent text-gray-600 dark:text-blue-400/50 hover:text-gray-800 dark:hover:text-blue-300"
               }`}>
               <tab.icon className="w-4 h-4" /> {tab.label}
             </button>
@@ -371,8 +363,8 @@ export default function ChannelPage() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-12">
             {channelVideos.length === 0 ? (
                <div className="text-center py-16">
-                 <Play className={`w-12 h-12 mx-auto mb-3 ${darkMode ? "text-blue-400/20" : "text-gray-300"}`} />
-                 <p className={darkMode ? "text-blue-400/40" : "text-gray-500"}>No videos yet</p>
+                 <Play className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-blue-400/20" />
+                 <p className="text-gray-500 dark:text-blue-400/40">No videos yet</p>
                 {isOwnChannel && (
                   <Link to="/CreatorStudio"><Button className="mt-4">Upload your first video</Button></Link>
                 )}
@@ -382,7 +374,7 @@ export default function ChannelPage() {
                 {channelVideos.map((video, i) => (
                   <motion.div key={video.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
                      className="group cursor-pointer" onClick={() => setSelectedVideo(video)}>
-                     <div className={`relative aspect-video rounded-xl overflow-hidden mb-2 ${darkMode ? "bg-[#060d18]" : "bg-gray-200"}`}>
+                     <div className="relative aspect-video rounded-xl overflow-hidden mb-2 bg-gray-200 dark:bg-[#060d18]">
                       <img
                         src={video.thumbnail_url || `https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop&sig=${video.id}`}
                         alt={video.title}
@@ -394,8 +386,8 @@ export default function ChannelPage() {
                         </div>
                       </div>
                     </div>
-                    <h3 className={`text-sm font-semibold line-clamp-2 leading-snug ${darkMode ? "text-[#c8dff5]" : "text-gray-800"}`}>{video.title}</h3>
-                     <p className={`text-xs mt-0.5 ${darkMode ? "text-blue-400/40" : "text-gray-500"}`}>
+                    <h3 className="text-sm font-semibold line-clamp-2 leading-snug text-gray-800 dark:text-[#c8dff5]">{video.title}</h3>
+                     <p className="text-xs mt-0.5 text-gray-500 dark:text-blue-400/40">
                       {formatCount(video.view_count)} views · {timeAgo(video.published_date || video.created_date)}
                     </p>
                   </motion.div>
