@@ -66,6 +66,11 @@ export default function AdvancedVideoEditor() {
   const [aiType, setAiType] = useState(null);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  const [hue, setHue] = useState(0);
+  const [blur, setBlur] = useState(0);
+  const [rotation, setRotation] = useState(0);
+  const [opacity, setOpacity] = useState(100);
+  const [speed, setSpeed] = useState(1);
 
   // Thumbnail state
   const canvasRef = useRef(null);
@@ -226,14 +231,15 @@ export default function AdvancedVideoEditor() {
     const f = filterPresets.find(p => p.id === selectedFilter);
     if (!f || !video) return {};
     return {
-      filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) sepia(${f.filters.sepia || 0}%) grayscale(${f.filters.grayscale || 0}%)`,
+      filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) sepia(${f.filters.sepia || 0}%) grayscale(${f.filters.grayscale || 0}%) hue-rotate(${hue}deg) blur(${blur}px) opacity(${opacity}%)`,
+      transform: `rotate(${rotation}deg) scaleX(${speed < 0 ? -1 : 1})`,
     };
   })();
 
   return (
     <div className="flex h-[calc(100vh-120px)] bg-gradient-to-br from-[#0a0e27] to-[#050a14] text-white gap-0 rounded-2xl overflow-hidden border border-blue-900/60 shadow-2xl">
       {/* LEFT SIDEBAR - Media & Transitions */}
-      <div className="w-48 border-r border-blue-900/50 flex flex-col bg-gradient-to-b from-[#0d1628] to-[#050a14] overflow-hidden">
+      <div className="w-56 border-r border-blue-900/50 flex flex-col bg-gradient-to-b from-[#0d1628] to-[#050a14] overflow-hidden">
         <div className="flex gap-1 p-2.5 border-b border-blue-900/50 bg-gradient-to-r from-blue-950/40 to-transparent">
           <button onClick={() => setActiveTab("media")} className={`flex-1 px-2 py-1.5 text-xs rounded-lg font-semibold transition-all ${activeTab === "media" ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20" : "text-blue-300/70 hover:bg-blue-900/30 border border-blue-900/30"}`}>📁 Media</button>
           <button onClick={() => setActiveTab("effects")} className={`flex-1 px-2 py-1.5 text-xs rounded-lg font-semibold transition-all ${activeTab === "effects" ? "bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/20" : "text-blue-300/70 hover:bg-blue-900/30 border border-blue-900/30"}`}>✨ Effects</button>
@@ -470,7 +476,7 @@ export default function AdvancedVideoEditor() {
         </div>
 
       {/* RIGHT SIDEBAR - Text & Thumbnail */}
-      <div className="w-72 border-l border-blue-900/50 flex flex-col bg-gradient-to-b from-[#0d1628] to-[#050a14] overflow-y-auto">
+      <div className="w-96 border-l border-blue-900/50 flex flex-col bg-gradient-to-b from-[#0d1628] to-[#050a14] overflow-y-auto">
         <div className="p-2.5 border-b border-blue-900/50 bg-gradient-to-r from-blue-950/40 to-transparent">
           <h3 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">✏️ Content Tools</h3>
         </div>
@@ -521,6 +527,41 @@ export default function AdvancedVideoEditor() {
               <input type="range" min="20" max="100" value={fontSize} onChange={(e) => setFontSize(parseInt(e.target.value))} className="w-full h-1.5 rounded-full" />
             </div>
             <Button onClick={handleDownloadThumbnail} className="w-full h-7 text-xs gap-1 bg-gradient-to-r from-cyan-600 to-pink-600 hover:from-cyan-500 hover:to-pink-500 rounded-lg font-semibold shadow-lg shadow-cyan-500/20"><Download className="w-3 h-3" /> Download</Button>
+          </div>
+
+          {/* Advanced Color & Transform */}
+          <div className="pt-3 border-t border-blue-900/40 space-y-2">
+            <h4 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-400">🎨 Advanced Color</h4>
+            <div className="space-y-1.5 bg-orange-950/20 rounded-lg p-2 border border-orange-900/30">
+              <div>
+                <label className="text-xs font-semibold text-orange-300 block mb-1">Hue: {hue}°</label>
+                <input type="range" min="-180" max="180" value={hue} onChange={(e) => setHue(parseFloat(e.target.value))} className="w-full h-1.5 rounded-full" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-orange-300 block mb-1">Blur: {blur}px</label>
+                <input type="range" min="0" max="20" value={blur} onChange={(e) => setBlur(parseFloat(e.target.value))} className="w-full h-1.5 rounded-full" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-orange-300 block mb-1">Opacity: {opacity}%</label>
+                <input type="range" min="0" max="100" value={opacity} onChange={(e) => setOpacity(parseFloat(e.target.value))} className="w-full h-1.5 rounded-full" />
+              </div>
+            </div>
+          </div>
+
+          {/* Transform Controls */}
+          <div className="pt-3 border-t border-blue-900/40 space-y-2">
+            <h4 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-400">🔄 Transform</h4>
+            <div className="space-y-1.5 bg-yellow-950/20 rounded-lg p-2 border border-yellow-900/30">
+              <div>
+                <label className="text-xs font-semibold text-yellow-300 block mb-1">Rotation: {rotation}°</label>
+                <input type="range" min="-180" max="180" value={rotation} onChange={(e) => setRotation(parseFloat(e.target.value))} className="w-full h-1.5 rounded-full" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-yellow-300 block mb-1">Playback Speed: {Math.abs(speed).toFixed(1)}x</label>
+                <input type="range" min="-2" max="2" step="0.1" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))} className="w-full h-1.5 rounded-full" />
+                <p className="text-xs text-yellow-400/60 mt-0.5">Negative = reverse</p>
+              </div>
+            </div>
           </div>
 
           {/* AI Tools */}
