@@ -54,18 +54,19 @@ export default function TopNav({
   const isAdmin = user?.role === "admin";
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-white via-blue-50 to-white backdrop-blur-lg border-b-2 border-cyan-200 shadow-lg shadow-cyan-300/20" role="navigation" aria-label="Main navigation">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#03080f]/95 backdrop-blur-xl border-b border-blue-900/40 shadow-lg shadow-blue-900/20" role="navigation" aria-label="Main navigation">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 px-1">
           {/* Logo & Workspace */}
           <div className="flex items-center gap-3 flex-shrink-0">
             <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2 group" title="Go to Dashboard">
-              <div className="w-9 h-9 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center transform group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-purple-500/50 transition-all duration-200">
-                <span className="text-slate-900 font-black text-lg">P</span>
+              <div className="relative w-9 h-9 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-lg bg-[#1e78ff]/20 group-hover:bg-[#1e78ff]/30 border border-[#1e78ff]/50 transition-all" />
+                <span className="relative text-[#1e78ff] font-black text-lg tracking-tight">V</span>
               </div>
-              <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600 hidden sm:block text-lg uppercase tracking-wider">Planify</span>
+              <span className="font-black hidden sm:block text-lg tracking-widest uppercase" style={{background:'linear-gradient(135deg,#1e78ff,#00c8ff)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>VStream</span>
             </Link>
-            <span className="text-slate-300 hidden sm:block">/</span>
+            <span className="text-blue-800 hidden sm:block">/</span>
             <div className="hidden sm:block">
               <WorkspaceSelector currentWorkspace={currentWorkspace} onWorkspaceChange={onWorkspaceChange} user={user} />
             </div>
@@ -76,7 +77,7 @@ export default function TopNav({
             <Link
               to={createPageUrl("CreatorStudio")}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
-                currentPageName === "Dashboard" || currentPageName === "CreatorStudio" ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-400/30" : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+                currentPageName === "Dashboard" || currentPageName === "CreatorStudio" ? "bg-[#1e78ff]/20 text-[#1e78ff] border border-[#1e78ff]/50 shadow-lg shadow-blue-900/30" : "text-blue-400 hover:text-blue-200 hover:bg-blue-900/20"
               }`}
               aria-current={currentPageName === "CreatorStudio" ? "page" : "false"}
             >
@@ -104,7 +105,7 @@ export default function TopNav({
 
           {/* Right Section */}
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 border border-slate-200">
+            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="text-blue-400 hover:text-blue-200 hover:bg-blue-900/20 border border-blue-900/40">
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
             <NotificationBell
@@ -114,25 +115,25 @@ export default function TopNav({
               onDelete={onDeleteNotification}
             />
 
-            <div className="hidden sm:flex items-center gap-2 pl-2 border-l-2 border-cyan-200">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-sm font-black flex-shrink-0 shadow-lg shadow-cyan-400/30">
+            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-blue-900/40">
+              <div className="w-8 h-8 rounded-full bg-[#1e78ff]/20 border border-[#1e78ff]/50 flex items-center justify-center text-[#1e78ff] text-sm font-black flex-shrink-0">
                 {user?.full_name?.charAt(0) || "U"}
               </div>
               <div className="hidden lg:block text-right">
-                <p className="text-xs font-bold text-slate-700 leading-tight uppercase">{user?.full_name || "User"}</p>
-                <p className="text-xs text-slate-500 leading-tight">{user?.role || "user"}</p>
+                <p className="text-xs font-bold text-blue-200 leading-tight uppercase">{user?.full_name || "User"}</p>
+                <p className="text-xs text-blue-500 leading-tight">{user?.role || "user"}</p>
               </div>
               <Link to={createPageUrl("Settings")}>
-                <Button variant="ghost" size="icon" className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 border border-slate-200">
+                <Button variant="ghost" size="icon" className="text-blue-400 hover:text-blue-200 hover:bg-blue-900/20 border border-blue-900/40">
                   <Settings className="w-4 h-4" />
                 </Button>
               </Link>
-              <Button variant="ghost" size="icon" onClick={() => base44.auth.logout()} className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 border border-slate-200">
+              <Button variant="ghost" size="icon" onClick={() => base44.auth.logout()} className="text-blue-400 hover:text-blue-200 hover:bg-blue-900/20 border border-blue-900/40">
                 <LogOut className="w-4 h-4" />
               </Button>
             </div>
 
-            <Button variant="ghost" size="icon" className="md:hidden text-slate-600 hover:text-slate-800 hover:bg-slate-100 border border-slate-200" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <Button variant="ghost" size="icon" className="md:hidden text-blue-400 hover:text-blue-200 hover:bg-blue-900/20 border border-blue-900/40" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
@@ -145,7 +146,7 @@ export default function TopNav({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="md:hidden border-t-2 border-cyan-200 bg-gradient-to-b from-slate-50 to-blue-50"
+          className="md:hidden border-t border-blue-900/40 bg-[#03080f]/98"
         >
           <div className="px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto">
             {[
@@ -162,19 +163,19 @@ export default function TopNav({
                 to={createPageUrl(item.page)}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                  currentPageName === item.page ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-400/30" : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+                  currentPageName === item.page ? "bg-[#1e78ff]/20 text-[#1e78ff] border border-[#1e78ff]/50" : "text-blue-400 hover:text-blue-200 hover:bg-blue-900/20"
                 }`}
               >
                 <item.icon className="w-5 h-5" />
                 {item.name}
               </Link>
             ))}
-            <div className="pt-3 mt-3 border-t-2 border-cyan-200">
+            <div className="pt-3 mt-3 border-t border-blue-900/40">
               <div className="px-3 py-2">
-                <p className="text-sm font-bold text-slate-700 uppercase">{user?.full_name}</p>
-                <p className="text-xs text-slate-500">{user?.email}</p>
+                <p className="text-sm font-bold text-blue-200 uppercase">{user?.full_name}</p>
+                <p className="text-xs text-blue-500">{user?.email}</p>
               </div>
-              <Button variant="ghost" onClick={() => base44.auth.logout()} className="w-full justify-start text-slate-600 hover:text-slate-800 hover:bg-slate-100 mt-1 font-bold border border-slate-200">
+              <Button variant="ghost" onClick={() => base44.auth.logout()} className="w-full justify-start text-blue-400 hover:text-blue-200 hover:bg-blue-900/20 mt-1 font-bold border border-blue-900/40">
                 <LogOut className="w-4 h-4 mr-2" /> Sign out
               </Button>
             </div>

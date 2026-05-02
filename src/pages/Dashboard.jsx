@@ -301,13 +301,13 @@ export default function Dashboard() {
   const trending = [...regularVideos].sort((a, b) => (b.view_count || 0) - (a.view_count || 0)).slice(0, 4);
 
   const sidebarBtnBase = "flex items-center gap-3 px-3 py-2 rounded-xl text-sm w-full text-left transition-colors";
-  const sidebarBtnIdle = "text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white";
-  const sidebarBtnActive = "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white font-medium";
+  const sidebarBtnIdle = "text-blue-400/70 hover:bg-blue-900/20 hover:text-blue-200";
+  const sidebarBtnActive = "bg-[#1e78ff]/15 text-[#1e78ff] border border-[#1e78ff]/30 font-medium";
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-gray-900 dark:text-white flex">
+    <div className="min-h-screen bg-[#03080f] text-[#e8f4ff] flex">
       {/* Sidebar */}
-      <aside className={`flex flex-col w-48 sm:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto bg-white dark:bg-zinc-950 py-3 px-2 z-40 border-r border-gray-200 dark:border-zinc-900 transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"}`}>
+      <aside className={`flex flex-col w-48 sm:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto bg-[#03080f] py-3 px-2 z-40 border-r border-blue-900/30 transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"}`}>
         {SIDEBAR_ITEMS.map(item => (
           <button key={item.label} className={`${sidebarBtnBase} ${item.active ? sidebarBtnActive : sidebarBtnIdle}`}>
             <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -324,16 +324,16 @@ export default function Dashboard() {
           <Users className="w-5 h-5 flex-shrink-0" /> My Channel
         </Link>
 
-        <hr className="border-gray-200 dark:border-zinc-800 my-3" />
-        <Link to="/CreatorStudio" className={`${sidebarBtnBase} bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 hover:from-cyan-500/20 hover:to-blue-500/20`}>
+        <hr className="border-blue-900/30 my-3" />
+        <Link to="/CreatorStudio" className={`${sidebarBtnBase} bg-[#1e78ff]/10 border border-[#1e78ff]/30 text-[#1e78ff] hover:bg-[#1e78ff]/20`}>
           <PlusCircle className="w-5 h-5 flex-shrink-0" /> Creator Studio
         </Link>
-        <Link to="/VideoAnalytics" className={`${sidebarBtnBase} bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:from-amber-500/20 hover:to-orange-500/20`}>
+        <Link to="/VideoAnalytics" className={`${sidebarBtnBase} bg-[#00c8ff]/10 border border-[#00c8ff]/30 text-[#00c8ff] hover:bg-[#00c8ff]/20`}>
           <BarChart2 className="w-5 h-5 flex-shrink-0" /> Analytics
         </Link>
 
-        <hr className="border-gray-200 dark:border-zinc-800 my-3" />
-        <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">You</p>
+        <hr className="border-blue-900/30 my-3" />
+        <p className="text-xs font-semibold text-blue-500/50 uppercase tracking-wider px-3 mb-1">You</p>
         {SIDEBAR_YOU.map(item => (
           <button key={item.label} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
             <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -341,12 +341,12 @@ export default function Dashboard() {
           </button>
         ))}
 
-        <hr className="border-gray-200 dark:border-zinc-800 my-3" />
-        <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">My Playlists</p>
+        <hr className="border-blue-900/30 my-3" />
+        <p className="text-xs font-semibold text-blue-500/50 uppercase tracking-wider px-3 mb-1">My Playlists</p>
         {user?.email && <PlaylistsSidebarSection userEmail={user.email} sidebarBtnBase={sidebarBtnBase} sidebarBtnIdle={sidebarBtnIdle} />}
 
-        <hr className="border-gray-200 dark:border-zinc-800 my-3" />
-        <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">Subscriptions</p>
+        <hr className="border-blue-900/30 my-3" />
+        <p className="text-xs font-semibold text-blue-500/50 uppercase tracking-wider px-3 mb-1">Subscriptions</p>
         {(showMoreSubs ? MOCK_SUBSCRIPTIONS : MOCK_SUBSCRIPTIONS.slice(0, 4)).map(sub => (
           <button key={sub.name} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
             <div className={`w-6 h-6 rounded-full ${sub.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>{sub.avatar}</div>
@@ -358,8 +358,8 @@ export default function Dashboard() {
           {showMoreSubs ? "Show less" : "Show more"}
         </button>
 
-        <hr className="border-gray-200 dark:border-zinc-800 my-3" />
-        <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1">Explore</p>
+        <hr className="border-blue-900/30 my-3" />
+        <p className="text-xs font-semibold text-blue-500/50 uppercase tracking-wider px-3 mb-1">Explore</p>
         {EXPLORE_ITEMS.map(item => (
           <button key={item.label} className={`${sidebarBtnBase} ${sidebarBtnIdle}`}>
             <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -369,21 +369,21 @@ export default function Dashboard() {
       </aside>
 
       {/* Overlay for mobile */}
-      {sidebarOpen && <div className="fixed inset-0 bg-black/20 z-30 sm:hidden" onClick={() => setSidebarOpen(false)} />}
+      {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-30 sm:hidden" onClick={() => setSidebarOpen(false)} />}
 
       {/* Main */}
       <main className="flex-1 min-w-0 ml-0 sm:ml-48 md:ml-56 flex">
         <div className="flex-1 min-w-0">
           {/* Sticky bar */}
-          <div className="sticky top-16 z-30 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-zinc-900 px-3 sm:px-4 pt-2 pb-1 space-y-2">
+          <div className="sticky top-16 z-30 bg-[#03080f]/95 backdrop-blur-sm border-b border-blue-900/30 px-3 sm:px-4 pt-2 pb-1 space-y-2">
             {/* Main tabs */}
             <div className="flex gap-5 overflow-x-auto scrollbar-hide">
               {MAIN_TABS.map(tab => (
                 <button key={tab} onClick={() => setActiveMainTab(tab)}
                   className={`text-sm font-semibold pb-2 border-b-2 flex-shrink-0 transition-colors ${
                     activeMainTab === tab
-                      ? "border-gray-900 dark:border-white text-gray-900 dark:text-white"
-                      : "border-transparent text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300"
+                      ? "border-[#1e78ff] text-[#1e78ff]"
+                      : "border-transparent text-blue-500/50 hover:text-blue-300"
                   }`}
                 >
                   {tab}
@@ -398,21 +398,22 @@ export default function Dashboard() {
             {activeMainTab === "Home" && (
               <>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setSidebarOpen(!sidebarOpen)} className="sm:hidden flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
-                    <Menu className="w-5 h-5 text-gray-600 dark:text-zinc-400" />
+                  <button onClick={() => setSidebarOpen(!sidebarOpen)} className="sm:hidden flex-shrink-0 p-2 hover:bg-blue-900/20 rounded-lg transition-colors">
+                    <Menu className="w-5 h-5 text-blue-400" />
                   </button>
-                  <div className={`flex items-center gap-2 bg-gray-100 dark:bg-zinc-900 border ${searchFocused ? "border-gray-400 dark:border-zinc-500" : "border-gray-200 dark:border-zinc-800"} rounded-full px-3 py-1.5 flex-1 transition-colors`}>
-                    <Search className="w-4 h-4 text-gray-400 dark:text-zinc-500 flex-shrink-0" />
+                  <div className={`flex items-center gap-2 bg-[#060d18] border ${searchFocused ? "border-[#1e78ff]/60" : "border-blue-900/40"} rounded-full px-3 py-1.5 flex-1 transition-colors`}>
+                    <Search className="w-4 h-4 text-blue-500/60 flex-shrink-0" />
                     <input
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                       onFocus={() => setSearchFocused(true)}
                       onBlur={() => setSearchFocused(false)}
                       placeholder="Search videos..."
-                      className="flex-1 bg-transparent text-gray-900 dark:text-white text-sm outline-none placeholder:text-gray-400 dark:placeholder:text-zinc-500"
+                      className="flex-1 text-blue-100 text-sm outline-none"
+                      style={{background:'transparent',border:'none'}}
                     />
                     {searchQuery && (
-                      <button onClick={() => setSearchQuery("")} className="text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-white">
+                      <button onClick={() => setSearchQuery("")} className="text-blue-500/60 hover:text-blue-300">
                         <X className="w-4 h-4" />
                       </button>
                     )}
@@ -426,8 +427,8 @@ export default function Dashboard() {
                         onClick={() => setActiveCategory(cat)}
                         className={`flex-shrink-0 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                           activeCategory === cat
-                            ? "bg-gray-900 dark:bg-white text-white dark:text-black"
-                            : "bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700"
+                            ? "bg-[#1e78ff] text-white border border-[#1e78ff]/50"
+                            : "bg-[#060d18] text-blue-400/70 border border-blue-900/30 hover:bg-blue-900/20 hover:text-blue-200"
                         }`}
                       >
                         {cat}
@@ -534,14 +535,14 @@ export default function Dashboard() {
         </div>
 
         {/* Right Sidebar — Live + AI */}
-        <aside className="hidden lg:flex flex-col w-60 xl:w-72 flex-shrink-0 border-l border-gray-200 dark:border-zinc-800 px-3 xl:px-4 pb-8 overflow-y-auto space-y-4" style={{ marginTop: "5rem" }}>
+        <aside className="hidden lg:flex flex-col w-60 xl:w-72 flex-shrink-0 border-l border-blue-900/30 px-3 xl:px-4 pb-8 overflow-y-auto space-y-4" style={{ marginTop: "5rem" }}>
           {liveStreams.length > 0 && <LiveSidebar liveChannels={liveStreams} onSelectStream={setSelectedStream} />}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center">
-                <span className="text-black font-black text-xs">P</span>
+              <div className="w-6 h-6 rounded-lg bg-[#1e78ff]/20 border border-[#1e78ff]/40 flex items-center justify-center">
+                <span className="text-[#1e78ff] font-black text-xs">V</span>
               </div>
-              <span className="text-sm font-bold text-gray-900 dark:text-white">Planify AI</span>
+              <span className="text-sm font-bold text-blue-200">VStream AI</span>
             </div>
             <AIContentAdvisor videos={displayVideos} channels={channels} user={user} />
           </div>

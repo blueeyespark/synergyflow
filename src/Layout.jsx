@@ -106,50 +106,51 @@ export default function Layout({ children, currentPageName }) {
       <AIProactivePopup projects={projects} tasks={tasks} />
 
       <style>{`
-        html {
-          scroll-behavior: smooth;
-          background: linear-gradient(135deg, #1a1028 0%, #2d1b4e 50%, #1a1028 100%);
-        }
-        
-        * {
-          scroll-padding-top: 4rem;
-        }
-        
-        .dark .bg-white { background-color: rgb(30 41 59) !important; }
-        .dark .bg-slate-50 { background-color: rgb(15 23 42) !important; }
-        .dark .bg-slate-100 { background-color: rgb(51 65 85) !important; }
-        .dark .text-slate-900 { color: rgb(248 250 252) !important; }
-        .dark .text-slate-800 { color: rgb(226 232 240) !important; }
-        .dark .text-slate-700 { color: rgb(203 213 225) !important; }
-        .dark .text-slate-600 { color: rgb(148 163 184) !important; }
-        .dark .text-slate-500 { color: rgb(148 163 184) !important; }
-        .dark .text-slate-400 { color: rgb(100 116 139) !important; }
-        .dark .border-slate-100, .dark .border-slate-200 { border-color: rgb(51 65 85) !important; }
-        .dark .border-slate-300 { border-color: rgb(71 85 105) !important; }
-        .dark .bg-white\\/80 { background-color: rgba(30, 41, 59, 0.95) !important; }
-        .dark input, .dark textarea, .dark select { background-color: rgb(51 65 85) !important; color: rgb(248 250 252) !important; border-color: rgb(71 85 105) !important; }
-        .dark input::placeholder, .dark textarea::placeholder { color: rgb(100 116 139) !important; }
-        .dark .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.15) !important; }
-        .dark .bg-green-100 { background-color: rgba(34, 197, 94, 0.2) !important; }
-        .dark .bg-red-100 { background-color: rgba(239, 68, 68, 0.2) !important; }
-        .dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.2) !important; }
-        .dark .bg-purple-100 { background-color: rgba(168, 85, 247, 0.2) !important; }
-        .dark .bg-blue-100 { background-color: rgba(59, 130, 246, 0.2) !important; }
-        .dark [data-radix-popper-content-wrapper] > div { background-color: rgb(30 41 59) !important; border-color: rgb(51 65 85) !important; }
-        .dark [role="dialog"] { background-color: rgb(30 41 59) !important; border-color: rgb(51 65 85) !important; }
-        .dark [role="listbox"] { background-color: rgb(30 41 59) !important; }
-        .dark [role="option"]:hover { background-color: rgb(51 65 85) !important; }
-        .dark .hover\\:bg-slate-50:hover { background-color: rgb(51 65 85) !important; }
-        .dark .hover\\:bg-slate-100:hover { background-color: rgb(51 65 85) !important; }
-        .dark table { color: rgb(248 250 252) !important; }
-        .dark th, .dark td { border-color: rgb(51 65 85) !important; }
-        .dark .divide-slate-100 > * + * { border-color: rgb(51 65 85) !important; }
-        .dark .divide-slate-200 > * + * { border-color: rgb(51 65 85) !important; }
-        .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 { color: rgb(248 250 252) !important; }
-        .dark p { color: rgb(203 213 225); }
-        .dark .recharts-cartesian-grid line { stroke: rgb(51 65 85) !important; }
-        .dark .recharts-text { fill: rgb(148 163 184) !important; }
-        .dark .shadow-sm, .dark .shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important; }
+        html { scroll-behavior: smooth; background: #03080f; }
+        * { scroll-padding-top: 4rem; }
+
+        /* Cyber overrides — map light colors to dark cyber equivalents */
+        .bg-white { background-color: #060d18 !important; }
+        .bg-slate-50, .bg-gray-50 { background-color: #07111f !important; }
+        .bg-slate-100, .bg-gray-100 { background-color: #0d1a2e !important; }
+        .bg-slate-200, .bg-gray-200 { background-color: #122040 !important; }
+        .bg-slate-800, .bg-gray-800 { background-color: #040a14 !important; }
+        .bg-slate-900, .bg-gray-900 { background-color: #03080f !important; }
+        .bg-zinc-900 { background-color: #03080f !important; }
+        .bg-zinc-950 { background-color: #020608 !important; }
+        .bg-zinc-800 { background-color: #060d18 !important; }
+
+        .text-slate-900, .text-gray-900 { color: #e8f4ff !important; }
+        .text-slate-800, .text-gray-800 { color: #c8dff5 !important; }
+        .text-slate-700, .text-gray-700 { color: #9fc3e8 !important; }
+        .text-slate-600, .text-gray-600 { color: #6a9ec5 !important; }
+        .text-slate-500, .text-gray-500 { color: #4a7ea0 !important; }
+        .text-slate-400, .text-gray-400 { color: #3a6080 !important; }
+        .text-white { color: #e8f4ff !important; }
+        .text-zinc-300 { color: #9fc3e8 !important; }
+        .text-zinc-400 { color: #4a7ea0 !important; }
+        .text-zinc-500 { color: #3a6080 !important; }
+
+        .border-slate-100, .border-slate-200, .border-gray-100, .border-gray-200 { border-color: #0d2040 !important; }
+        .border-slate-300, .border-gray-300 { border-color: #1a3a60 !important; }
+        .border-zinc-800, .border-zinc-700 { border-color: #0d2040 !important; }
+
+        input, textarea, select { background-color: #0a1525 !important; color: #c8dff5 !important; border-color: #1a3a60 !important; }
+        input::placeholder, textarea::placeholder { color: #3a6080 !important; }
+
+        [data-radix-popper-content-wrapper] > div { background-color: #060d18 !important; border-color: #0d2040 !important; }
+        [role="dialog"] { background-color: #060d18 !important; border-color: #0d2040 !important; }
+        [role="listbox"] { background-color: #060d18 !important; }
+        [role="option"]:hover { background-color: #0d2040 !important; }
+
+        table { color: #c8dff5 !important; }
+        th, td { border-color: #0d2040 !important; }
+
+        .recharts-cartesian-grid line { stroke: #0d2040 !important; }
+        .recharts-text { fill: #4a7ea0 !important; }
+
+        h1, h2, h3, h4, h5, h6 { color: #e8f4ff; }
+        p { color: #9fc3e8; }
       `}</style>
 
       <TopNav

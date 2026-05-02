@@ -1,24 +1,23 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority";
-
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-400/30 hover:shadow-cyan-400/50 hover:scale-105 active:scale-95",
+          "bg-[#1e78ff] text-white shadow-lg shadow-blue-900/50 hover:bg-[#3d8fff] hover:shadow-blue-500/40 hover:shadow-xl active:scale-95 border border-blue-500/30",
         destructive:
-          "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg shadow-red-400/30 hover:shadow-red-400/50 hover:scale-105 active:scale-95",
+          "bg-red-600 text-white shadow-lg shadow-red-900/50 hover:bg-red-500 active:scale-95",
         outline:
-          "border-2 border-cyan-500 bg-transparent text-cyan-600 hover:bg-cyan-50 hover:border-cyan-600 active:scale-95",
+          "border border-[#1e78ff]/50 bg-transparent text-[#1e78ff] hover:bg-[#1e78ff]/10 hover:border-[#1e78ff] active:scale-95",
         secondary:
-          "bg-gradient-to-r from-orange-400 to-red-500 text-white shadow-lg shadow-orange-400/30 hover:shadow-orange-400/50 hover:scale-105 active:scale-95",
-        ghost: "text-slate-600 hover:bg-slate-100 active:scale-95",
-        link: "text-cyan-600 underline-offset-4 hover:underline hover:text-cyan-700 font-semibold",
+          "bg-[#0d1a2e] text-blue-200 border border-blue-900/40 hover:bg-[#1a2d4a] hover:border-blue-600/50 active:scale-95",
+        ghost: "text-blue-300 hover:bg-blue-900/20 hover:text-blue-100 active:scale-95",
+        link: "text-[#1e78ff] underline-offset-4 hover:underline hover:text-[#00c8ff] font-semibold",
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -37,10 +36,11 @@ const buttonVariants = cva(
 const Button = React.forwardRef(({ className, variant, size, asChild = false, ...props }, ref) => {
   const Comp = asChild ? Slot : "button"
   return (
-    (<Comp
+    <Comp
       className={cn(buttonVariants({ variant, size, className }))}
       ref={ref}
-      {...props} />)
+      {...props}
+    />
   );
 })
 Button.displayName = "Button"
