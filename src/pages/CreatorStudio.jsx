@@ -3,25 +3,32 @@ import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Upload, BarChart3, Calendar, Users, ArrowLeft, TrendingUp, Edit3, Zap
+  Upload, BarChart3, Calendar, Users, ArrowLeft, TrendingUp, Edit3
 } from "lucide-react";
 import ProductionHub from "@/components/studio/ProductionHub";
 import PlanningHub from "@/components/studio/PlanningHub";
-import TeamManagement from "@/components/studio/TeamManagement";
 import AnalyticsHub from "@/components/studio/AnalyticsHub";
-import AnalyticsPlus from "@/components/studio/AnalyticsPlus";
 import ChannelEditor from "@/components/studio/ChannelEditor";
-import CommunityEngagement from "@/components/studio/CommunityEngagement";
+import ContentCreationHub from "@/components/studio/ContentCreationHub";
+import IntegrationsHub from "@/components/studio/IntegrationsHub";
+import AdvancedAnalyticsHub from "@/components/studio/AdvancedAnalyticsHub";
+import MonetizationHub from "@/components/studio/MonetizationHub";
+import CollaborationHub from "@/components/studio/CollaborationHub";
+import CreatorResourcesHub from "@/components/studio/CreatorResourcesHub";
+import CommunityManagementHub from "@/components/studio/CommunityManagementHub";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
-  { id: "channel",    label: "Channel",       icon: Edit3,      component: ChannelEditor },
-  { id: "production", label: "Production",    icon: Upload,     component: ProductionHub },
-  { id: "planning",   label: "Planning",      icon: Calendar,   component: PlanningHub },
-  { id: "analytics",  label: "Analytics",     icon: BarChart3,  component: AnalyticsHub },
-  { id: "discover",   label: "Discover",      icon: TrendingUp, component: AnalyticsPlus },
-  { id: "community",  label: "Community",     icon: Users,      component: CommunityEngagement },
-  { id: "team",       label: "Team",          icon: Users,      component: TeamManagement },
+  { id: "channel",      label: "Channel",         icon: Edit3,      component: ChannelEditor },
+  { id: "content",      label: "Create",          icon: Upload,     component: ContentCreationHub },
+  { id: "production",   label: "Production",      icon: Upload,     component: ProductionHub },
+  { id: "planning",     label: "Planning",        icon: Calendar,   component: PlanningHub },
+  { id: "analytics",    label: "Analytics",       icon: BarChart3,  component: AdvancedAnalyticsHub },
+  { id: "monetization", label: "Monetization",    icon: TrendingUp, component: MonetizationHub },
+  { id: "integrations", label: "Integrations",    icon: Upload,     component: IntegrationsHub },
+  { id: "collaboration",label: "Collaboration",   icon: Users,      component: CollaborationHub },
+  { id: "resources",    label: "Resources",       icon: BarChart3,  component: CreatorResourcesHub },
+  { id: "community",    label: "Community Mgmt",  icon: Users,      component: CommunityManagementHub },
 ];
 
 export default function CreatorStudio() {
@@ -82,11 +89,14 @@ export default function CreatorStudio() {
               <ArrowLeft className="w-4 h-4" />
               My Channel
             </Link>
+            <div className="flex-1" />
             <div>
-              <h1 className="text-xl font-black tracking-wide" style={{ background: 'linear-gradient(135deg,#1e78ff,#00c8ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Creator Studio
-              </h1>
+              <div>
+                <h1 className="text-xl font-black tracking-wide" style={{ background: 'linear-gradient(135deg,#1e78ff,#00c8ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  Creator Studio
+                </h1>
               <p className="text-xs text-blue-500/60">Manage your channel, content, and team</p>
+            </div>
             </div>
           </div>
 
