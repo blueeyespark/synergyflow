@@ -1,40 +1,15 @@
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+// TopNav — YouTube-style nav with avatar dropdown
 import { base44 } from "@/api/base44Client";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, LogOut, Menu, X, Users,
-  Moon, Sun, Settings, ChevronDown, BarChart2, CheckSquare,
-  Globe, Bot, Receipt, UserCog, History, Scan, Bug, Timer,
-  Trophy, FolderOpen, LayoutTemplate, Share2, Zap, Clock, TrendingUp, Folder
+  Menu, X, Moon, Sun, Settings, LogOut, Search,
+  Tv, Youtube, Zap, Users, Scan, LayoutDashboard,
+  Radio, PlaySquare, ChevronRight, UserCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/notifications/NotificationBell";
-import NavDropdown from "./NavDropdown";
-
-const navGroups = [
-  { label: "Dashboard", icon: LayoutDashboard, page: "Dashboard", single: true },
-  {
-    label: "Creator",
-    icon: Zap,
-    children: [
-      { section: "Studio", items: [
-        { name: "Creator Studio", icon: Zap, page: "CreatorStudio" },
-      ]},
-    ],
-  },
-  {
-    label: "AI Tools",
-    icon: Scan,
-    adminOnly: true,
-    children: [
-      { section: null, items: [
-        { name: "AI Tools", icon: Scan, page: "AITools" },
-        { name: "Users", icon: Users, page: "UserViewer" },
-      ]},
-    ],
-  },
-];
 
 export default function TopNav({
   user,
@@ -48,138 +23,253 @@ export default function TopNav({
   onMarkAllRead,
   onDeleteNotification,
   newVideos = [],
-  currentWorkspace,
-  onWorkspaceChange,
 }) {
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
   const isAdmin = user?.role === "admin";
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setAccountOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchOpen(false);
+      setSearchQuery("");
+    }
+  };
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#03080f]/95 backdrop-blur-xl border-b border-blue-900/40 shadow-lg shadow-blue-900/20" role="navigation" aria-label="Main navigation">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 px-1">
-          {/* Logo & Workspace */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2 group" title="Go to Dashboard">
-              <div className="relative w-9 h-9 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-lg bg-[#1e78ff]/20 group-hover:bg-[#1e78ff]/30 border border-[#1e78ff]/50 transition-all" />
-                <span className="relative text-[#1e78ff] font-black text-lg tracking-tight">V</span>
-              </div>
-              <span className="font-black hidden sm:block text-lg tracking-widest uppercase" style={{background:'linear-gradient(135deg,#1e78ff,#00c8ff)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>VStream</span>
-            </Link>
+    <nav
+      className="fixed top-0 left-0 right-0 z-50 bg-[#03080f]/97 backdrop-blur-xl border-b border-blue-900/30"
+      role="navigation"
+    >
+      <div className="flex items-center justify-between h-14 px-3 sm:px-5 gap-2">
 
-          </div>
-
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1">
-            <Link
-              to={createPageUrl("CreatorStudio")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
-                currentPageName === "Dashboard" || currentPageName === "CreatorStudio" ? "bg-[#1e78ff]/20 text-[#1e78ff] border border-[#1e78ff]/50 shadow-lg shadow-blue-900/30" : "text-blue-400 hover:text-blue-200 hover:bg-blue-900/20"
-              }`}
-              aria-current={currentPageName === "CreatorStudio" ? "page" : "false"}
-            >
-              <LayoutDashboard className="w-4 h-4" />
-              Studio
-            </Link>
-
-            {navGroups.filter(g => !g.single && (!g.adminOnly || isAdmin)).map(group => (
-              <NavDropdown key={group.label} group={group} currentPageName={currentPageName} isAdmin={isAdmin} />
-            ))}
-            {navGroups.filter(g => g.single && g.page !== 'Dashboard' && (!g.adminOnly || isAdmin)).map(group => (
-              <Link
-                key={group.page}
-                to={createPageUrl(group.page)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold uppercase tracking-wide transition-all duration-200 ${
-                  currentPageName === group.page ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/50" : "text-green-300 hover:text-green-100 hover:bg-green-500/20"
-                }`}
-                aria-current={currentPageName === group.page ? "page" : "false"}
-              >
-                <group.icon className="w-4 h-4" />
-                {group.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Right Section */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="text-blue-400 hover:text-blue-200 hover:bg-blue-900/20 border border-blue-900/40">
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-            <NotificationBell
-              notifications={notifications}
-              onMarkAsRead={onMarkAsRead}
-              onMarkAllRead={onMarkAllRead}
-              onDelete={onDeleteNotification}
-              newVideos={newVideos}
-            />
-
-            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-blue-900/40">
-              <div className="w-8 h-8 rounded-full bg-[#1e78ff]/20 border border-[#1e78ff]/50 flex items-center justify-center text-[#1e78ff] text-sm font-black flex-shrink-0">
-                {user?.full_name?.charAt(0) || "U"}
-              </div>
-              <div className="hidden lg:block text-right">
-                <p className="text-xs font-bold text-blue-200 leading-tight uppercase">{user?.full_name || "User"}</p>
-                <p className="text-xs text-blue-500 leading-tight">{user?.role || "user"}</p>
-              </div>
-              <Link to={createPageUrl("Settings")}>
-                <Button variant="ghost" size="icon" className="text-blue-400 hover:text-blue-200 hover:bg-blue-900/20 border border-blue-900/40">
-                  <Settings className="w-4 h-4" />
-                </Button>
-              </Link>
-              <Button variant="ghost" size="icon" onClick={() => base44.auth.logout()} className="text-blue-400 hover:text-blue-200 hover:bg-blue-900/20 border border-blue-900/40">
-                <LogOut className="w-4 h-4" />
-              </Button>
+        {/* Left: hamburger + logo */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-lg text-blue-400 hover:bg-blue-900/20 transition-colors"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+          <Link to="/" className="flex items-center gap-1.5 group">
+            <div className="relative w-8 h-8 flex items-center justify-center flex-shrink-0">
+              <div className="absolute inset-0 rounded-lg bg-[#1e78ff]/20 border border-[#1e78ff]/40" />
+              <span className="relative text-[#1e78ff] font-black text-base">V</span>
             </div>
+            <span
+              className="font-black text-base tracking-widest uppercase hidden sm:block"
+              style={{ background: "linear-gradient(135deg,#1e78ff,#00c8ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+            >
+              VStream
+            </span>
+          </Link>
+        </div>
 
-            <Button variant="ghost" size="icon" className="md:hidden text-blue-400 hover:text-blue-200 hover:bg-blue-900/20 border border-blue-900/40" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
+        {/* Center: search bar (desktop) */}
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-4 items-center">
+          <div className="flex w-full items-center bg-[#060d18] border border-[#1a3060] rounded-xl overflow-hidden focus-within:border-[#1e78ff]/60 transition-all">
+            <input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search videos, creators..."
+              className="flex-1 px-4 py-2 text-sm text-[#c8dff5] placeholder-blue-400/30 outline-none bg-transparent"
+            />
+            <button type="submit" className="px-4 py-2 bg-[#0d1a2e] hover:bg-[#1e78ff]/20 border-l border-[#1a3060] text-blue-400 transition-colors">
+              <Search className="w-4 h-4" />
+            </button>
+          </div>
+        </form>
+
+        {/* Right: icons + avatar */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {/* Mobile search */}
+          <button
+            className="md:hidden p-2 rounded-lg text-blue-400 hover:bg-blue-900/20 transition-colors"
+            onClick={() => setSearchOpen(!searchOpen)}
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
+          <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="text-blue-400 hover:text-blue-200 hover:bg-blue-900/20">
+            {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </Button>
+
+          <NotificationBell
+            notifications={notifications}
+            onMarkAsRead={onMarkAsRead}
+            onMarkAllRead={onMarkAllRead}
+            onDelete={onDeleteNotification}
+            newVideos={newVideos}
+          />
+
+          {/* Avatar / account dropdown — YouTube style */}
+          <div className="relative ml-1" ref={dropdownRef}>
+            <button
+              onClick={() => setAccountOpen(!accountOpen)}
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] flex items-center justify-center text-white text-sm font-black hover:ring-2 hover:ring-[#1e78ff]/60 transition-all"
+            >
+              {user?.full_name?.charAt(0) || "U"}
+            </button>
+
+            <AnimatePresence>
+              {accountOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                  transition={{ duration: 0.12 }}
+                  className="absolute right-0 top-full mt-2 w-64 bg-[#060d18] border border-blue-900/40 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden z-50"
+                >
+                  {/* User header */}
+                  <div className="px-4 py-4 border-b border-blue-900/30">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] flex items-center justify-center text-white font-black text-base flex-shrink-0">
+                        {user?.full_name?.charAt(0) || "U"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-[#e8f4ff] truncate">{user?.full_name || "User"}</p>
+                        <p className="text-xs text-blue-400/50 truncate">{user?.email}</p>
+                      </div>
+                    </div>
+                    <Link
+                      to="/Channel"
+                      onClick={() => setAccountOpen(false)}
+                      className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#1e78ff] hover:text-[#00c8ff] border border-[#1e78ff]/30 rounded-lg py-1.5 transition-colors hover:bg-[#1e78ff]/10"
+                    >
+                      <Tv className="w-3.5 h-3.5" /> View your channel
+                    </Link>
+                  </div>
+
+                  {/* Menu items */}
+                  <div className="py-1">
+                    <MenuItem icon={Zap} label="Creator Studio" to="/CreatorStudio" onClick={() => setAccountOpen(false)} />
+                    <MenuItem icon={Radio} label="Go Live" to="/StreamerDashboard" onClick={() => setAccountOpen(false)} />
+                    <MenuItem icon={PlaySquare} label="Your Clips" to="/Shorts" onClick={() => setAccountOpen(false)} />
+                    {isAdmin && <MenuItem icon={Scan} label="AI Tools" to="/AITools" onClick={() => setAccountOpen(false)} />}
+                    {isAdmin && <MenuItem icon={Users} label="Users" to="/UserViewer" onClick={() => setAccountOpen(false)} />}
+                  </div>
+
+                  <div className="border-t border-blue-900/30 py-1">
+                    <MenuItem icon={Settings} label="Settings" to="/Settings" onClick={() => setAccountOpen(false)} />
+                    <button
+                      onClick={() => base44.auth.logout()}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-blue-300/70 hover:bg-blue-900/20 hover:text-blue-200 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4 flex-shrink-0" />
+                      Sign out
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="md:hidden border-t border-blue-900/40 bg-[#03080f]/98"
-        >
-          <div className="px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto">
-            {[
-              { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
-              ...navGroups
-                .filter(g => g.single && g.page !== 'Dashboard' && (!g.adminOnly || isAdmin))
-                .map(g => ({ name: g.label, icon: g.icon, page: g.page })),
-              ...navGroups
-                .filter(g => !g.single && (!g.adminOnly || isAdmin))
-                .flatMap(g => (g.children || []).flatMap(section => section.items || []))
-            ].map(item => (
-              <Link
-                key={item.page}
-                to={createPageUrl(item.page)}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                  currentPageName === item.page ? "bg-[#1e78ff]/20 text-[#1e78ff] border border-[#1e78ff]/50" : "text-blue-400 hover:text-blue-200 hover:bg-blue-900/20"
-                }`}
-              >
-                <item.icon className="w-5 h-5" />
-                {item.name}
-              </Link>
-            ))}
-            <div className="pt-3 mt-3 border-t border-blue-900/40">
-              <div className="px-3 py-2">
-                <p className="text-sm font-bold text-blue-200 uppercase">{user?.full_name}</p>
-                <p className="text-xs text-blue-500">{user?.email}</p>
+      {/* Mobile search bar */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="md:hidden border-t border-blue-900/30 overflow-hidden"
+          >
+            <form onSubmit={handleSearch} className="flex items-center px-3 py-2 gap-2">
+              <div className="flex flex-1 items-center bg-[#060d18] border border-[#1a3060] rounded-xl overflow-hidden">
+                <input
+                  autoFocus
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search..."
+                  className="flex-1 px-3 py-2 text-sm text-[#c8dff5] placeholder-blue-400/30 outline-none bg-transparent"
+                />
+                <button type="submit" className="px-3 py-2 text-blue-400">
+                  <Search className="w-4 h-4" />
+                </button>
               </div>
-              <Button variant="ghost" onClick={() => base44.auth.logout()} className="w-full justify-start text-blue-400 hover:text-blue-200 hover:bg-blue-900/20 mt-1 font-bold border border-blue-900/40">
-                <LogOut className="w-4 h-4 mr-2" /> Sign out
-              </Button>
+              <button type="button" onClick={() => setSearchOpen(false)} className="text-blue-400/50 hover:text-blue-300 p-1">
+                <X className="w-4 h-4" />
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile slide-out menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="md:hidden border-t border-blue-900/30 bg-[#03080f]"
+          >
+            <div className="px-4 py-3 space-y-0.5 max-h-[75vh] overflow-y-auto">
+              {[
+                { label: "Home", icon: LayoutDashboard, to: "/" },
+                { label: "Live", icon: Radio, to: "/Live" },
+                { label: "Clips", icon: PlaySquare, to: "/Shorts" },
+                { label: "Creator Studio", icon: Zap, to: "/CreatorStudio" },
+                { label: "My Channel", icon: Tv, to: "/Channel" },
+                { label: "Go Live", icon: Radio, to: "/StreamerDashboard" },
+                ...(isAdmin ? [
+                  { label: "AI Tools", icon: Scan, to: "/AITools" },
+                  { label: "Users", icon: Users, to: "/UserViewer" },
+                ] : []),
+                { label: "Settings", icon: Settings, to: "/Settings" },
+              ].map(item => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-blue-400/70 hover:bg-blue-900/20 hover:text-blue-200 transition-colors"
+                >
+                  <item.icon className="w-4 h-4 flex-shrink-0" />
+                  {item.label}
+                </Link>
+              ))}
+              <div className="pt-2 mt-2 border-t border-blue-900/30">
+                <button
+                  onClick={() => base44.auth.logout()}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-400/70 hover:bg-red-900/20 hover:text-red-300 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" /> Sign out
+                </button>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
+  );
+}
+
+function MenuItem({ icon: Icon, label, to, onClick }) {
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className="flex items-center gap-3 px-4 py-2.5 text-sm text-blue-300/70 hover:bg-blue-900/20 hover:text-blue-200 transition-colors"
+    >
+      <Icon className="w-4 h-4 flex-shrink-0" />
+      <span className="flex-1">{label}</span>
+      <ChevronRight className="w-3.5 h-3.5 text-blue-400/20" />
+    </Link>
   );
 }

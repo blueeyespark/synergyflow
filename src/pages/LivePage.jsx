@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Radio, Eye, Users, Heart, Settings, ChevronLeft, Star, Zap } from "lucide-react";
+import { Radio, Eye, Users, Heart, Settings, ChevronLeft, Star, Zap, Home } from "lucide-react";
 import { motion } from "framer-motion";
 import LiveChat from "@/components/live/LiveChat";
 import ChannelPoints from "@/components/live/ChannelPoints";
@@ -53,6 +53,9 @@ export default function LivePage() {
           <button onClick={() => setSelectedStream(null)} className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm">
             <ChevronLeft className="w-4 h-4" /> Back to Browse
           </button>
+          <Link to="/" className="flex items-center gap-1.5 text-zinc-500 hover:text-white transition-colors text-sm ml-1">
+            <Home className="w-3.5 h-3.5" /> Dashboard
+          </Link>
           <div className="flex items-center gap-2 ml-auto">
             <div className="flex items-center gap-1 bg-red-600/20 border border-red-500/40 rounded-full px-2.5 py-1">
               <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />

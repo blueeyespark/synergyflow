@@ -26,11 +26,11 @@ const SIDEBAR_NAV = [
 ];
 
 const SIDEBAR_LIBRARY = [
-  { icon: History, label: "History" },
-  { icon: ListVideo, label: "Playlists" },
-  { icon: Clock, label: "Watch Later" },
-  { icon: ThumbsUp, label: "Liked" },
-  { icon: Download, label: "Downloads" },
+  { icon: History, label: "History", to: "/" },
+  { icon: ListVideo, label: "Playlists", to: "/" },
+  { icon: Clock, label: "Watch Later", to: "/" },
+  { icon: ThumbsUp, label: "Liked", to: "/" },
+  { icon: Download, label: "Downloads", to: "/" },
 ];
 
 
@@ -354,10 +354,10 @@ export default function Dashboard() {
         <p className="text-xs font-bold text-blue-400/30 uppercase tracking-widest px-3 mb-2">Library</p>
         <div className="space-y-0.5">
           {SIDEBAR_LIBRARY.map(item => (
-            <button key={item.label} className={`${btnBase} ${btnIdle}`}>
+            <Link key={item.label} to={item.to} className={`${btnBase} ${btnIdle}`}>
               <item.icon className="w-4 h-4 flex-shrink-0 text-blue-400/40" />
               <span className="text-xs">{item.label}</span>
-            </button>
+            </Link>
           ))}
         </div>
 
