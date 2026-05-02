@@ -2,31 +2,27 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
-  LayoutDashboard, Globe, Bot, Upload, BarChart3, Calendar,
+  Globe, Bot, Upload, BarChart3, Calendar,
   Users, ImageIcon, ArrowLeft, DollarSign
 } from "lucide-react";
 import ContentProductionHub from "@/components/studio/ContentProductionHub";
 import MediaLibrary from "./MediaLibrary";
 import ChannelPage from "./ChannelPage";
-import FinancialOverview from "./FinancialOverview";
-import AudienceAnalytics from "./AudienceAnalytics";
 import ClientPortal from "./ClientPortal";
 import DiscordBot from "./DiscordBot";
-import AnalyticsHub from "@/components/studio/AnalyticsHub";
 import PlanningHub from "@/components/studio/PlanningHub";
 import TeamManagement from "@/components/studio/TeamManagement";
+import StreamerAnalytics from "@/components/studio/StreamerAnalytics";
 
 const tabs = [
-  { id: "channel",    label: "My Channel",        icon: Users,          component: ChannelPage },
-  { id: "production", label: "Production",         icon: Upload,         component: ContentProductionHub },
-  { id: "media",      label: "Media Library",      icon: ImageIcon,      component: MediaLibrary },
-  { id: "planning",   label: "Planning",           icon: Calendar,       component: PlanningHub },
-  { id: "analytics",  label: "Analytics",          icon: BarChart3,      component: AnalyticsHub },
-  { id: "audience",   label: "Audience",           icon: BarChart3,      component: AudienceAnalytics },
-  { id: "financials", label: "Financials",         icon: DollarSign,     component: FinancialOverview },
-  { id: "team",       label: "Team",               icon: Users,          component: TeamManagement },
-  { id: "client",     label: "Client Portal",      icon: Globe,          component: ClientPortal },
-  { id: "discord",    label: "Discord Bot",        icon: Bot,            component: DiscordBot },
+  { id: "channel",    label: "My Channel",   icon: Users,      component: ChannelPage },
+  { id: "production", label: "Production",   icon: Upload,     component: ContentProductionHub },
+  { id: "media",      label: "Media",        icon: ImageIcon,  component: MediaLibrary },
+  { id: "planning",   label: "Planning",     icon: Calendar,   component: PlanningHub },
+  { id: "analytics",  label: "Analytics",   icon: BarChart3,  component: StreamerAnalytics },
+  { id: "team",       label: "Team",         icon: Users,      component: TeamManagement },
+  { id: "client",     label: "Client Portal",icon: Globe,      component: ClientPortal },
+  { id: "discord",    label: "Discord Bot",  icon: Bot,        component: DiscordBot },
 ];
 
 export default function CreatorStudio() {
@@ -39,11 +35,11 @@ export default function CreatorStudio() {
       {/* Header */}
       <div className="border-b border-blue-900/40 bg-[#03080f]/90 backdrop-blur-sm sticky top-16 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Top row: back button + title */}
+          {/* Top row */}
           <div className="flex items-center gap-4 pt-4 pb-2">
             <Link
               to="/"
-              className="flex items-center gap-1.5 text-sm font-semibold text-blue-400 hover:text-blue-200 bg-blue-900/20 hover:bg-blue-900/30 border border-blue-900/40 rounded-lg px-3 py-1.5 transition-all"
+              className="flex items-center gap-1.5 text-sm font-semibold text-blue-400 hover:text-blue-200 bg-blue-900/20 hover:bg-blue-900/30 border border-blue-900/40 rounded-lg px-3 py-1.5 transition-all flex-shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
               Dashboard
@@ -57,7 +53,7 @@ export default function CreatorStudio() {
           </div>
 
           {/* Tab bar */}
-          <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-0">
+          <div className="flex gap-0.5 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;

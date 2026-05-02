@@ -328,9 +328,7 @@ export default function Dashboard() {
         <Link to="/CreatorStudio" className={`${sidebarBtnBase} bg-[#1e78ff]/10 border border-[#1e78ff]/30 text-[#1e78ff] hover:bg-[#1e78ff]/20`}>
           <PlusCircle className="w-5 h-5 flex-shrink-0" /> Creator Studio
         </Link>
-        <Link to="/VideoAnalytics" className={`${sidebarBtnBase} bg-[#00c8ff]/10 border border-[#00c8ff]/30 text-[#00c8ff] hover:bg-[#00c8ff]/20`}>
-          <BarChart2 className="w-5 h-5 flex-shrink-0" /> Analytics
-        </Link>
+
 
         <hr className="border-blue-900/30 my-3" />
         <p className="text-xs font-semibold text-blue-500/50 uppercase tracking-wider px-3 mb-1">You</p>
