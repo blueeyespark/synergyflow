@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Heart, MessageCircle, Share2, Music, ChevronUp, ChevronDown, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Heart, MessageCircle, Share2, Music, ChevronUp, ChevronDown, X, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 function formatViews(n) {
@@ -106,6 +107,7 @@ export default function ShortsPage({ onClose }) {
   const [likes, setLikes] = useState({});
   const containerRef = useRef(null);
   const touchStartY = useRef(null);
+  const navigate = useNavigate();
 
   const { data: videos = [] } = useQuery({
     queryKey: ["shorts"],
@@ -170,9 +172,14 @@ export default function ShortsPage({ onClose }) {
       onTouchEnd={handleTouchEnd}
       onWheel={handleWheel}
     >
-      {/* Close button */}
+      {/* Back button */}
+      <button onClick={() => navigate("/")} className="absolute top-4 left-4 z-50 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition-colors flex items-center justify-center">
+        <ArrowLeft className="w-5 h-5" />
+      </button>
+
+      {/* Close button (if onClose provided) */}
       {onClose && (
-        <button onClick={onClose} className="absolute top-4 left-4 z-50 bg-black/50 rounded-full p-2 text-white">
+        <button onClick={onClose} className="absolute top-4 right-4 z-50 bg-black/50 rounded-full p-2 text-white">
           <X className="w-5 h-5" />
         </button>
       )}
