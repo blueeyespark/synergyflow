@@ -1,0 +1,82 @@
+{
+  "name": "Raid",
+  "type": "object",
+  "properties": {
+    "from_channel_id": {
+      "type": "string",
+      "description": "Channel sending the raid"
+    },
+    "to_channel_id": {
+      "type": "string",
+      "description": "Channel receiving the raid"
+    },
+    "viewer_count": {
+      "type": "number",
+      "description": "Approximate viewers sent"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "completed",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Raid status"
+    },
+    "message": {
+      "type": "string",
+      "description": "Raid message from host"
+    },
+    "accepted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "from_channel_id",
+    "to_channel_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.from_channel_id": "{{user.email}}"
+        },
+        {
+          "data.to_channel_id": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.to_channel_id": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

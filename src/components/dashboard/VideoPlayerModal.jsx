@@ -3,6 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { X, ThumbsUp, ThumbsDown, Share2, Bell, MoreHorizontal, ChevronUp, ChevronDown, Settings, Clock } from "lucide-react";
 import MerchShelf from "@/components/video/MerchShelf";
 import ClipsMaker from "@/components/video/ClipsMaker";
+import SuperChatButton from "@/components/video/SuperChatButton";
+import RaidButton from "@/components/video/RaidButton";
+import EmotePanel from "@/components/video/EmotePanel";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthPrompt from "@/components/AuthPrompt";
 
@@ -211,6 +214,8 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
                     <button className="flex items-center gap-1.5 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 rounded-full px-3 py-1.5 text-sm transition-colors">
                       <Share2 className="w-4 h-4" /> Share
                     </button>
+                    <SuperChatButton video={video} channel={channel} user={user} />
+                    {channel && <RaidButton channel={channel} user={user} />}
 
                     {/* Playback Speed */}
                     <div className="relative">
@@ -291,7 +296,10 @@ export default function VideoPlayerModal({ video, channel, relatedVideos = [], c
 
                 {activeTab === "comments" && (
                 <div>
-                  <h3 className="text-gray-900 dark:text-white font-semibold mb-3">{comments.length} Comments</h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-gray-900 dark:text-white font-semibold">{comments.length} Comments</h3>
+                    <EmotePanel channel={channel} user={user} />
+                  </div>
                   {user ? (
                     <div className="flex gap-3 mb-4">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">

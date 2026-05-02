@@ -1,0 +1,105 @@
+{
+  "name": "SuperChat",
+  "type": "object",
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "description": "Channel receiving the super chat"
+    },
+    "video_id": {
+      "type": "string",
+      "description": "Video/stream this was sent during (optional)"
+    },
+    "sender_email": {
+      "type": "string"
+    },
+    "sender_name": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string",
+      "description": "Super chat message"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount in USD"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "$1",
+        "$5",
+        "$10",
+        "$50",
+        "$100",
+        "custom"
+      ],
+      "description": "Super chat tier"
+    },
+    "color": {
+      "type": "string",
+      "description": "Chat highlight color (hex)"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "Payment transaction ID"
+    },
+    "is_highlighted": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show prominently in chat"
+    }
+  },
+  "required": [
+    "channel_id",
+    "sender_email",
+    "message",
+    "amount"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.channel_id": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.channel_id": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

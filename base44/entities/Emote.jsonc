@@ -1,0 +1,76 @@
+{
+  "name": "Emote",
+  "type": "object",
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "description": "Channel that owns this emote"
+    },
+    "name": {
+      "type": "string",
+      "description": "Emote code (e.g., 'pogU', 'KEKW')"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Image URL of the emote"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "default",
+        "subscriber_only",
+        "vip_only"
+      ],
+      "default": "default",
+      "description": "Who can use this emote"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "description": "Subscriber tier required (if subscriber_only)"
+    },
+    "is_animated": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "channel_id",
+    "name",
+    "image_url"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$ne": "guest"
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.type": "default"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
