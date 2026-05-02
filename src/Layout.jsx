@@ -5,7 +5,6 @@ import PointsToast from "@/components/gamification/PointsToast";
 import MobileNav from "@/components/MobileNav";
 import OfflineBanner from "@/components/OfflineBanner";
 import AIAssistant from "@/components/AIAssistant";
-import AIProactivePopup from "@/components/AIProactivePopup";
 import TopNav from "@/components/layout/TopNav";
 
 export default function Layout({ children, currentPageName }) {
@@ -136,7 +135,6 @@ export default function Layout({ children, currentPageName }) {
       {pointsEvent && <PointsToast event={pointsEvent} onDismiss={() => setPointsEvent(null)} />}
       <OfflineBanner />
       <AIAssistant projects={projects} tasks={tasks} budget={budget} userRole={user?.role || 'viewer'} />
-      <AIProactivePopup projects={projects} tasks={tasks} />
 
       <style>{`
         html { scroll-behavior: smooth; }

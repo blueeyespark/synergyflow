@@ -83,13 +83,43 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [], us
   const [talking, setTalking] = useState(false);
   const [pulsing, setPulsing] = useState(true);
   const [dynamicSuggestions, setDynamicSuggestions] = useState([]);
+  const [checkInVisible, setCheckInVisible] = useState(false);
+  const [checkInMessages, setCheckInMessages] = useState([]);
+  const [checkInLoading, setCheckInLoading] = useState(false);
+  const [checkInReplying, setCheckInReplying] = useState(false);
+  const [checkInInput, setCheckInInput] = useState("");
   const messagesRef = useRef(messages);
   const bottomRef = useRef(null);
   const lastRequestTimeRef = useRef(0);
   const MIN_REQUEST_INTERVAL = 1000;
+  const shownCheckInRef = useRef(false);
 
   // Keep ref in sync so send() always reads latest messages (fixes stale closure bug)
   useEffect(() => { messagesRef.current = messages; }, [messages]);
+
+  // Trigger "Just checking in" periodically
+  useEffect(() => {
+    if (!shownCheckInRef.current && tasks.length > 0) {
+      const first = setTimeout(() => {
+        shownCheckInRef.current = true;
+        triggerCheckIn();
+      }, 120000); // 2 minutes initial delay
+      return () => clearTimeout(first);
+    }
+  }, [tasks.length]);
+
+  useEffect(() => {
+    const schedule = () => {
+      const delay = (20 + Math.random() * 10) * 60 * 1000; // 20-30 min intervals
+      return setTimeout(() => {
+        triggerCheckIn();
+        timerRef.current = schedule();
+      }, delay);
+    };
+    const timerRef = { current: null };
+    timerRef.current = schedule();
+    return () => clearTimeout(timerRef.current);
+  }, []);
 
   useEffect(() => {
     if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -108,6 +138,75 @@ export default function AIAssistant({ projects = [], tasks = [], budget = [], us
     const totalBudget = budget.reduce((s, b) => b.type === 'income' ? s + b.amount : s - b.amount, 0);
     // Simplified context to avoid rate limits — skip bug fetching
     return `App context: ${activeProjects} active projects, ${tasks.length} total tasks (${completedTasks} completed, ${overdueTasks} overdue), net budget $${totalBudget.toLocaleString()}.\nProjects: ${projects.slice(0, 5).map(p => `${p.name} (${p.status})`).join(', ')}.`;
+  };
+
+  const triggerCheckIn = async () => {
+    if (checkInLoading || checkInVisible) return;
+    setCheckInLoading(true);
+    setCheckInVisible(true);
+    setCheckInMessages([]);
+
+    const overdue = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'completed').length;
+    const completed = tasks.filter(t => t.status === 'completed').length;
+    const completionRate = tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0;
+    const unassigned = tasks.filter(t => !t.assigned_to).length;
+    const blocked = tasks.filter(t => t.depends_on?.length > 0).length;
+    const income = budget.filter(b => b.type === 'income').reduce((s, b) => s + (b.amount || 0), 0);
+    const expenses = budget.filter(b => b.type === 'expense').reduce((s, b) => s + Math.abs(b.amount || 0), 0);
+
+    let priority = 'standard';
+    if (overdue > 0) priority = 'overdue';
+    else if (completionRate > 75) priority = 'momentum';
+    else if (unassigned > tasks.length * 0.3) priority = 'assignment';
+
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `You are VStream AI, a friendly assistant. Be warm, brief (max 25 words), and address the user directly.
+
+Context:
+- ${projects.length} projects, ${tasks.length} tasks (${completed} done, ${completionRate}% complete)
+- Overdue: ${overdue} | Unassigned: ${unassigned} | Blocked: ${blocked}
+- Budget: $${income.toFixed(0)} income, $${expenses.toFixed(0)} expenses
+- Priority insight: ${priority === 'overdue' ? 'URGENT - Address overdue tasks!' : priority === 'momentum' ? 'CELEBRATE - Great progress momentum!' : priority === 'assignment' ? 'ORGANIZE - Assign pending tasks' : 'OPTIMIZE - Keep workflow smooth'}
+
+Generate a contextual message matching this priority. Be specific and encouraging.`,
+      model: 'gpt_5_mini',
+    });
+
+    const msg = typeof result === 'string' ? result : result?.response || "Stay focused — you've got this! 🚀";
+    setCheckInMessages([{ role: "assistant", content: msg }]);
+    setCheckInLoading(false);
+  };
+
+  const sendCheckInReply = async () => {
+    const text = checkInInput.trim();
+    if (!text || checkInReplying) return;
+    setCheckInInput("");
+    setCheckInReplying(true);
+
+    const updated = [...checkInMessages, { role: "user", content: text }];
+    setCheckInMessages(updated);
+
+    const overdue = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'completed').length;
+    const completed = tasks.filter(t => t.status === 'completed').length;
+    const completionRate = tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0;
+    const assigned = tasks.filter(t => t.assigned_to).length;
+    const history = updated.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
+
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `You are VStream AI — friendly, sharp, concise, data-aware.
+
+Context: ${projects.length} projects, ${tasks.length} tasks (${completionRate}% done, ${assigned} assigned, ${overdue} overdue).
+
+Conversation:
+${history}
+
+Respond naturally in 1-3 sentences max. Reference actual data if relevant. Stay warm and helpful.`,
+      model: 'gpt_5_mini',
+    });
+
+    const reply = typeof result === 'string' ? result : result?.response || "Happy to help! 😊";
+    setCheckInMessages(prev => [...prev, { role: "assistant", content: reply }]);
+    setCheckInReplying(false);
   };
 
   const scheduleTask = async (taskData) => {
@@ -295,6 +394,87 @@ Generate 3 punchy follow-up suggestions (max 7 words each) that are different fr
       </motion.button>
 
       {/* Chat Panel */}
+      <AnimatePresence>
+        {checkInVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.9 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            className="fixed bottom-24 left-4 md:bottom-8 md:left-6 z-50 w-72 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2.5 flex items-center gap-2 flex-shrink-0">
+              <div className="w-7 h-7 flex-shrink-0">
+                <AvatarFace talking={checkInReplying} thinking={false} />
+              </div>
+              <p className="text-white text-xs font-semibold flex-1">VStream AI</p>
+              <span className="text-indigo-200 text-xs flex items-center gap-1">
+                <Sparkles className="w-3 h-3" /> Just checking in
+              </span>
+              <button onClick={() => setCheckInVisible(false)} className="text-indigo-200 hover:text-white ml-1">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2 max-h-52">
+              {checkInLoading ? (
+                <div className="flex gap-1 items-center py-1">
+                  {[0, 1, 2].map(i => (
+                    <motion.div key={i} className="w-1.5 h-1.5 bg-indigo-400 rounded-full"
+                      animate={{ y: [0, -5, 0] }} transition={{ duration: 0.6, delay: i * 0.15, repeat: Infinity }} />
+                  ))}
+                </div>
+              ) : (
+                checkInMessages.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] rounded-xl px-3 py-1.5 text-xs leading-relaxed ${
+                      msg.role === 'user'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'
+                    }`}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))
+              )}
+              {checkInReplying && (
+                <div className="flex justify-start">
+                  <div className="bg-slate-100 dark:bg-slate-700 rounded-xl px-3 py-1.5 flex gap-1 items-center">
+                    {[0, 1, 2].map(i => (
+                      <motion.div key={i} className="w-1.5 h-1.5 bg-indigo-400 rounded-full"
+                        animate={{ y: [0, -4, 0] }} transition={{ duration: 0.5, delay: i * 0.12, repeat: Infinity }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Reply input */}
+            {!checkInLoading && checkInMessages.length > 0 && (
+              <div className="flex gap-2 px-3 py-2.5 border-t border-slate-100 dark:border-slate-700 flex-shrink-0">
+                <input
+                  value={checkInInput}
+                  onChange={e => setCheckInInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && sendCheckInReply()}
+                  placeholder="Reply..."
+                  disabled={checkInReplying}
+                  className="flex-1 text-xs border border-slate-200 dark:border-slate-600 rounded-lg px-2.5 py-1.5 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                />
+                <button
+                  onClick={sendCheckInReply}
+                  disabled={checkInReplying || !checkInInput.trim()}
+                  className="w-7 h-7 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 rounded-lg flex items-center justify-center flex-shrink-0"
+                >
+                  {checkInReplying ? <Loader2 className="w-3 h-3 text-white animate-spin" /> : <Send className="w-3 h-3 text-white" />}
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {open && (
           <motion.div
