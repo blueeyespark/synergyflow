@@ -34,11 +34,9 @@ const MOODS = [
 
 const SIDEBAR_NAV = [
   { icon: Home,       label: "Home",          to: "/" },
-  { icon: Flame,      label: "Trending",      to: "/?mood=hype" },
+  { icon: Flame,      label: "Trending",      to: "/?tab=home&mood=hype" },
   { icon: Radio,      label: "Live",          to: "/Live" },
   { icon: PlaySquare, label: "Clips",         to: "/Shorts" },
-  { icon: Clock,      label: "Watch History", to: "/" },
-  { icon: Bookmark,   label: "Saved",         to: "/" },
 ];
 
 function fmt(n) {
