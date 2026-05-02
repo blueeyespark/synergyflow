@@ -48,6 +48,12 @@ export default function VideoEditor() {
     }
   };
 
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+
   const handleDownloadTrimmed = async () => {
     if (!video) return;
     toast.success(`Video trimmed: ${startTime.toFixed(2)}s to ${endTime.toFixed(2)}s ready for export`);

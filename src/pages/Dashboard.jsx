@@ -342,24 +342,25 @@ export default function Dashboard() {
             {activeMainTab === "Home" && (
               <>
                 <div className="flex items-center gap-2">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="sm:hidden flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
-              <Menu className="w-5 h-5 text-gray-600 dark:text-zinc-400" />
-            </button>
-            <div className={`flex items-center gap-2 bg-gray-100 dark:bg-zinc-900 border ${searchFocused ? "border-gray-400 dark:border-zinc-500" : "border-gray-200 dark:border-zinc-800"} rounded-full px-3 py-1.5 flex-1 transition-colors`}>
-              <Search className="w-4 h-4 text-gray-400 dark:text-zinc-500 flex-shrink-0" />
-                  <input
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    onFocus={() => setSearchFocused(true)}
-                    onBlur={() => setSearchFocused(false)}
-                    placeholder="Search videos..."
-                    className="flex-1 bg-transparent text-gray-900 dark:text-white text-sm outline-none placeholder:text-gray-400 dark:placeholder:text-zinc-500"
-                  />
-                  {searchQuery && (
-                    <button onClick={() => setSearchQuery("")} className="text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-white">
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
+                  <button onClick={() => setSidebarOpen(!sidebarOpen)} className="sm:hidden flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                    <Menu className="w-5 h-5 text-gray-600 dark:text-zinc-400" />
+                  </button>
+                  <div className={`flex items-center gap-2 bg-gray-100 dark:bg-zinc-900 border ${searchFocused ? "border-gray-400 dark:border-zinc-500" : "border-gray-200 dark:border-zinc-800"} rounded-full px-3 py-1.5 flex-1 transition-colors`}>
+                    <Search className="w-4 h-4 text-gray-400 dark:text-zinc-500 flex-shrink-0" />
+                    <input
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      onFocus={() => setSearchFocused(true)}
+                      onBlur={() => setSearchFocused(false)}
+                      placeholder="Search videos..."
+                      className="flex-1 bg-transparent text-gray-900 dark:text-white text-sm outline-none placeholder:text-gray-400 dark:placeholder:text-zinc-500"
+                    />
+                    {searchQuery && (
+                      <button onClick={() => setSearchQuery("")} className="text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-white">
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 {!searchQuery && (
                   <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
