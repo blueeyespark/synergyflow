@@ -1,33 +1,34 @@
-import { useState } from "react";
-import { BarChart3, DollarSign } from "lucide-react";
+import { useState, useMemo } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import StreamerAnalytics from "./StreamerAnalytics";
 import MonetizationRevenue from "./MonetizationRevenue";
 
-const subtabs = [
-  { id: "performance", label: "Performance", icon: BarChart3, component: StreamerAnalytics },
-  { id: "revenue", label: "Revenue", icon: DollarSign, component: MonetizationRevenue },
-];
-
 export default function AnalyticsHub() {
-  const [activeTab, setActiveTab] = useState("performance");
-  const ActiveComponent = subtabs.find(t => t.id === activeTab)?.component;
+  const { data: videos = [] } = useQuery({
+    queryKey: ["videos-all"],
+    queryFn: () => base44.entities.Video.list("-created_date", 100),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: analyticsRows = [] } = useQuery({
+    queryKey: ["video-analytics-all"],
+    queryFn: () => base44.entities.VideoAnalytics.list("-date", 200),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const activeVideos = useMemo(() => videos.filter(v => v.status !== "deleted" && v.status !== "uploading"), [videos]);
+  const hasRealData = activeVideos.length > 0 || analyticsRows.length > 0;
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-1 border-b border-blue-900/30">
-        {subtabs.map(tab => {
-          const Icon = tab.icon;
-          return (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 -mb-px transition-all ${
-                activeTab === tab.id ? "border-[#1e78ff] text-[#1e78ff]" : "border-transparent text-blue-400/60 hover:text-blue-300"
-              }`}>
-              <Icon className="w-3.5 h-3.5" /> {tab.label}
-            </button>
-          );
-        })}
-      </div>
-      {ActiveComponent && <ActiveComponent />}
+    <div className="space-y-8 pb-6">
+      <StreamerAnalytics />
+      {hasRealData && (
+        <>
+          <div className="h-px bg-blue-900/30" />
+          <MonetizationRevenue />
+        </>
+      )}
     </div>
   );
 }

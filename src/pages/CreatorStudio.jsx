@@ -7,8 +7,6 @@ import {
   Users, ImageIcon, ArrowLeft, TrendingUp, Edit3, Zap, Activity, ShoppingBag
 } from "lucide-react";
 import ProductionHub from "@/components/studio/ProductionHub";
-import ClientPortal from "./ClientPortal";
-import DiscordBot from "./DiscordBot";
 import PlanningHub from "@/components/studio/PlanningHub";
 import TeamManagement from "@/components/studio/TeamManagement";
 import AnalyticsHub from "@/components/studio/AnalyticsHub";
@@ -18,14 +16,13 @@ import CommunityEngagement from "@/components/studio/CommunityEngagement";
 import { Button } from "@/components/ui/button";
 
 const tabs = [
-  { id: "editchannel",label: "Edit Channel",   icon: Edit3,      component: ChannelEditor },
-  { id: "production", label: "Production",     icon: Upload,     component: ProductionHub },
-  { id: "planning",   label: "Planning",       icon: Calendar,   component: PlanningHub },
-  { id: "analytics",  label: "Analytics",      icon: BarChart3,  component: AnalyticsHub },
-  { id: "discover",   label: "Discover",       icon: TrendingUp, component: AnalyticsPlus },
-  { id: "community",  label: "Community",      icon: Users,      component: CommunityEngagement },
-  { id: "team",       label: "Team",           icon: Users,      component: TeamManagement },
-  { id: "client",     label: "Client Portal",  icon: Globe,      component: ClientPortal },
+  { id: "editchannel",label: "Channel",       icon: Edit3,      component: ChannelEditor },
+  { id: "production", label: "Production",    icon: Upload,     component: ProductionHub },
+  { id: "planning",   label: "Planning",      icon: Calendar,   component: PlanningHub },
+  { id: "analytics",  label: "Analytics",     icon: BarChart3,  component: AnalyticsHub },
+  { id: "discover",   label: "Discover",      icon: TrendingUp, component: AnalyticsPlus },
+  { id: "community",  label: "Community",     icon: Users,      component: CommunityEngagement },
+  { id: "team",       label: "Team",          icon: Users,      component: TeamManagement },
 ];
 
 export default function CreatorStudio() {

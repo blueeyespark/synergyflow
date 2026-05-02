@@ -1,37 +1,39 @@
 import { useState } from "react";
-import { Upload, ImageIcon, Zap, Activity } from "lucide-react";
-import ContentProductionHub from "./ContentProductionHub";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Upload, Video, ImageIcon, Radio } from "lucide-react";
+import VideoUpload from "@/pages/VideoUpload";
+import VideoEditor from "@/pages/VideoEditor";
+import ThumbnailMaker from "@/pages/ThumbnailMaker";
+import IntroOutroMaker from "@/pages/IntroOutroMaker";
 import MediaLibrary from "@/pages/MediaLibrary";
 import AIAssistantHub from "./AIAssistantHub";
 import StreamingTechnical from "./StreamingTechnical";
 
 const subtabs = [
-  { id: "content", label: "Content", icon: Upload, component: ContentProductionHub },
-  { id: "media", label: "Media", icon: ImageIcon, component: MediaLibrary },
-  { id: "ai", label: "AI Assistant", icon: Zap, component: AIAssistantHub },
-  { id: "live", label: "Live Setup", icon: Activity, component: StreamingTechnical },
+  { id: "upload", label: "Upload", icon: Upload, component: VideoUpload },
+  { id: "editor", label: "Editor", icon: Video, component: VideoEditor },
+  { id: "thumbnail", label: "Thumbnail", icon: ImageIcon, component: ThumbnailMaker },
+  { id: "intro", label: "Intro/Outro", icon: Radio, component: IntroOutroMaker },
+  { id: "media", label: "Media Library", icon: ImageIcon, component: MediaLibrary },
+  { id: "ai", label: "AI Assistant", icon: Radio, component: AIAssistantHub },
 ];
 
 export default function ProductionHub() {
-  const [activeTab, setActiveTab] = useState("content");
-  const ActiveComponent = subtabs.find(t => t.id === activeTab)?.component;
+  const [active, setActive] = useState("upload");
+  const ActiveComponent = subtabs.find(t => t.id === active)?.component;
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-1 border-b border-blue-900/30 overflow-x-auto">
-        {subtabs.map(tab => {
-          const Icon = tab.icon;
-          return (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 -mb-px transition-all whitespace-nowrap ${
-                activeTab === tab.id ? "border-[#1e78ff] text-[#1e78ff]" : "border-transparent text-blue-400/60 hover:text-blue-300"
-              }`}>
-              <Icon className="w-3.5 h-3.5" /> {tab.label}
-            </button>
-          );
-        })}
-      </div>
-      {ActiveComponent && <ActiveComponent />}
+    <div>
+      <Tabs value={active} onValueChange={setActive}>
+        <TabsList className="mb-6 flex flex-wrap gap-1 h-auto">
+          {subtabs.map(t => (
+            <TabsTrigger key={t.id} value={t.id} className="gap-2">
+              <t.icon className="w-4 h-4" /> {t.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <div>{ActiveComponent && <ActiveComponent />}</div>
+      </Tabs>
     </div>
   );
 }
