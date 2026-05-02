@@ -145,16 +145,17 @@ export default function AIScanner() {
   const [codeModal, setCodeModal] = useState(null);
   const [autoFixingBugs, setAutoFixingBugs] = useState(false);
   const [appliedItems, setAppliedItems] = useState(new Set());
-  const [autoApplying, setAutoApplying] = useState(false);
+  const [autoApplying, setAutoApplying] = useState(new Set()); // Track multiple concurrent operations
   const queryClient = useQueryClient();
 
-  // Auto-apply: generates code, logs it silently, no confirmation needed
+  // Auto-apply: generates code, logs it silently, and APPLIES via autoImplementCode without staff approval
   const autoApplyCode = async (item, type) => {
     const key = `${type}-${item.title}`;
-    setAutoApplying(key);
+    setAutoApplying(prev => new Set([...prev, key]));
     toast.loading(`Auto-coding "${item.title}"...`, { id: key });
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are an expert React/Tailwind developer working on Planify. Auto-implement this suggestion:
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are an expert React/Tailwind developer working on Planify. Auto-implement this suggestion:
 
 Title: "${item.title}"
 Description: "${item.description || ''}"
@@ -166,29 +167,48 @@ Generate a complete, production-ready implementation. Provide:
 3. A one-sentence summary of what was built
 
 Rules: Use React hooks, Tailwind CSS, shadcn/ui (@/components/ui/), lucide-react (valid icons only), base44 SDK (import { base44 } from '@/api/base44Client'), export default function ComponentName() pattern.`,
-      model: 'claude_sonnet_4_6',
-      response_json_schema: {
-        type: "object",
-        properties: {
-          code: { type: "string" },
-          file_path: { type: "string" },
-          explanation: { type: "string" }
+        model: 'claude_sonnet_4_6',
+        response_json_schema: {
+          type: "object",
+          properties: {
+            code: { type: "string" },
+            file_path: { type: "string" },
+            explanation: { type: "string" }
+          }
+        }
+      });
+      // Auto-log to AIAppliedChange — no confirmation needed
+      await base44.entities.AIAppliedChange.create({
+        title: item.title,
+        source: 'self_scan',
+        change_type: type === 'ux' ? 'ux_improvement' : type === 'feature' ? 'feature' : 'other',
+        file_path: result.file_path || '',
+        code_snippet: result.code || '',
+        explanation: result.explanation || '',
+        applied_by: user?.email || 'ai-scanner',
+      });
+      // Auto-apply the code via backend function without staff approval
+      if (result.code && result.file_path) {
+        try {
+          await base44.functions.invoke('autoImplementCode', {
+            file_path: result.file_path,
+            code: result.code,
+          });
+          toast.success(`✅ "${item.title}" auto-applied & logged`, { id: key });
+        } catch (e) {
+          toast.error(`⚠️ Code logged but auto-apply failed: ${e.message}`, { id: key });
         }
       }
-    });
-    // Auto-log to AIAppliedChange — no confirmation needed
-    await base44.entities.AIAppliedChange.create({
-      title: item.title,
-      source: 'self_scan',
-      change_type: type === 'ux' ? 'ux_improvement' : type === 'feature' ? 'feature' : 'other',
-      file_path: result.file_path || '',
-      code_snippet: result.code || '',
-      explanation: result.explanation || '',
-      applied_by: user?.email || 'ai-scanner',
-    });
-    setAutoApplying(null);
-    setAppliedItems(prev => new Set([...prev, key]));
-    toast.success(`✅ "${item.title}" applied & logged`, { id: key });
+      setAppliedItems(prev => new Set([...prev, key]));
+    } catch (e) {
+      toast.error(`❌ "${item.title}" failed: ${e.message}`, { id: key });
+    } finally {
+      setAutoApplying(prev => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+    }
   };
 
   if (!unlocked) {
@@ -519,22 +539,22 @@ Be very specific — list actual UI components, data interactions, and implement
                               </div>
                                       <div className="flex gap-1 flex-shrink-0">
                                 <Button size="sm" variant="outline"
-                                  className={`text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-indigo-600 border-indigo-200 hover:bg-indigo-50'}`}
-                                  onClick={() => implementSuggestion(item, 'ux')}
-                                  disabled={implementing === key || autoApplying === key}
-                                >
-                                  {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Wand2 className="w-3 h-3" />}
-                                  {isApplied ? 'View' : 'Preview'}
-                                </Button>
-                                <Button size="sm"
-                                  className="text-xs gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
-                                  onClick={() => autoApplyCode(item, 'ux')}
-                                  disabled={implementing === key || autoApplying === key}
-                                  title="AI auto-generates and applies code"
-                                >
-                                  {autoApplying === key ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
-                                  Auto-Code
-                                </Button>
+                                   className={`text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-indigo-600 border-indigo-200 hover:bg-indigo-50'}`}
+                                   onClick={() => implementSuggestion(item, 'ux')}
+                                   disabled={implementing === key || autoApplying.has(key)}
+                                 >
+                                   {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Wand2 className="w-3 h-3" />}
+                                   {isApplied ? 'View' : 'Preview'}
+                                 </Button>
+                                 <Button size="sm"
+                                   className="text-xs gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+                                   onClick={() => autoApplyCode(item, 'ux')}
+                                   disabled={implementing === key || autoApplying.has(key)}
+                                   title="AI auto-generates and applies code"
+                                 >
+                                   {autoApplying.has(key) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                                   Auto-Code
+                                 </Button>
                               </div>
                             </div>
                           </div>
@@ -566,22 +586,22 @@ Be very specific — list actual UI components, data interactions, and implement
                             </div>
                             <div className="flex gap-1 flex-shrink-0">
                               <Button size="sm" variant="outline"
-                                className={`text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-blue-600 border-blue-200 hover:bg-blue-50'}`}
-                                onClick={() => implementSuggestion(item, 'feature')}
-                                disabled={implementing === key || autoApplying === key}
-                              >
-                                {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Wand2 className="w-3 h-3" />}
-                                {isApplied ? 'View' : 'Preview'}
-                              </Button>
-                              <Button size="sm"
-                                className="text-xs gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
-                                onClick={() => autoApplyCode(item, 'feature')}
-                                disabled={implementing === key || autoApplying === key}
-                                title="AI auto-generates and applies code"
-                              >
-                                {autoApplying === key ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
-                                Auto-Code
-                              </Button>
+                                 className={`text-xs gap-1 ${isApplied ? 'text-green-600 border-green-300' : 'text-blue-600 border-blue-200 hover:bg-blue-50'}`}
+                                 onClick={() => implementSuggestion(item, 'feature')}
+                                 disabled={implementing === key || autoApplying.has(key)}
+                               >
+                                 {implementing === key ? <Loader2 className="w-3 h-3 animate-spin" /> : isApplied ? <Check className="w-3 h-3" /> : <Wand2 className="w-3 h-3" />}
+                                 {isApplied ? 'View' : 'Preview'}
+                               </Button>
+                               <Button size="sm"
+                                 className="text-xs gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+                                 onClick={() => autoApplyCode(item, 'feature')}
+                                 disabled={implementing === key || autoApplying.has(key)}
+                                 title="AI auto-generates and applies code"
+                               >
+                                 {autoApplying.has(key) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                                 Auto-Code
+                               </Button>
                             </div>
                           </div>
                         );
