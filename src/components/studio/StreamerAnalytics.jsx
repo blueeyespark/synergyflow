@@ -235,11 +235,12 @@ export default function StreamerAnalytics() {
 
   const viewsData = useMemo(() => {
     return DAILY_90.slice(90 - range).map(d => ({
-      ...d,
-      views:       analyticsMap[d.date]?.views      || d.views,
-      watch_hours: analyticsMap[d.date]?.watch_time || d.watch_hours,
+      date: d.date,
+      views:       analyticsMap[d.date]?.views      || (hasRealData ? d.views : 0),
+      watch_hours: analyticsMap[d.date]?.watch_time || (hasRealData ? d.watch_hours : 0),
+      subs_gained: hasRealData ? d.subs_gained : 0,
     }));
-  }, [range, analyticsMap]);
+  }, [range, analyticsMap, hasRealData]);
 
   const topVideos = useMemo(() =>
     [...activeVideos].sort((a, b) => (b.view_count || 0) - (a.view_count || 0)).slice(0, 8),
@@ -254,28 +255,16 @@ export default function StreamerAnalytics() {
     return Object.entries(catData).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([name, views]) => ({ name, views }));
   }, [activeVideos]);
 
-  const grossRevenue    = MOCK_REVENUE.reduce((s, i) => s + i.value, 0);
+  const grossRevenue    = hasRealData ? MOCK_REVENUE.reduce((s, i) => s + i.value, 0) : 0;
   const creatorEarnings = Math.round(grossRevenue * 0.8);
-  const displayMonthly  = revenueRange === "3m" ? MOCK_MONTHLY.slice(-3) : revenueRange === "6m" ? MOCK_MONTHLY.slice(-6) : MOCK_MONTHLY;
+  const emptyMonthly    = MOCK_MONTHLY.map(m => ({ month: m.month, memberships: 0, tips: 0, products: 0, ads: 0 }));
+  const rawMonthly      = hasRealData ? MOCK_MONTHLY : emptyMonthly;
+  const displayMonthly  = revenueRange === "3m" ? rawMonthly.slice(-3) : revenueRange === "6m" ? rawMonthly.slice(-6) : rawMonthly;
+  const weeklyData      = hasRealData ? MOCK_WEEKLY : MOCK_WEEKLY.map(d => ({ ...d, views: 0, watchH: 0, pollRate: 0, engagement: 0, subs: 0 }));
+  const revenueStreams   = hasRealData ? MOCK_REVENUE : MOCK_REVENUE.map(r => ({ ...r, value: 0, change: 0 }));
 
-  const displayTopVideos = topVideos.length > 0
-    ? topVideos
-    : MOCK_CONTENT.map((c, i) => ({ id: i, title: c.title, view_count: c.views, like_count: Math.floor(c.views * 0.03), thumbnail_url: null }));
+  const displayTopVideos = topVideos;
   const maxViews = displayTopVideos[0]?.view_count || 1;
-
-  if (!hasRealData) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="w-20 h-20 rounded-2xl bg-[#1e78ff]/10 border border-[#1e78ff]/20 flex items-center justify-center mb-5">
-          <BarChart2 className="w-9 h-9 text-[#1e78ff]/40" />
-        </div>
-        <h3 className="text-lg font-bold text-[#e8f4ff] mb-2">No data yet</h3>
-        <p className="text-sm text-blue-400/50 max-w-sm">
-          Analytics will appear here once you start uploading videos and going live. Head to the <span className="text-[#1e78ff] font-semibold">Production</span> tab to get started.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8 pb-6">
@@ -292,10 +281,10 @@ export default function StreamerAnalytics() {
           <KPI icon={MessageSquare} label="Comments"       value={fmt(totalComments)} sub="all time"         color="#f97316" change={7}  />
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <KPI icon={Clock}         label="Avg Duration"   value={`${Math.floor(avgDur/60)}m ${avgDur%60}s`} color="#06b6d4" />
-          <KPI icon={Users}         label="Subscribers"    value="12.4K"  sub="+193 this week"  color="#1e78ff" change={4}  />
-          <KPI icon={Share2}        label="Total Shares"   value="8.2K"   sub="all time"        color="#a855f7" change={22} />
-          <KPI icon={DollarSign}    label="Monthly Rev"    value={`$${grossRevenue.toLocaleString()}`} sub="est." color="#22c55e" change={12} />
+          <KPI icon={Clock}         label="Avg Duration"   value={avgDur > 0 ? `${Math.floor(avgDur/60)}m ${avgDur%60}s` : "—"} color="#06b6d4" />
+          <KPI icon={Users}         label="Subscribers"    value={hasRealData ? "12.4K" : "0"}   sub={hasRealData ? "+193 this week" : "no data yet"} color="#1e78ff" change={hasRealData ? 4 : undefined} />
+          <KPI icon={Share2}        label="Total Shares"   value={hasRealData ? "8.2K"  : "0"}   sub="all time"        color="#a855f7" change={hasRealData ? 22 : undefined} />
+          <KPI icon={DollarSign}    label="Monthly Rev"    value={grossRevenue > 0 ? `$${grossRevenue.toLocaleString()}` : "$0"} sub="est." color="#22c55e" change={hasRealData ? 12 : undefined} />
         </div>
 
         {/* Views & Watch Time chart */}
@@ -352,7 +341,9 @@ export default function StreamerAnalytics() {
               <Star className="w-4 h-4 text-yellow-400" /> Top Videos
             </p>
             <div className="space-y-3">
-              {displayTopVideos.map((v, i) => (
+              {displayTopVideos.length === 0 ? (
+                <p className="text-xs text-blue-400/40 text-center py-6">No videos uploaded yet</p>
+              ) : displayTopVideos.map((v, i) => (
                 <div key={v.id ?? i} className="flex items-center gap-3">
                   <span className="text-xs font-bold text-blue-500/40 w-4 flex-shrink-0">#{i + 1}</span>
                   <div className="w-12 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-[#0a1525] border border-blue-900/30">
@@ -392,7 +383,8 @@ export default function StreamerAnalytics() {
                 <Area type="monotone" dataKey="viewers" name="% Watching" stroke="#22c55e" fill="url(#sa-gRet)" strokeWidth={2} dot={false} />
               </AreaChart>
             </ResponsiveContainer>
-            <p className="text-xs text-green-400 font-semibold mt-2">68% avg retention — above platform avg (55%)</p>
+            {hasRealData && <p className="text-xs text-green-400 font-semibold mt-2">68% avg retention — above platform avg (55%)</p>}
+            {!hasRealData && <p className="text-xs text-blue-400/40 mt-2">Upload videos to see retention data</p>}
           </Card>
         </div>
 
@@ -439,7 +431,9 @@ export default function StreamerAnalytics() {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_CONTENT.map((row, i) => (
+                {!hasRealData ? (
+                  <tr><td colSpan={4} className="py-8 text-center text-xs text-blue-400/40">No content data yet</td></tr>
+                ) : MOCK_CONTENT.map((row, i) => (
                   <tr key={i} className="border-b border-blue-900/20 hover:bg-blue-900/10 transition-colors">
                     <td className="py-2.5 pr-2 text-[#c8dff5] font-medium max-w-[130px] truncate">{row.title}</td>
                     <td className="py-2.5 px-2 text-right text-blue-400/60">{row.views.toLocaleString()}</td>
@@ -460,10 +454,10 @@ export default function StreamerAnalytics() {
         <SectionHeader icon={Users} title="Audience Insights" color="#06b6d4" />
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <KPI icon={Clock}     label="Avg Watch Time"  value="6.8m"  sub="per session"        color="#06b6d4" change={5}  />
-          <KPI icon={BarChart2} label="Poll Rate"       value="26%"   sub="avg participation"  color="#a855f7" change={3}  />
-          <KPI icon={ThumbsUp}  label="Like Ratio"      value="5.6×"  sub="likes per comment"  color="#f97316" change={8}  />
-          <KPI icon={Eye}       label="Weekly Views"    value="15.0K" sub="+18% last week"      color="#22c55e" change={18} />
+          <KPI icon={Clock}     label="Avg Watch Time"  value={hasRealData ? "6.8m"  : "—"} sub="per session"        color="#06b6d4" change={hasRealData ? 5  : undefined} />
+          <KPI icon={BarChart2} label="Poll Rate"       value={hasRealData ? "26%"   : "—"} sub="avg participation"  color="#a855f7" change={hasRealData ? 3  : undefined} />
+          <KPI icon={ThumbsUp}  label="Like Ratio"      value={hasRealData ? "5.6×"  : "—"} sub="likes per comment"  color="#f97316" change={hasRealData ? 8  : undefined} />
+          <KPI icon={Eye}       label="Weekly Views"    value={hasRealData ? "15.0K" : "0"} sub={hasRealData ? "+18% last week" : "no data yet"} color="#22c55e" change={hasRealData ? 18 : undefined} />
         </div>
 
         <div className="grid lg:grid-cols-2 gap-5 mb-5">
@@ -473,7 +467,7 @@ export default function StreamerAnalytics() {
               <Target className="w-4 h-4 text-[#1e78ff]" /> Engagement Score
             </p>
             <ResponsiveContainer width="100%" height={250}>
-              <RadarChart data={MOCK_RADAR} cx="50%" cy="50%" outerRadius="70%">
+              <RadarChart data={hasRealData ? MOCK_RADAR : MOCK_RADAR.map(r => ({ ...r, value: 0 }))} cx="50%" cy="50%" outerRadius="70%">
                 <PolarGrid stroke="#0d2040" />
                 <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: "#4a7ea0" }} />
                 <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} />
@@ -489,7 +483,7 @@ export default function StreamerAnalytics() {
               <Globe className="w-4 h-4 text-[#00c8ff]" /> Traffic Sources
             </p>
             <div className="space-y-3.5">
-              {TRAFFIC_SOURCES.map((s, i) => (
+              {(hasRealData ? TRAFFIC_SOURCES : TRAFFIC_SOURCES.map(s => ({ ...s, pct: 0 }))).map((s, i) => (
                 <div key={i}>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-[#9fc3e8]">{s.source}</span>
@@ -510,7 +504,7 @@ export default function StreamerAnalytics() {
             <TrendingUp className="w-4 h-4 text-[#a855f7]" /> Weekly Engagement Trends
           </p>
           <ResponsiveContainer width="100%" height={210}>
-            <LineChart data={MOCK_WEEKLY} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+            <LineChart data={weeklyData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
               <XAxis dataKey="day" tick={{ fontSize: 11, fill: "#3a6080" }} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#3a6080" }} tickLine={false} axisLine={false} />
@@ -535,7 +529,7 @@ export default function StreamerAnalytics() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
               <p className="text-blue-400/60 text-xs mb-1">Gross Revenue This Month</p>
-              <p className="text-4xl font-black text-[#e8f4ff]">${grossRevenue.toLocaleString()}</p>
+              <p className="text-4xl font-black text-[#e8f4ff]">{grossRevenue > 0 ? `$${grossRevenue.toLocaleString()}` : "$0"}</p>
             </div>
             <div className="flex items-center gap-2 bg-[#1e78ff]/15 border border-[#1e78ff]/30 rounded-xl px-3 py-2 w-fit">
               <TrendingUp className="w-3.5 h-3.5 text-[#1e78ff]" />
@@ -566,7 +560,7 @@ export default function StreamerAnalytics() {
 
         {/* Revenue stream KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          {MOCK_REVENUE.map((r, i) => (
+          {revenueStreams.map((r, i) => (
             <KPI key={i} icon={r.icon} label={r.name} value={`$${r.value}`} color={r.color} change={r.change} />
           ))}
         </div>
@@ -623,10 +617,10 @@ export default function StreamerAnalytics() {
         <SectionHeader icon={TrendingUp} title="Growth & Reach" color="#22c55e" />
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <KPI icon={Users}      label="Total Subs"      value="12.4K" sub="+193 this week"   color="#1e78ff" change={4}  />
-          <KPI icon={TrendingUp} label="Sub Growth Rate" value="+1.6%" sub="week over week"   color="#22c55e" change={12} />
-          <KPI icon={Zap}        label="Viral Score"     value="74"    sub="out of 100"       color="#a855f7" change={9}  />
-          <KPI icon={Radio}      label="Live Viewers"    value="832"   sub="avg peak"         color="#f97316" change={15} />
+          <KPI icon={Users}      label="Total Subs"      value={hasRealData ? "12.4K"  : "0"}   sub={hasRealData ? "+193 this week" : "no data yet"}  color="#1e78ff" change={hasRealData ? 4  : undefined} />
+          <KPI icon={TrendingUp} label="Sub Growth Rate" value={hasRealData ? "+1.6%"  : "—"}   sub="week over week"                                      color="#22c55e" change={hasRealData ? 12 : undefined} />
+          <KPI icon={Zap}        label="Viral Score"     value={hasRealData ? "74"     : "—"}   sub="out of 100"                                           color="#a855f7" change={hasRealData ? 9  : undefined} />
+          <KPI icon={Radio}      label="Live Viewers"    value={hasRealData ? "832"    : "0"}   sub={hasRealData ? "avg peak" : "no streams yet"}          color="#f97316" change={hasRealData ? 15 : undefined} />
         </div>
 
         <div className="grid lg:grid-cols-2 gap-5">
@@ -656,7 +650,7 @@ export default function StreamerAnalytics() {
               <Share2 className="w-4 h-4 text-[#a855f7]" /> Weekly Subs & Views
             </p>
             <ResponsiveContainer width="100%" height={190}>
-              <BarChart data={MOCK_WEEKLY} barSize={14} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+              <BarChart data={weeklyData} barSize={14} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
                 <XAxis dataKey="day" tick={{ fontSize: 11, fill: "#3a6080" }} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#3a6080" }} tickLine={false} axisLine={false} />
