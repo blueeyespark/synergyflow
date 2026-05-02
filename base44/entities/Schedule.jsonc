@@ -41,6 +41,15 @@
       ],
       "default": "scheduled"
     },
+    "calendar_type": {
+      "type": "string",
+      "enum": [
+        "creator_only",
+        "viewer_calendar"
+      ],
+      "default": "creator_only",
+      "description": "Creator-only for private planning, viewer_calendar for public follower visibility"
+    },
     "expected_duration_minutes": {
       "type": "number",
       "description": "Expected duration in minutes"

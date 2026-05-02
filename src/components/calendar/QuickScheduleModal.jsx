@@ -9,12 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { FolderKanban, CheckSquare, ListTodo, LayoutTemplate, Loader2, Sparkles } from "lucide-react";
+import { FolderKanban, CheckSquare, ListTodo, LayoutTemplate, Loader2, Sparkles, Calendar, Eye, Lock } from "lucide-react";
 
 export default function QuickScheduleModal({ open, onOpenChange, selectedDate }) {
   const [tab, setTab] = useState("task");
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ title: "", project_id: "", planner_id: "", priority: "medium" });
+  const [form, setForm] = useState({ title: "", project_id: "", planner_id: "", priority: "medium", calendar_type: "creator_only" });
   const queryClient = useQueryClient();
 
   const { data: projects = [] } = useQuery({
@@ -32,6 +32,12 @@ export default function QuickScheduleModal({ open, onOpenChange, selectedDate })
   const { data: templates = [], isLoading: loadingTemplates } = useQuery({
     queryKey: ["templates"],
     queryFn: () => base44.entities.ProjectTemplate.list(),
+    enabled: open,
+  });
+
+  const { data: channels = [] } = useQuery({
+    queryKey: ["channels"],
+    queryFn: () => base44.entities.Channel.list(),
     enabled: open,
   });
 
@@ -97,9 +103,35 @@ export default function QuickScheduleModal({ open, onOpenChange, selectedDate })
     });
     queryClient.invalidateQueries({ queryKey: ["planners"] });
     toast.success("Planner created");
-    setForm({ title: "", project_id: "", planner_id: "", priority: "medium" });
+    setForm({ title: "", project_id: "", planner_id: "", priority: "medium", calendar_type: "creator_only" });
     onOpenChange(false);
     setSubmitting(false);
+  };
+
+  const handleCreateSchedule = async () => {
+    if (!form.title || !form.project_id) { 
+      toast.error("Title and channel required"); 
+      return; 
+    }
+    setSubmitting(true);
+    try {
+      await base44.entities.Schedule.create({
+        title: form.title,
+        channel_id: form.project_id,
+        scheduled_date: selectedDate.toISOString(),
+        calendar_type: form.calendar_type,
+        type: 'live_stream',
+        status: 'scheduled',
+      });
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      toast.success(`Event added to ${form.calendar_type === 'creator_only' ? 'creator' : 'viewer'} calendar`);
+      setForm({ title: "", project_id: "", planner_id: "", priority: "medium", calendar_type: "creator_only" });
+      onOpenChange(false);
+    } catch (err) {
+      toast.error("Failed to create schedule");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleUseTemplate = async () => {
@@ -129,10 +161,11 @@ export default function QuickScheduleModal({ open, onOpenChange, selectedDate })
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="task" className="text-xs gap-1"><CheckSquare className="w-3 h-3" /> Task</TabsTrigger>
             <TabsTrigger value="project" className="text-xs gap-1"><FolderKanban className="w-3 h-3" /> Project</TabsTrigger>
             <TabsTrigger value="planner" className="text-xs gap-1"><ListTodo className="w-3 h-3" /> Planner</TabsTrigger>
+            <TabsTrigger value="schedule" className="text-xs gap-1"><Calendar className="w-3 h-3" /> Schedule</TabsTrigger>
             <TabsTrigger value="template" className="text-xs gap-1"><LayoutTemplate className="w-3 h-3" /> Template</TabsTrigger>
           </TabsList>
 
@@ -221,6 +254,54 @@ export default function QuickScheduleModal({ open, onOpenChange, selectedDate })
             <Button className="w-full" onClick={handleCreatePlanner} disabled={submitting}>
               {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Create Planner
+            </Button>
+          </TabsContent>
+
+          {/* Schedule Tab */}
+          <TabsContent value="schedule" className="space-y-3 mt-4">
+            <div>
+              <Label>Event Title</Label>
+              <Input
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="e.g., Weekly Stream, Product Launch"
+              />
+            </div>
+            <div>
+              <Label>Channel</Label>
+              <Select value={form.project_id} onValueChange={(v) => setForm({ ...form, project_id: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select channel" />
+                </SelectTrigger>
+                <SelectContent>
+                  {channels.map(c => <SelectItem key={c.id} value={c.id}>{c.channel_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Calendar Type</Label>
+              <Select value={form.calendar_type} onValueChange={(v) => setForm({ ...form, calendar_type: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="creator_only" className="flex items-center gap-2">
+                    <Lock className="w-3 h-3" /> Creator Only (Private Planning)
+                  </SelectItem>
+                  <SelectItem value="viewer_calendar" className="flex items-center gap-2">
+                    <Eye className="w-3 h-3" /> Viewer Calendar (Public)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-slate-500 mt-1">
+                {form.calendar_type === 'creator_only' 
+                  ? "👤 Private planning calendar - only you see this"
+                  : "👀 Public viewer calendar - followers can see this date"}
+              </p>
+            </div>
+            <Button className="w-full" onClick={handleCreateSchedule} disabled={submitting || !form.project_id}>
+              {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Add to Calendar
             </Button>
           </TabsContent>
 
