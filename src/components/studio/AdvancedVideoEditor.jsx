@@ -1,36 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Upload, Play, Pause, Download, Trash2, Volume2, Type, Palette, Music, Image, Sparkles, MessageSquare, X, Search, Plus, Folder, FileVideo, Settings, Layers, Zap, Filter as FilterIcon, RotateCcw, Copy, Eye } from "lucide-react";
+import { Download, Trash2, Play, Pause, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import AIContentTools from "./AIContentTools";
 import AdvancedVideoEditorSettings from "./AdvancedVideoEditorSettings";
+import VideoPreview from "./editor/VideoPreview";
+import Timeline from "./editor/Timeline";
+import QuickControls from "./editor/QuickControls";
+import AdvancedControls from "./editor/AdvancedControls";
+import MediaPanel from "./editor/MediaPanel";
+import EffectsPanel from "./editor/EffectsPanel";
 
 const presets = [
   { name: "YouTube", width: 1280, height: 720, ratio: "16:9" },
   { name: "Square", width: 1080, height: 1080, ratio: "1:1" },
   { name: "Vertical", width: 1080, height: 1920, ratio: "9:16" },
-];
-
-const transitions = [
-  { id: "fade", name: "Fade", duration: 0.5 },
-  { id: "dissolve", name: "Dissolve", duration: 0.5 },
-  { id: "slide", name: "Slide", duration: 0.5 },
-  { id: "wipe", name: "Wipe", duration: 0.5 },
-  { id: "zoom", name: "Zoom", duration: 0.5 },
-  { id: "cross-fade", name: "Cross Fade", duration: 0.5 },
-];
-
-const filterPresets = [
-  { id: "none", name: "None", filters: {} },
-  { id: "vintage", name: "Vintage", filters: { sepia: 30, saturation: 0.8 } },
-  { id: "noir", name: "B&W", filters: { grayscale: 100, contrast: 1.2 } },
-  { id: "cool", name: "Cool", filters: { hue: -10, saturation: 1.1 } },
-  { id: "warm", name: "Warm", filters: { hue: 20, saturation: 1.1 } },
-  { id: "vibrant", name: "Vibrant", filters: { saturation: 1.4, contrast: 1.1 } },
 ];
 
 const textAnimations = [
@@ -40,6 +27,15 @@ const textAnimations = [
   { id: "bounce", name: "Bounce" },
   { id: "scale", name: "Scale" },
   { id: "pop", name: "Pop" },
+];
+
+const filterPresets = [
+  { id: "none", name: "None", filters: {} },
+  { id: "vintage", name: "Vintage", filters: { sepia: 30, saturation: 0.8 } },
+  { id: "noir", name: "B&W", filters: { grayscale: 100, contrast: 1.2 } },
+  { id: "cool", name: "Cool", filters: { hue: -10, saturation: 1.1 } },
+  { id: "warm", name: "Warm", filters: { hue: 20, saturation: 1.1 } },
+  { id: "vibrant", name: "Vibrant", filters: { saturation: 1.4, contrast: 1.1 } },
 ];
 
 export default function AdvancedVideoEditor() {
@@ -54,6 +50,11 @@ export default function AdvancedVideoEditor() {
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [saturation, setSaturation] = useState(100);
+  const [hue, setHue] = useState(0);
+  const [blur, setBlur] = useState(0);
+  const [rotation, setRotation] = useState(0);
+  const [opacity, setOpacity] = useState(100);
+  const [speed, setSpeed] = useState(1);
   const [activeTab, setActiveTab] = useState("media");
   const [searchMedia, setSearchMedia] = useState("");
   const [selectedTransition, setSelectedTransition] = useState("fade");
@@ -66,20 +67,13 @@ export default function AdvancedVideoEditor() {
   const [aiType, setAiType] = useState(null);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
-  const [hue, setHue] = useState(0);
-  const [blur, setBlur] = useState(0);
-  const [rotation, setRotation] = useState(0);
-  const [opacity, setOpacity] = useState(100);
-  const [speed, setSpeed] = useState(1);
-
-  // Thumbnail state
-  const canvasRef = useRef(null);
   const [preset, setPreset] = useState(presets[0]);
   const [bgColor, setBgColor] = useState("#FF6B6B");
   const [mainText, setMainText] = useState("AWESOME VIDEO");
   const [fontSize, setFontSize] = useState(60);
   const [uploadedImage, setUploadedImage] = useState(null);
 
+  const canvasRef = useRef(null);
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -93,9 +87,7 @@ export default function AdvancedVideoEditor() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const filteredMedia = mediaAssets.filter(m => 
-    m.name?.toLowerCase().includes(searchMedia.toLowerCase())
-  );
+  const filteredMedia = mediaAssets.filter(m => m.name?.toLowerCase().includes(searchMedia.toLowerCase()));
 
   const handleVideoUpload = (e) => {
     const file = e.target.files?.[0];
@@ -127,9 +119,12 @@ export default function AdvancedVideoEditor() {
   };
 
   const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
-    }
+    if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
+  };
+
+  const handleSeek = (newTime, ref) => {
+    if (ref.current) ref.current.currentTime = newTime;
+    setCurrentTime(newTime);
   };
 
   const handleDownloadVideo = () => {
@@ -225,8 +220,6 @@ export default function AdvancedVideoEditor() {
     }
   };
 
-  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
-
   const filterStyle = (() => {
     const f = filterPresets.find(p => p.id === selectedFilter);
     if (!f || !video) return {};
@@ -238,7 +231,7 @@ export default function AdvancedVideoEditor() {
 
   return (
     <div className="flex h-[calc(100vh-120px)] bg-gradient-to-br from-[#0a0e27] to-[#050a14] text-white gap-0 rounded-2xl overflow-hidden border border-blue-900/60 shadow-2xl">
-      {/* LEFT SIDEBAR - Media & Transitions */}
+      {/* LEFT SIDEBAR - Media & Effects */}
       <div className="w-56 border-r border-blue-900/50 flex flex-col bg-gradient-to-b from-[#0d1628] to-[#050a14] overflow-hidden">
         <div className="flex gap-1 p-2.5 border-b border-blue-900/50 bg-gradient-to-r from-blue-950/40 to-transparent">
           <button onClick={() => setActiveTab("media")} className={`flex-1 px-2 py-1.5 text-xs rounded-lg font-semibold transition-all ${activeTab === "media" ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20" : "text-blue-300/70 hover:bg-blue-900/30 border border-blue-900/30"}`}>📁 Media</button>
@@ -247,77 +240,10 @@ export default function AdvancedVideoEditor() {
 
         <div className="flex-1 overflow-y-auto p-2.5 space-y-2.5">
           {activeTab === "media" && (
-            <>
-              <label className="flex flex-col items-center justify-center p-2 border-2 border-dashed border-blue-900/40 rounded-lg cursor-pointer hover:border-blue-600/60 transition-colors">
-                <Upload className="w-4 h-4 text-blue-400/60 mb-0.5" />
-                <p className="text-xs text-center text-blue-400/60">Upload</p>
-                <input type="file" accept="video/*,image/*,audio/*" onChange={handleVideoUpload} className="hidden" />
-              </label>
-              <div className="relative">
-                <Search className="absolute left-2 top-1.5 w-3 h-3 text-blue-400/40" />
-                <Input
-                  placeholder="Search..."
-                  value={searchMedia}
-                  onChange={(e) => setSearchMedia(e.target.value)}
-                  className="pl-6 h-6 text-xs bg-[#050a14] border-blue-900/40"
-                />
-              </div>
-              {filteredMedia.length > 0 ? (
-                <div className="grid grid-cols-3 gap-1.5">
-                  {filteredMedia.slice(0, 9).map(m => (
-                    <div key={m.id} className="group relative rounded overflow-hidden bg-[#050a14] border border-blue-900/40 hover:border-blue-500/60 transition-colors cursor-pointer aspect-square">
-                      {m.type === "image" && m.url && (
-                        <img src={m.url} alt={m.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                      )}
-                      {m.type !== "image" && (
-                        <div className="w-full h-full flex items-center justify-center bg-black">
-                          <FileVideo className="w-3 h-3 text-blue-400/40" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-4"><Folder className="w-5 h-5 text-blue-400/30 mx-auto mb-1" /><p className="text-xs text-blue-400/40">No media</p></div>
-              )}
-            </>
+            <MediaPanel mediaAssets={mediaAssets} searchMedia={searchMedia} onSearchChange={setSearchMedia} onVideoUpload={handleVideoUpload} filteredMedia={filteredMedia} />
           )}
-
           {activeTab === "effects" && (
-            <>
-              <div>
-                <p className="text-xs font-semibold text-blue-300 mb-1.5">Transitions</p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {transitions.map(t => (
-                    <button
-                      key={t.id}
-                      onClick={() => setSelectedTransition(t.id)}
-                      className={`p-1.5 rounded text-xs font-medium transition-all ${
-                        selectedTransition === t.id ? "bg-cyan-600 text-white" : "bg-[#050a14] text-blue-400/60 border border-blue-900/40 hover:border-blue-600/40"
-                      }`}
-                    >
-                      {t.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-blue-300 mb-1.5">Filters</p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {filterPresets.map(f => (
-                    <button
-                      key={f.id}
-                      onClick={() => setSelectedFilter(f.id)}
-                      className={`p-1.5 rounded text-xs font-medium transition-all ${
-                        selectedFilter === f.id ? "bg-purple-600 text-white" : "bg-[#050a14] text-blue-400/60 border border-blue-900/40 hover:border-blue-600/40"
-                      }`}
-                    >
-                      {f.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
+            <EffectsPanel selectedTransition={selectedTransition} selectedFilter={selectedFilter} onTransitionChange={setSelectedTransition} onFilterChange={setSelectedFilter} />
           )}
         </div>
       </div>
@@ -336,239 +262,79 @@ export default function AdvancedVideoEditor() {
         </div>
 
         {/* Video Preview */}
-        <div className="flex-1 flex items-center justify-center bg-black relative group overflow-hidden">
-          {video ? (
-            <div className="relative w-full h-full flex items-center justify-center" style={filterStyle}>
-              <video
-                ref={videoRef}
-                src={video.url}
-                onTimeUpdate={handleTimeUpdate}
-                onLoadedMetadata={handleLoadedMetadata}
-                className="w-full h-full object-contain"
-                style={{ volume: volume }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 cursor-pointer" onClick={handlePlay}>
-                <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
-                  {isPlaying ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white" />}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <label className="flex flex-col items-center justify-center cursor-pointer hover:opacity-75 transition-opacity w-full h-full">
-              <FileVideo className="w-12 h-12 text-blue-400/30 mb-2" />
-              <p className="text-xs text-blue-400/50">Click to upload video or drag & drop</p>
-              <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
-            </label>
-          )}
-        </div>
+        <VideoPreview video={video} isPlaying={isPlaying} onPlay={handlePlay} filterStyle={filterStyle} onVideoRef={videoRef} onLoadedMetadata={handleLoadedMetadata} onTimeUpdate={handleTimeUpdate} />
 
         {/* Timeline */}
-        {video && (
-          <div className="h-24 border-t border-blue-900/50 bg-gradient-to-b from-[#0a0e27] to-[#050a14] p-3 space-y-2 overflow-x-auto">
-            <div className="flex justify-between text-xs font-semibold text-cyan-400/80">
-              <span>{currentTime.toFixed(2)}s</span>
-              <span className="text-blue-400/60">{duration.toFixed(2)}s</span>
-            </div>
-            <div className="relative h-2 bg-gradient-to-r from-blue-950 to-purple-950 rounded-full cursor-pointer shadow-inner">
-              <div className="absolute h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 rounded-full shadow-lg shadow-cyan-500/40" style={{ width: `${progressPercent}%` }} />
-              <input
-                type="range"
-                min="0"
-                max={duration}
-                value={currentTime}
-                onChange={(e) => {
-                  const newTime = parseFloat(e.target.value);
-                  if (videoRef.current) videoRef.current.currentTime = newTime;
-                  setCurrentTime(newTime);
-                }}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-            </div>
-            <div className="h-10 bg-gradient-to-b from-blue-950/30 to-purple-950/30 rounded border border-blue-900/50 flex items-end justify-around p-0.5 gap-0.5 shadow-inner">
-              {Array.from({ length: 25 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-1 bg-gradient-to-t from-cyan-400/70 via-blue-500/50 to-purple-600/30 rounded-t transition-all"
-                  style={{ height: `${30 + Math.random() * 70}%` }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        <Timeline video={video} currentTime={currentTime} duration={duration} onSeek={handleSeek} videoRef={videoRef} />
       </div>
 
-
-
-        <div className="flex-1 overflow-y-auto">
-          <div className="space-y-3 p-3 text-sm">
-            {/* Quick Controls */}
-            <div>
-              <h4 className="text-xs font-bold text-cyan-300 mb-2">Quick Controls</h4>
-              <div className="space-y-1.5">
-                {/* Brightness */}
-                <div className="space-y-1 bg-blue-950/20 rounded-lg p-2 border border-blue-900/30">
-                  <label className="text-xs font-semibold text-cyan-300 block">☀️ Brightness</label>
-                  <div className="flex items-center gap-2">
-                    <input type="range" min="50" max="150" value={brightness} onChange={(e) => setBrightness(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
-                    <span className="text-xs font-bold text-cyan-400 w-8 text-right">{brightness}%</span>
-                  </div>
-                </div>
-
-                {/* Contrast */}
-                <div className="space-y-1 bg-purple-950/20 rounded-lg p-2 border border-purple-900/30">
-                  <label className="text-xs font-semibold text-purple-300 block">🎯 Contrast</label>
-                  <div className="flex items-center gap-2">
-                    <input type="range" min="50" max="150" value={contrast} onChange={(e) => setContrast(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
-                    <span className="text-xs font-bold text-purple-400 w-8 text-right">{contrast}%</span>
-                  </div>
-                </div>
-
-                {/* Saturation */}
-                <div className="space-y-1 bg-pink-950/20 rounded-lg p-2 border border-pink-900/30">
-                  <label className="text-xs font-semibold text-pink-300 block">🎨 Saturation</label>
-                  <div className="flex items-center gap-2">
-                    <input type="range" min="0" max="200" value={saturation} onChange={(e) => setSaturation(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
-                    <span className="text-xs font-bold text-pink-400 w-8 text-right">{saturation}%</span>
-                  </div>
-                </div>
-
-                {/* Volume */}
-                <div className="space-y-1 bg-green-950/20 rounded-lg p-2 border border-green-900/30">
-                  <label className="text-xs font-semibold text-green-300 block">🔊 Volume</label>
-                  <div className="flex items-center gap-2">
-                    <input type="range" min="0" max="1" step="0.1" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
-                    <span className="text-xs font-bold text-green-400 w-8 text-right">{(volume * 100).toFixed(0)}%</span>
-                  </div>
-                </div>
-
-                {video && (
-                  <>
-                    <div className="space-y-1 bg-orange-950/20 rounded-lg p-2 border border-orange-900/30">
-                      <label className="text-xs font-semibold text-orange-300 block">▶️ Start Time</label>
-                      <div className="flex items-center gap-2">
-                        <input type="range" min="0" max={duration} value={startTime} onChange={(e) => setStartTime(Math.min(parseFloat(e.target.value), endTime))} className="flex-1 h-1.5 rounded-full" />
-                        <span className="text-xs font-bold text-orange-400 w-12 text-right">{startTime.toFixed(2)}s</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1 bg-red-950/20 rounded-lg p-2 border border-red-900/30">
-                      <label className="text-xs font-semibold text-red-300 block">⏹️ End Time</label>
-                      <div className="flex items-center gap-2">
-                        <input type="range" min="0" max={duration} value={endTime} onChange={(e) => setEndTime(Math.max(parseFloat(e.target.value), startTime))} className="flex-1 h-1.5 rounded-full" />
-                        <span className="text-xs font-bold text-red-400 w-12 text-right">{endTime.toFixed(2)}s</span>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Advanced Settings */}
-            <div className="border-t border-blue-900/40 pt-3">
-              <h4 className="text-xs font-bold text-blue-300 mb-2 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Advanced Settings
-              </h4>
-              <AdvancedVideoEditorSettings onSettingChange={(id, value) => {
-                // Handle advanced settings changes here
-              }} />
-            </div>
-          </div>
-        </div>
-
-      {/* RIGHT SIDEBAR - Text & Thumbnail */}
+      {/* RIGHT SIDEBAR - Controls & Tools */}
       <div className="w-96 border-l border-blue-900/50 flex flex-col bg-gradient-to-b from-[#0d1628] to-[#050a14] overflow-y-auto">
         <div className="p-2.5 border-b border-blue-900/50 bg-gradient-to-r from-blue-950/40 to-transparent">
-          <h3 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">✏️ Content Tools</h3>
+          <h3 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">⚙️ Controls</h3>
         </div>
 
-        <div className="flex-1 p-3 space-y-3 text-sm overflow-y-auto">
+        <div className="flex-1 overflow-y-auto p-3 space-y-4 text-sm">
+          {/* Quick Controls Section */}
+          <div>
+            <h4 className="text-xs font-bold text-cyan-300 mb-2">Quick Controls</h4>
+            <QuickControls 
+              brightness={brightness} contrast={contrast} saturation={saturation} volume={volume} 
+              startTime={startTime} endTime={endTime} duration={duration} video={video}
+              onBrightness={setBrightness} onContrast={setContrast} onSaturation={setSaturation} 
+              onVolume={setVolume} onStartTime={setStartTime} onEndTime={setEndTime}
+            />
+          </div>
+
+          {/* Advanced Settings */}
+          <div className="border-t border-blue-900/40 pt-3">
+            <h4 className="text-xs font-bold text-blue-300 mb-2 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" /> Advanced Settings
+            </h4>
+            <AdvancedVideoEditorSettings onSettingChange={(id, value) => {}} />
+          </div>
+
           {/* Text Overlay */}
-          <div className="pt-0 border-t-0 border-blue-900/40 space-y-2">
+          <div className="border-t border-blue-900/40 pt-3">
             <h4 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">📝 Text Overlay</h4>
-            <Input value={textOverlay} onChange={(e) => setTextOverlay(e.target.value)} placeholder="Add text..." className="h-7 text-xs bg-blue-950/40 border-blue-900/40 focus:border-blue-600" />
-            <div>
-              <label className="text-xs font-semibold text-purple-300 block mb-1">Size: {textSize}px</label>
-              <input type="range" min="12" max="72" value={textSize} onChange={(e) => setTextSize(parseInt(e.target.value))} className="w-full h-1.5 rounded-full" />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-pink-300 block mb-1">Color</label>
-              <div className="flex gap-1.5">
-                <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-8 h-7 rounded-lg cursor-pointer border-2 border-pink-600 shadow-lg shadow-pink-500/20" />
-                <Input value={textColor} onChange={(e) => setTextColor(e.target.value)} className="text-xs flex-1 h-7 bg-blue-950/40 border-blue-900/40" />
+            <div className="mt-2 space-y-2">
+              <input value={textOverlay} onChange={(e) => setTextOverlay(e.target.value)} placeholder="Add text..." className="w-full h-7 text-xs rounded-lg px-2 bg-blue-950/40 border border-blue-900/40 focus:border-blue-600 text-white outline-none" />
+              <div>
+                <label className="text-xs font-semibold text-purple-300 block mb-1">Size: {textSize}px</label>
+                <input type="range" min="12" max="72" value={textSize} onChange={(e) => setTextSize(parseInt(e.target.value))} className="w-full h-1.5 rounded-full" />
               </div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-orange-300 block mb-1">Animation</label>
-              <select className="w-full bg-blue-950/40 border border-blue-900/40 rounded-lg text-xs p-1.5 text-blue-100 font-medium">
-                {textAnimations.map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </select>
             </div>
           </div>
 
-          {/* Thumbnail */}
-          <div className="pt-2.5 border-t border-blue-900/40 space-y-2">
+          {/* Thumbnail Creator */}
+          <div className="border-t border-blue-900/40 pt-3">
             <h4 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-400">🎬 Thumbnail</h4>
-            <div className="bg-gradient-to-b from-blue-950/40 to-purple-950/20 rounded-lg p-1.5 border border-blue-900/30 shadow-inner">
-              <canvas ref={canvasRef} className="w-full rounded border border-blue-900/40" style={{ maxHeight: "80px" }} />
+            <div className="mt-2 space-y-2">
+              <div className="bg-gradient-to-b from-blue-950/40 to-purple-950/20 rounded-lg p-1.5 border border-blue-900/30 shadow-inner">
+                <canvas ref={canvasRef} className="w-full rounded border border-blue-900/40" style={{ maxHeight: "80px" }} />
+              </div>
+              <select className="w-full bg-blue-950/40 border border-blue-900/40 rounded-lg text-xs p-1.5 text-blue-100 font-medium outline-none">
+                {presets.map(p => (
+                  <option key={p.name} value={p.name}>{p.name} ({p.ratio})</option>
+                ))}
+              </select>
+              <Button onClick={handleDownloadThumbnail} className="w-full h-7 text-xs gap-1 bg-gradient-to-r from-cyan-600 to-pink-600 hover:from-cyan-500 hover:to-pink-500 rounded-lg font-semibold shadow-lg shadow-cyan-500/20"><Download className="w-3 h-3" /> Download</Button>
             </div>
-            <select className="w-full bg-blue-950/40 border border-blue-900/40 rounded-lg text-xs p-1.5 text-blue-100 font-medium">
-              {presets.map(p => (
-                <option key={p.name} value={p.name}>{p.name} ({p.ratio})</option>
-              ))}
-            </select>
-            <div className="flex gap-1.5">
-              <Input value={mainText} onChange={(e) => setMainText(e.target.value)} placeholder="Text" className="text-xs h-7 flex-1 bg-blue-950/40 border-blue-900/40" />
-              <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} className="w-8 h-7 rounded-lg cursor-pointer border-2 border-cyan-600 shadow-lg shadow-cyan-500/20" />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-cyan-300 block mb-1">Font Size: {fontSize}px</label>
-              <input type="range" min="20" max="100" value={fontSize} onChange={(e) => setFontSize(parseInt(e.target.value))} className="w-full h-1.5 rounded-full" />
-            </div>
-            <Button onClick={handleDownloadThumbnail} className="w-full h-7 text-xs gap-1 bg-gradient-to-r from-cyan-600 to-pink-600 hover:from-cyan-500 hover:to-pink-500 rounded-lg font-semibold shadow-lg shadow-cyan-500/20"><Download className="w-3 h-3" /> Download</Button>
           </div>
 
           {/* Advanced Color & Transform */}
-          <div className="pt-3 border-t border-blue-900/40 space-y-2">
-            <h4 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-400">🎨 Advanced Color</h4>
-            <div className="space-y-1.5 bg-orange-950/20 rounded-lg p-2 border border-orange-900/30">
-              <div>
-                <label className="text-xs font-semibold text-orange-300 block mb-1">Hue: {hue}°</label>
-                <input type="range" min="-180" max="180" value={hue} onChange={(e) => setHue(parseFloat(e.target.value))} className="w-full h-1.5 rounded-full" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-orange-300 block mb-1">Blur: {blur}px</label>
-                <input type="range" min="0" max="20" value={blur} onChange={(e) => setBlur(parseFloat(e.target.value))} className="w-full h-1.5 rounded-full" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-orange-300 block mb-1">Opacity: {opacity}%</label>
-                <input type="range" min="0" max="100" value={opacity} onChange={(e) => setOpacity(parseFloat(e.target.value))} className="w-full h-1.5 rounded-full" />
-              </div>
-            </div>
-          </div>
-
-          {/* Transform Controls */}
-          <div className="pt-3 border-t border-blue-900/40 space-y-2">
-            <h4 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-400">🔄 Transform</h4>
-            <div className="space-y-1.5 bg-yellow-950/20 rounded-lg p-2 border border-yellow-900/30">
-              <div>
-                <label className="text-xs font-semibold text-yellow-300 block mb-1">Rotation: {rotation}°</label>
-                <input type="range" min="-180" max="180" value={rotation} onChange={(e) => setRotation(parseFloat(e.target.value))} className="w-full h-1.5 rounded-full" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-yellow-300 block mb-1">Playback Speed: {Math.abs(speed).toFixed(1)}x</label>
-                <input type="range" min="-2" max="2" step="0.1" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))} className="w-full h-1.5 rounded-full" />
-                <p className="text-xs text-yellow-400/60 mt-0.5">Negative = reverse</p>
-              </div>
-            </div>
+          <div className="border-t border-blue-900/40 pt-3">
+            <AdvancedControls 
+              hue={hue} blur={blur} opacity={opacity} rotation={rotation} speed={speed}
+              onHue={setHue} onBlur={setBlur} onOpacity={setOpacity} onRotation={setRotation} onSpeed={setSpeed}
+            />
           </div>
 
           {/* AI Tools */}
-          <div className="pt-3 border-t border-blue-900/40 space-y-2.5">
+          <div className="border-t border-blue-900/40 pt-3">
             <h4 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">🤖 AI Tools</h4>
-            <Button onClick={() => { setAiType("image"); setAiModalOpen(true); }} className="w-full h-7 text-xs gap-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg font-semibold shadow-lg shadow-purple-500/20"><Sparkles className="w-3 h-3" /> Generate Image</Button>
-            <div className="bg-purple-950/20 rounded-lg p-2 border border-purple-900/30 space-y-2">
+            <Button onClick={() => { setAiType("image"); setAiModalOpen(true); }} className="w-full h-7 text-xs gap-1 mt-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg font-semibold shadow-lg shadow-purple-500/20"><Sparkles className="w-3 h-3" /> Generate Image</Button>
+            <div className="bg-purple-950/20 rounded-lg p-2 border border-purple-900/30 space-y-2 mt-2">
               <AIContentTools />
             </div>
           </div>
