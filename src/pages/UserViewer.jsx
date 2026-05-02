@@ -23,6 +23,8 @@ export default function UserViewer() {
     queryKey: ["users"],
     queryFn: () => base44.entities.User.list(),
     enabled: !!user?.email && user?.role === 'admin',
+    retry: false,
+    throwOnError: false,
   });
 
   // Get default user (first non-admin user)
