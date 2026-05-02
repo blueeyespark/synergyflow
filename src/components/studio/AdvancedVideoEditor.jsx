@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import AIContentTools from "./AIContentTools";
+import AdvancedVideoEditorSettings from "./AdvancedVideoEditorSettings";
 
 const presets = [
   { name: "YouTube", width: 1280, height: 720, ratio: "16:9" },
@@ -390,71 +391,94 @@ export default function AdvancedVideoEditor() {
         )}
       </div>
 
-      {/* RIGHT SIDEBAR - Advanced Controls */}
+
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-3 p-3 text-sm">
+            {/* Quick Controls */}
+            <div>
+              <h4 className="text-xs font-bold text-cyan-300 mb-2">Quick Controls</h4>
+              <div className="space-y-1.5">
+                {/* Brightness */}
+                <div className="space-y-1 bg-blue-950/20 rounded-lg p-2 border border-blue-900/30">
+                  <label className="text-xs font-semibold text-cyan-300 block">☀️ Brightness</label>
+                  <div className="flex items-center gap-2">
+                    <input type="range" min="50" max="150" value={brightness} onChange={(e) => setBrightness(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
+                    <span className="text-xs font-bold text-cyan-400 w-8 text-right">{brightness}%</span>
+                  </div>
+                </div>
+
+                {/* Contrast */}
+                <div className="space-y-1 bg-purple-950/20 rounded-lg p-2 border border-purple-900/30">
+                  <label className="text-xs font-semibold text-purple-300 block">🎯 Contrast</label>
+                  <div className="flex items-center gap-2">
+                    <input type="range" min="50" max="150" value={contrast} onChange={(e) => setContrast(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
+                    <span className="text-xs font-bold text-purple-400 w-8 text-right">{contrast}%</span>
+                  </div>
+                </div>
+
+                {/* Saturation */}
+                <div className="space-y-1 bg-pink-950/20 rounded-lg p-2 border border-pink-900/30">
+                  <label className="text-xs font-semibold text-pink-300 block">🎨 Saturation</label>
+                  <div className="flex items-center gap-2">
+                    <input type="range" min="0" max="200" value={saturation} onChange={(e) => setSaturation(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
+                    <span className="text-xs font-bold text-pink-400 w-8 text-right">{saturation}%</span>
+                  </div>
+                </div>
+
+                {/* Volume */}
+                <div className="space-y-1 bg-green-950/20 rounded-lg p-2 border border-green-900/30">
+                  <label className="text-xs font-semibold text-green-300 block">🔊 Volume</label>
+                  <div className="flex items-center gap-2">
+                    <input type="range" min="0" max="1" step="0.1" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
+                    <span className="text-xs font-bold text-green-400 w-8 text-right">{(volume * 100).toFixed(0)}%</span>
+                  </div>
+                </div>
+
+                {video && (
+                  <>
+                    <div className="space-y-1 bg-orange-950/20 rounded-lg p-2 border border-orange-900/30">
+                      <label className="text-xs font-semibold text-orange-300 block">▶️ Start Time</label>
+                      <div className="flex items-center gap-2">
+                        <input type="range" min="0" max={duration} value={startTime} onChange={(e) => setStartTime(Math.min(parseFloat(e.target.value), endTime))} className="flex-1 h-1.5 rounded-full" />
+                        <span className="text-xs font-bold text-orange-400 w-12 text-right">{startTime.toFixed(2)}s</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 bg-red-950/20 rounded-lg p-2 border border-red-900/30">
+                      <label className="text-xs font-semibold text-red-300 block">⏹️ End Time</label>
+                      <div className="flex items-center gap-2">
+                        <input type="range" min="0" max={duration} value={endTime} onChange={(e) => setEndTime(Math.max(parseFloat(e.target.value), startTime))} className="flex-1 h-1.5 rounded-full" />
+                        <span className="text-xs font-bold text-red-400 w-12 text-right">{endTime.toFixed(2)}s</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Advanced Settings */}
+            <div className="border-t border-blue-900/40 pt-3">
+              <h4 className="text-xs font-bold text-blue-300 mb-2 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" /> Advanced Settings
+              </h4>
+              <AdvancedVideoEditorSettings onSettingChange={(id, value) => {
+                // Handle advanced settings changes here
+              }} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT SIDEBAR - Text & Thumbnail */}
       <div className="w-72 border-l border-blue-900/50 flex flex-col bg-gradient-to-b from-[#0d1628] to-[#050a14] overflow-y-auto">
         <div className="p-2.5 border-b border-blue-900/50 bg-gradient-to-r from-blue-950/40 to-transparent">
-          <h3 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">⚙️ Settings</h3>
+          <h3 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">✏️ Content Tools</h3>
         </div>
 
         <div className="flex-1 p-3 space-y-3 text-sm overflow-y-auto">
-          {/* Brightness */}
-          <div className="space-y-1 bg-blue-950/20 rounded-lg p-2 border border-blue-900/30">
-            <label className="text-xs font-semibold text-cyan-300 block">☀️ Brightness</label>
-            <div className="flex items-center gap-2">
-              <input type="range" min="50" max="150" value={brightness} onChange={(e) => setBrightness(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
-              <span className="text-xs font-bold text-cyan-400 w-8 text-right">{brightness}%</span>
-            </div>
-          </div>
-
-          {/* Contrast */}
-          <div className="space-y-1 bg-purple-950/20 rounded-lg p-2 border border-purple-900/30">
-            <label className="text-xs font-semibold text-purple-300 block">🎯 Contrast</label>
-            <div className="flex items-center gap-2">
-              <input type="range" min="50" max="150" value={contrast} onChange={(e) => setContrast(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
-              <span className="text-xs font-bold text-purple-400 w-8 text-right">{contrast}%</span>
-            </div>
-          </div>
-
-          {/* Saturation */}
-          <div className="space-y-1 bg-pink-950/20 rounded-lg p-2 border border-pink-900/30">
-            <label className="text-xs font-semibold text-pink-300 block">🎨 Saturation</label>
-            <div className="flex items-center gap-2">
-              <input type="range" min="0" max="200" value={saturation} onChange={(e) => setSaturation(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
-              <span className="text-xs font-bold text-pink-400 w-8 text-right">{saturation}%</span>
-            </div>
-          </div>
-
-          {/* Volume */}
-          <div className="space-y-1 bg-green-950/20 rounded-lg p-2 border border-green-900/30">
-            <label className="text-xs font-semibold text-green-300 block">🔊 Volume</label>
-            <div className="flex items-center gap-2">
-              <input type="range" min="0" max="1" step="0.1" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="flex-1 h-1.5 rounded-full" />
-              <span className="text-xs font-bold text-green-400 w-8 text-right">{(volume * 100).toFixed(0)}%</span>
-            </div>
-          </div>
-
-          {video && (
-            <>
-              <div className="space-y-1 bg-orange-950/20 rounded-lg p-2 border border-orange-900/30">
-                <label className="text-xs font-semibold text-orange-300 block">▶️ Start Time</label>
-                <div className="flex items-center gap-2">
-                  <input type="range" min="0" max={duration} value={startTime} onChange={(e) => setStartTime(Math.min(parseFloat(e.target.value), endTime))} className="flex-1 h-1.5 rounded-full" />
-                  <span className="text-xs font-bold text-orange-400 w-12 text-right">{startTime.toFixed(2)}s</span>
-                </div>
-              </div>
-
-              <div className="space-y-1 bg-red-950/20 rounded-lg p-2 border border-red-900/30">
-                <label className="text-xs font-semibold text-red-300 block">⏹️ End Time</label>
-                <div className="flex items-center gap-2">
-                  <input type="range" min="0" max={duration} value={endTime} onChange={(e) => setEndTime(Math.max(parseFloat(e.target.value), startTime))} className="flex-1 h-1.5 rounded-full" />
-                  <span className="text-xs font-bold text-red-400 w-12 text-right">{endTime.toFixed(2)}s</span>
-                </div>
-              </div>
-            </>
-          )}
-
           {/* Text Overlay */}
-          <div className="pt-2.5 border-t border-blue-900/40 space-y-2">
+          <div className="pt-0 border-t-0 border-blue-900/40 space-y-2">
             <h4 className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">📝 Text Overlay</h4>
             <Input value={textOverlay} onChange={(e) => setTextOverlay(e.target.value)} placeholder="Add text..." className="h-7 text-xs bg-blue-950/40 border-blue-900/40 focus:border-blue-600" />
             <div>
