@@ -1,17 +1,38 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Scan, Bug, History } from "lucide-react";
-
-// ── Lazy-load sub-pages as inline imports ──
+import { motion } from "framer-motion";
 import AIScanner from "./AIScanner";
 import AIBugMonitor from "./AIBugMonitor";
 import AIChangesLog from "./AIChangesLog";
+import AITokenGate from "@/components/aitools/AITokenGate";
+import StaffManager from "@/components/aitools/StaffManager";
 
 export default function AITools() {
+  const [user, setUser] = useState(null);
+  const [sessionToken, setSessionToken] = useState(null);
   const [tab, setTab] = useState("scanner");
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
+
+  // Admins bypass the gate automatically
+  const isAdmin = user?.role === "admin";
+  const hasAccess = isAdmin || !!sessionToken;
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#03080f] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#1e78ff] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return <AITokenGate user={user} onGranted={setSessionToken} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50/30 dark:from-slate-900 dark:to-purple-950/20">
@@ -20,6 +41,9 @@ export default function AITools() {
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">AI Tools</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Scanner · Bug Monitor · Changes Log</p>
         </motion.div>
+
+        {/* Admin-only: manage approved staff */}
+        {isAdmin && <StaffManager currentUser={user} />}
 
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="mb-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-1 rounded-xl">
@@ -34,15 +58,9 @@ export default function AITools() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="scanner">
-            <AIScanner />
-          </TabsContent>
-          <TabsContent value="bugs">
-            <AIBugMonitor />
-          </TabsContent>
-          <TabsContent value="changes">
-            <AIChangesLog />
-          </TabsContent>
+          <TabsContent value="scanner"><AIScanner /></TabsContent>
+          <TabsContent value="bugs"><AIBugMonitor /></TabsContent>
+          <TabsContent value="changes"><AIChangesLog /></TabsContent>
         </Tabs>
       </div>
     </div>

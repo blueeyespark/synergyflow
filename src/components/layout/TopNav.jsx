@@ -160,7 +160,7 @@ export default function TopNav({
                     <MenuItem icon={Zap} label="Creator Studio" to="/CreatorStudio" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={Radio} label="Go Live" to="/StreamerDashboard" onClick={() => setAccountOpen(false)} />
                     <MenuItem icon={PlaySquare} label="Your Clips" to="/Shorts" onClick={() => setAccountOpen(false)} />
-                    {isAdmin && <MenuItem icon={Scan} label="AI Tools" to="/AITools" onClick={() => setAccountOpen(false)} />}
+                    <MenuItem icon={Scan} label="AI Tools" to="/AITools" onClick={() => setAccountOpen(false)} />
                     {isAdmin && <MenuItem icon={Users} label="Users" to="/UserViewer" onClick={() => setAccountOpen(false)} />}
                   </div>
 
@@ -228,8 +228,8 @@ export default function TopNav({
                 { label: "Creator Studio", icon: Zap, to: "/CreatorStudio" },
                 { label: "My Channel", icon: Tv, to: "/Channel" },
                 { label: "Go Live", icon: Radio, to: "/StreamerDashboard" },
+                { label: "AI Tools", icon: Scan, to: "/AITools" },
                 ...(isAdmin ? [
-                  { label: "AI Tools", icon: Scan, to: "/AITools" },
                   { label: "Users", icon: Users, to: "/UserViewer" },
                 ] : []),
                 { label: "Settings", icon: Settings, to: "/Settings" },

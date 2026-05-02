@@ -1,0 +1,47 @@
+{
+  "name": "StaffAccess",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Email approved for AI Tools staff access"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the staff member"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Admin email who approved this"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
