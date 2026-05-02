@@ -33,26 +33,26 @@
   }
 
   .dark {
-    /* Dark mode - black and blue cyber theme */
-    --background: 222 47% 5%;
-    --foreground: 210 100% 95%;
-    --card: 222 40% 8%;
-    --card-foreground: 210 100% 95%;
-    --popover: 222 40% 8%;
-    --popover-foreground: 210 100% 95%;
-    --primary: 210 100% 56%;
-    --primary-foreground: 222 47% 5%;
-    --secondary: 222 30% 14%;
-    --secondary-foreground: 210 100% 80%;
-    --muted: 222 30% 14%;
-    --muted-foreground: 210 30% 55%;
+    /* Dark mode - pure black and blue */
+    --background: 220 20% 3%;
+    --foreground: 210 100% 93%;
+    --card: 220 25% 8%;
+    --card-foreground: 210 100% 93%;
+    --popover: 220 25% 8%;
+    --popover-foreground: 210 100% 93%;
+    --primary: 210 100% 50%;
+    --primary-foreground: 220 20% 3%;
+    --secondary: 220 25% 12%;
+    --secondary-foreground: 210 70% 75%;
+    --muted: 220 20% 16%;
+    --muted-foreground: 210 30% 50%;
     --accent: 195 100% 50%;
-    --accent-foreground: 222 47% 5%;
+    --accent-foreground: 220 20% 3%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 40% 15%;
-    --input: 222 40% 10%;
-    --ring: 210 100% 56%;
+    --border: 210 30% 18%;
+    --input: 220 25% 10%;
+    --ring: 210 100% 50%;
   }
 }
 
@@ -85,9 +85,9 @@
 
   .dark body::before {
     background:
-      radial-gradient(ellipse at 10% 20%, rgba(30, 120, 255, 0.12) 0%, transparent 55%),
-      radial-gradient(ellipse at 90% 80%, rgba(0, 200, 255, 0.08) 0%, transparent 55%),
-      radial-gradient(ellipse at 50% 50%, rgba(10, 20, 40, 0.9) 0%, transparent 100%);
+      radial-gradient(ellipse at 10% 20%, rgba(30, 100, 200, 0.08) 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 80%, rgba(0, 150, 255, 0.06) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 50%, rgba(5, 10, 20, 0.95) 0%, transparent 100%);
   }
 
   body::after {
