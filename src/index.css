@@ -139,12 +139,23 @@
   }
 
   /* Light mode overrides for all dark-themed elements */
-  .bg-\[\#060d18\] { background-color: #f3f4f6; }
-  .bg-\[\#03080f\] { background-color: #ffffff; }
-  .bg-\[\#0a1525\] { background-color: #f9fafb; }
-  .bg-\[\#0d1a2e\] { background-color: #eff6ff; }
-  .border-\[\#0d2040\] { border-color: #e5e7eb; }
-  .border-\[\#1a3a60\] { border-color: #d1d5db; }
+  .bg-\[\#060d18\] { background-color: #f3f4f6 !important; }
+  .bg-\[\#03080f\] { background-color: #ffffff !important; }
+  .bg-\[\#0a1525\] { background-color: #f9fafb !important; }
+  .bg-\[\#0d1a2e\] { background-color: #eff6ff !important; }
+  .border-\[\#0d2040\] { border-color: #e5e7eb !important; }
+  .border-\[\#1a3a60\] { border-color: #d1d5db !important; }
+  
+  /* Catch style attribute backgrounds */
+  [style*="background: #03080f"],
+  [style*="background: linear-gradient(180deg,#020b14"],
+  [style*="background: rgba(3,8,15"],
+  [style*="background-color: #03080f"],
+  [style*="background-color: #060d18"],
+  [style*="background-color: #0a1525"] {
+    background-color: #ffffff !important;
+    background-image: none !important;
+  }
   
   /* Light mode text colors — make blue/light text dark for visibility */
   .text-blue-400 { color: #1e40af; }

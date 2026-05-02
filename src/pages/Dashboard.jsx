@@ -101,7 +101,7 @@ function VideoCard({ video, channel, onClick, watched, user, compact = false }) 
 
   return (
     <motion.div className="group cursor-pointer relative" onClick={() => onClick(video)} whileHover={{ y: -2 }} transition={{ duration: 0.15 }}>
-      <div className="relative aspect-video rounded-2xl overflow-hidden mb-3 bg-[#060d18]">
+      <div className="relative aspect-video rounded-2xl overflow-hidden mb-3 bg-slate-100 dark:bg-[#060d18]">
         <img
           src={video.thumbnail_url || `https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop&sig=${video.id}`}
           alt={video.title}
@@ -128,7 +128,7 @@ function VideoCard({ video, channel, onClick, watched, user, compact = false }) 
             <MoreVertical className="w-3.5 h-3.5" />
           </button>
           {showMenu && (
-            <div className="absolute right-0 top-full mt-1 z-50 bg-[#060d18] border border-blue-900/40 rounded-xl shadow-xl w-48 py-1 text-sm">
+            <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-[#060d18] border border-slate-200 dark:border-blue-900/40 rounded-xl shadow-xl w-48 py-1 text-sm">
               <button className="w-full flex items-center gap-2 px-3 py-2 hover:bg-blue-900/20 text-blue-200 transition-colors" onClick={toggleWatchLater}>
                 <Clock className="w-4 h-4" /> {watchLater ? "Remove from Watch Later" : "Watch Later"}
               </button>
@@ -161,7 +161,7 @@ function VideoCard({ video, channel, onClick, watched, user, compact = false }) 
 function ClipCard({ video, onClick }) {
   return (
     <div className="group cursor-pointer flex-shrink-0 w-36 sm:w-40" onClick={() => onClick(video)}>
-      <div className="relative aspect-[9/16] rounded-2xl overflow-hidden mb-2 bg-[#060d18]">
+      <div className="relative aspect-[9/16] rounded-2xl overflow-hidden mb-2 bg-slate-100 dark:bg-[#060d18]">
         <img src={video.thumbnail_url || `https://images.unsplash.com/photo-1536240478700-b869ad10a2ab?w=200&h=356&fit=crop&sig=${video.id}`} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         <p className="absolute bottom-3 left-3 right-3 text-xs text-white font-semibold line-clamp-2 leading-tight">{video.title}</p>
@@ -376,10 +376,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background text-foreground dark:bg-[#03080f] dark:text-[#e8f4ff] flex">
 
       {/* ── LEFT SIDEBAR ─────────────────────────────────────── */}
-      <aside className="hidden sm:flex flex-col w-52 md:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto py-4 px-2.5 z-40 border-r border-slate-200 dark:border-[#0d2040]/80"
-        style={{ background: "linear-gradient(180deg, var(--light-bg-start), var(--light-bg-end))" }}
-        className="dark:bg-none"
-        style={{ background: "var(--background-gradient)" }}>
+      <aside className="hidden sm:flex flex-col w-52 md:w-56 flex-shrink-0 fixed top-16 left-0 bottom-0 overflow-y-auto py-4 px-2.5 z-40 border-r border-slate-200 dark:border-[#0d2040]/80 bg-white dark:bg-gradient-to-b dark:from-[#020b14] dark:to-[#03080f]">
         <div className="space-y-0.5 mb-3">
           {SIDEBAR_NAV.map(item => (
             <Link key={item.label} to={item.to} className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-blue-400/60 hover:bg-blue-900/20 hover:text-blue-200 transition-all w-full">
@@ -429,9 +426,7 @@ export default function Dashboard() {
         <div className="flex-1 min-w-0">
 
           {/* Sticky top bar */}
-          <div className="sticky top-16 z-30 border-b border-slate-200 dark:border-[#0d2040]/80 px-4 pt-3 pb-1 space-y-2"
-            className="dark:bg-none"
-            style={{ background: "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)" }}>
+          <div className="sticky top-16 z-30 border-b border-slate-200 dark:border-[#0d2040]/80 px-4 pt-3 pb-1 space-y-2 bg-white dark:bg-[#03080f]/97" style={{ backdropFilter: "blur(20px)" }}>
 
             {/* Tabs + Search */}
             <div className="flex items-center gap-1 flex-wrap">
@@ -615,7 +610,7 @@ export default function Dashboard() {
         </div>
 
         {/* ── RIGHT SIDEBAR ─────────────────────────────────────── */}
-        <aside className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-l border-slate-200 dark:border-[#0d2040]/80 px-4 pb-8 overflow-y-auto space-y-5" style={{ marginTop: "5rem" }}>
+        <aside className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-l border-slate-200 dark:border-[#0d2040]/80 px-4 pb-8 overflow-y-auto space-y-5 bg-white dark:bg-[#03080f]" style={{ marginTop: "5rem" }}>
 
           {/* Live channels */}
           {liveChannels.length > 0 && (
@@ -623,7 +618,7 @@ export default function Dashboard() {
           )}
 
           {/* AI "What to Watch" */}
-          <div className="rounded-2xl bg-[#060d18] border border-[#0d2040] overflow-hidden">
+          <div className="rounded-2xl bg-white dark:bg-[#060d18] border border-slate-200 dark:border-[#0d2040] overflow-hidden">
             <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[#0d2040]">
               <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#a855f7] to-[#1e78ff] flex items-center justify-center flex-shrink-0">
                 <Sparkles className="w-3.5 h-3.5 text-white" />
@@ -640,7 +635,7 @@ export default function Dashboard() {
 
           {/* Trending now quick list */}
           {trending.length > 0 && (
-            <div className="rounded-2xl bg-[#060d18] border border-[#0d2040] overflow-hidden">
+            <div className="rounded-2xl bg-white dark:bg-[#060d18] border border-slate-200 dark:border-[#0d2040] overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-[#0d2040]">
                 <TrendingUp className="w-4 h-4 text-orange-400" />
                 <p className="text-xs font-bold text-[#e8f4ff]">Trending Now</p>
@@ -663,7 +658,7 @@ export default function Dashboard() {
           )}
 
           {/* Quick links */}
-          <div className="rounded-2xl bg-[#060d18] border border-[#0d2040] overflow-hidden">
+          <div className="rounded-2xl bg-white dark:bg-[#060d18] border border-slate-200 dark:border-[#0d2040] overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-[#0d2040]">
               <PlaySquare className="w-4 h-4 text-[#1e78ff]" />
               <p className="text-xs font-bold text-[#e8f4ff]">Clips</p>
@@ -695,14 +690,14 @@ export default function Dashboard() {
             className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
             onClick={e => e.target === e.currentTarget && setShowWatchPartyModal(false)}>
             <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }}
-              className="bg-[#060d18] border border-blue-900/40 rounded-2xl p-6 w-full max-w-sm relative">
+              className="bg-white dark:bg-[#060d18] border border-slate-200 dark:border-blue-900/40 rounded-2xl p-6 w-full max-w-sm relative">
               <button onClick={() => setShowWatchPartyModal(false)} className="absolute top-3 right-3 text-blue-400/40 hover:text-blue-300"><X className="w-4 h-4" /></button>
               <div className="w-12 h-12 rounded-2xl bg-[#a855f7]/20 flex items-center justify-center mx-auto mb-4">
                 <Users className="w-6 h-6 text-[#a855f7]" />
               </div>
               <h3 className="text-center text-lg font-black text-[#e8f4ff] mb-1">Watch Party</h3>
               <p className="text-center text-sm text-blue-400/50 mb-5">Invite friends to watch videos together in real-time sync.</p>
-              <div className="bg-[#0a1525] border border-blue-900/30 rounded-xl p-3 mb-4">
+              <div className="bg-slate-100 dark:bg-[#0a1525] border border-slate-300 dark:border-blue-900/30 rounded-xl p-3 mb-4">
                 <p className="text-xs text-blue-400/40 mb-1">Party Link</p>
                 <div className="flex items-center gap-2">
                   <p className="text-xs text-[#1e78ff] font-mono flex-1 truncate">vstream.app/party/{Math.random().toString(36).slice(2,8)}</p>
