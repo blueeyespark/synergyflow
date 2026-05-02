@@ -36,6 +36,10 @@ function CreateChannelForm({ userEmail, onCreated, onCancel }) {
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem("darkMode") === "true";
+    return false;
+  });
 
   const handleImageUpload = async (file, type) => {
     if (type === "avatar") setUploadingAvatar(true);
@@ -68,16 +72,16 @@ function CreateChannelForm({ userEmail, onCreated, onCancel }) {
   };
 
   return (
-    <div className="min-h-screen bg-background dark:bg-[#03080f] flex items-center justify-center p-4">
+    <div className={`min-h-screen flex items-center justify-center p-4 ${darkMode ? "bg-[#03080f]" : "bg-white"}`}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-[#060d18] border border-slate-200 dark:border-blue-900/40 rounded-2xl w-full max-w-lg overflow-hidden">
+        className={`rounded-2xl w-full max-w-lg overflow-hidden border ${darkMode ? "bg-[#060d18] border-blue-900/40" : "bg-white border-slate-200"}`}>
 
         {/* Banner preview */}
-         <div className="relative h-32 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-[#1e78ff]/40 dark:to-[#a855f7]/40 overflow-hidden">
+         <div className={`relative h-32 bg-gradient-to-r overflow-hidden ${darkMode ? "from-[#1e78ff]/40 to-[#a855f7]/40" : "from-slate-200 via-slate-100 to-slate-200"}`}>
           {bannerUrl && <img src={bannerUrl} className="w-full h-full object-cover" alt="Banner" />}
           <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-black/30 transition-colors group">
             <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files[0] && handleImageUpload(e.target.files[0], "banner")} />
-            <div className="flex flex-col items-center gap-1 text-slate-600 dark:text-white/60 group-hover:text-slate-700 dark:group-hover:text-white transition-colors">
+            <div className={`flex flex-col items-center gap-1 group-hover:transition-colors ${darkMode ? "text-white/60 group-hover:text-white" : "text-slate-600 group-hover:text-slate-700"}`}>
               {uploadingBanner ? <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <ImageIcon className="w-5 h-5" />}
               <span className="text-xs font-medium">{bannerUrl ? "Change Banner" : "Add Banner (optional)"}</span>
             </div>
@@ -88,13 +92,13 @@ function CreateChannelForm({ userEmail, onCreated, onCancel }) {
            {/* Avatar */}
            <div className="flex items-end gap-4 mb-5">
              <label className="relative cursor-pointer group flex-shrink-0">
-               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] border-4 border-white dark:border-[#060d18] flex items-center justify-center overflow-hidden">
+               <div className={`w-20 h-20 rounded-full bg-gradient-to-br from-[#1e78ff] to-[#a855f7] border-4 flex items-center justify-center overflow-hidden ${darkMode ? "border-[#060d18]" : "border-white"}`}>
                 {avatarUrl
                   ? <img src={avatarUrl} className="w-full h-full object-cover" alt="Avatar" />
                   : <span className="text-white text-2xl font-black">{channelName.charAt(0) || "?"}</span>
                 }
                 <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  {uploadingAvatar ? <div className="w-4 h-4 border-2 border-slate-400/40 dark:border-white/40 border-t-slate-600 dark:border-t-white rounded-full animate-spin" /> : <Upload className="w-4 h-4 text-slate-700 dark:text-white" />}
+                  {uploadingAvatar ? <div className={`w-4 h-4 border-2 border-t-white rounded-full animate-spin ${darkMode ? "border-white/40 border-t-white" : "border-slate-400/40 border-t-slate-600"}`} /> : <Upload className={`w-4 h-4 ${darkMode ? "text-white" : "text-slate-700"}`} />}
                 </div>
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files[0] && handleImageUpload(e.target.files[0], "avatar")} />
@@ -105,37 +109,37 @@ function CreateChannelForm({ userEmail, onCreated, onCancel }) {
             </div>
           </div>
 
-          <h2 className="text-xl font-black text-foreground dark:text-[#e8f4ff] mb-5">Create Your Channel</h2>
+          <h2 className={`text-xl font-black mb-5 ${darkMode ? "text-[#e8f4ff]" : "text-gray-900"}`}>Create Your Channel</h2>
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-semibold text-slate-600 dark:text-blue-400/60 uppercase tracking-wider mb-1.5 block">Channel Name *</label>
-              <input
-                value={channelName}
-                onChange={e => { setChannelName(e.target.value); setError(""); }}
-                placeholder="e.g. NightStreamCo"
-                className="w-full bg-white dark:bg-[#0a1525] border border-slate-300 dark:border-blue-900/40 focus:border-slate-400 dark:focus:border-[#1e78ff]/60 rounded-xl px-4 py-2.5 text-sm text-foreground dark:text-[#c8dff5] placeholder-slate-400 dark:placeholder-blue-400/30 outline-none transition-colors"
-              />
-              {error && <p className="text-red-600 dark:text-red-400 text-xs mt-1">{error}</p>}
+              <label className={`text-xs font-semibold uppercase tracking-wider mb-1.5 block ${darkMode ? "text-blue-400/60" : "text-slate-600"}`}>Channel Name *</label>
+               <input
+                 value={channelName}
+                 onChange={e => { setChannelName(e.target.value); setError(""); }}
+                 placeholder="e.g. NightStreamCo"
+                 className={`w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition-colors ${darkMode ? "bg-[#0a1525] border-blue-900/40 focus:border-[#1e78ff]/60 text-[#c8dff5] placeholder-blue-400/30" : "bg-white border-slate-300 focus:border-slate-400 text-gray-900 placeholder-slate-400"}`}
+               />
+               {error && <p className={`text-xs mt-1 ${darkMode ? "text-red-400" : "text-red-600"}`}>{error}</p>}
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-600 dark:text-blue-400/60 uppercase tracking-wider mb-1.5 block">Description (optional)</label>
-              <textarea
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="Tell viewers what your channel is about..."
-                rows={3}
-                className="w-full bg-white dark:bg-[#0a1525] border border-slate-300 dark:border-blue-900/40 focus:border-slate-400 dark:focus:border-[#1e78ff]/60 rounded-xl px-4 py-2.5 text-sm text-foreground dark:text-[#c8dff5] placeholder-slate-400 dark:placeholder-blue-400/30 outline-none transition-colors resize-none"
-              />
+              <label className={`text-xs font-semibold uppercase tracking-wider mb-1.5 block ${darkMode ? "text-blue-400/60" : "text-slate-600"}`}>Description (optional)</label>
+               <textarea
+                 value={description}
+                 onChange={e => setDescription(e.target.value)}
+                 placeholder="Tell viewers what your channel is about..."
+                 rows={3}
+                 className={`w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition-colors resize-none ${darkMode ? "bg-[#0a1525] border-blue-900/40 focus:border-[#1e78ff]/60 text-[#c8dff5] placeholder-blue-400/30" : "bg-white border-slate-300 focus:border-slate-400 text-gray-900 placeholder-slate-400"}`}
+               />
             </div>
 
             <div className="flex gap-2">
-              <Button onClick={handleCreate} disabled={creating || !channelName.trim()} className="flex-1 gap-2">
-                {creating ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Creating...</> : <><Zap className="w-4 h-4" /> Create Channel</>}
-              </Button>
-              <Button variant="outline" onClick={onCancel}>Cancel</Button>
-            </div>
+               <Button onClick={handleCreate} disabled={creating || !channelName.trim()} className="flex-1 gap-2">
+                 {creating ? <><div className="w-4 h-4 border-2 border-t-white rounded-full animate-spin border-white/30" /> Creating...</> : <><Zap className="w-4 h-4" /> Create Channel</>}
+               </Button>
+               <Button variant="outline" onClick={onCancel}>Cancel</Button>
+             </div>
             </div>
             </div>
             </motion.div>
